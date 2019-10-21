@@ -1,27 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "/Users/connerverret/IntelliJIDEAProjects/MeshNet/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values-sk/values-sk.xml",
+            "outputFile": "C:\\Users\\zachz\\Documents\\Eastern\\2019 - 2020\\wifi-direct-android-communication\\app\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-sk\\values-sk.xml",
             "map": [
                 {
-                    "source": "/Users/connerverret/.gradle/caches/transforms-1/files-1.1/core-1.0.0.aar/33e7e91a027a70ebb5ba15928bf6c550/res/values-sk/values-sk.xml",
-                    "from": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "55",
-                        "endColumns": "100",
-                        "endOffsets": "151"
-                    },
-                    "to": {
-                        "startLines": "48",
-                        "startColumns": "4",
-                        "startOffsets": "5674",
-                        "endColumns": "100",
-                        "endOffsets": "5770"
-                    }
-                },
-                {
-                    "source": "/Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-basement-17.0.0.aar/239bb79b03bee647ddad5a0d63bb08f0/res/values-sk/values.xml",
+                    "source": "C:\\Users\\zachz\\.gradle\\caches\\transforms-1\\files-1.1\\play-services-basement-17.0.0.aar\\44909dd448efc8f2df24ee8595ec3776\\res\\values-sk\\values.xml",
                     "from": {
                         "startLines": "4",
                         "startColumns": "0",
@@ -38,7 +21,24 @@
                     }
                 },
                 {
-                    "source": "/Users/connerverret/.gradle/caches/transforms-1/files-1.1/appcompat-1.0.0-beta01.aar/18585bfdeddaaac6f922bc0e685fd0ff/res/values-sk/values-sk.xml",
+                    "source": "C:\\Users\\zachz\\.gradle\\caches\\transforms-1\\files-1.1\\core-1.0.0.aar\\f355890c747a5744c7fc2de17b8d90c2\\res\\values-sk\\values-sk.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "100",
+                        "endOffsets": "151"
+                    },
+                    "to": {
+                        "startLines": "48",
+                        "startColumns": "4",
+                        "startOffsets": "5674",
+                        "endColumns": "100",
+                        "endOffsets": "5770"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\zachz\\.gradle\\caches\\transforms-1\\files-1.1\\appcompat-1.0.0-beta01.aar\\92e11ae8c885579c3ded91bd085a241a\\res\\values-sk\\values-sk.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -55,7 +55,7 @@
                     }
                 },
                 {
-                    "source": "/Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-base-17.0.0.aar/e264fb46f16f6298d9a895611d2d0498/res/values-sk/values.xml",
+                    "source": "C:\\Users\\zachz\\.gradle\\caches\\transforms-1\\files-1.1\\play-services-base-17.0.0.aar\\23ed502741414bb071626998b46033b9\\res\\values-sk\\values.xml",
                     "from": {
                         "startLines": "4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20",
                         "startColumns": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",

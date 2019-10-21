@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "/Users/connerverret/IntelliJIDEAProjects/MeshNet/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values-h720dp-v13/values-h720dp-v13.xml",
+            "outputFile": "C:\\Users\\zachz\\Documents\\Eastern\\2019 - 2020\\wifi-direct-android-communication\\app\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-h720dp-v13\\values-h720dp-v13.xml",
             "map": [
                 {
-                    "source": "/Users/connerverret/.gradle/caches/transforms-1/files-1.1/appcompat-1.0.0-beta01.aar/18585bfdeddaaac6f922bc0e685fd0ff/res/values-h720dp-v13/values-h720dp-v13.xml",
+                    "source": "C:\\Users\\zachz\\.gradle\\caches\\transforms-1\\files-1.1\\appcompat-1.0.0-beta01.aar\\92e11ae8c885579c3ded91bd085a241a\\res\\values-h720dp-v13\\values-h720dp-v13.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

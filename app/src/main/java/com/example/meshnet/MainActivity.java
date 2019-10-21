@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -20,6 +21,8 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import java.util.ArrayList;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -45,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
 
     private Button findNodesButton;
     private String otherNodeEndpointId;
+
+    private ArrayList<String> connectedNodes = new ArrayList<String>();
+
     // Our randomly generated unique name for advertising
     private final String codeName = CodenameGenerator.generate();
 
@@ -54,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onPayloadReceived(String endpointId, Payload payload) {
                     String message = new String(payload.asBytes(), UTF_8);
+                    logs.append(endpointId + " sent: " + message + "\n");
                 }
 
                 @Override
@@ -92,7 +99,9 @@ public class MainActivity extends AppCompatActivity {
                 public void onConnectionResult(String endpointId, ConnectionResolution result) {
                     if (result.getStatus().isSuccess()) {
                         logs.append("onConnectionResult: connection successful with endpointId \n" + endpointId);
-                        otherNodeEndpointId = endpointId;
+
+                        connectedNodes.add(endpointId);
+
                         setStatusText(getString(R.string.status_connected));
                     } else {
                         logs.append("onConnectionResult: connection failed with endpointId \n" + endpointId);
@@ -102,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onDisconnected(String endpointId) {
                     logs.append("onDisconnected: disconnected from endpointId \n" + endpointId);
+                    connectedNodes.remove(endpointId);
                 }
             };
 
@@ -130,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
         connectionsClient = Nearby.getConnectionsClient(this);
 
         FloatingActionButton sendMessage = findViewById(R.id.sendMessage);
+
         statusText = findViewById(R.id.statusText);
         findNodesButton = findViewById(R.id.find_nodes);
         sendMessage.setOnClickListener(new View.OnClickListener() {
@@ -139,6 +150,12 @@ public class MainActivity extends AppCompatActivity {
                 String messageBoxText = messageBox.getText().toString();
                 Snackbar.make(view, "Message Sent!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+
+                for(String id : connectedNodes) {
+                    connectionsClient.sendPayload(id, Payload.fromBytes(messageBoxText.getBytes()));
+                }
+
             }
         });
 
