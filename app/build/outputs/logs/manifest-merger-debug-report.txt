@@ -1,0 +1,240 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:2:1-34:12
+INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:2:1-34:12
+INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:2:1-34:12
+INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:2:1-34:12
+MERGED from [com.google.android.material:material:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/material-1.0.0-beta01.aar/0186b60ef0945181e68471d74aac5c52/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.appcompat:appcompat:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/appcompat-1.0.0-beta01.aar/18585bfdeddaaac6f922bc0e685fd0ff/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.constraintlayout:constraintlayout:1.1.2] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/constraintlayout-1.1.2.aar/1ec972140e7e5d1cee6981cd1003e23d/AndroidManifest.xml:2:1-11:12
+MERGED from [com.google.android.gms:play-services-nearby:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-nearby-17.0.0.aar/b3c77b85032a2716ea26368a63e53b04/AndroidManifest.xml:2:1-11:12
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/vectordrawable-animated-1.0.0-beta01.aar/8a0fe454c87fa30ac0f163122b750862/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.vectordrawable:vectordrawable:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/vectordrawable-1.0.0-beta01.aar/d4ba42ad82fbee014777990e865c4903/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.transition:transition:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/transition-1.0.0-beta01.aar/4a5824917f63592035e51719ab43e31e/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.cardview:cardview:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/cardview-1.0.0-beta01.aar/f14fb71701f04e058ef1b08b273dc8d3/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.recyclerview:recyclerview:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/recyclerview-1.0.0-beta01.aar/7315d17c3675b61cf5892c2a64a8e18d/AndroidManifest.xml:17:1-22:12
+MERGED from [com.google.android.gms:play-services-base:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-base-17.0.0.aar/e264fb46f16f6298d9a895611d2d0498/AndroidManifest.xml:17:1-29:12
+MERGED from [com.google.android.gms:play-services-tasks:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-tasks-17.0.0.aar/ce666d127cf6904a552b0088b845c084/AndroidManifest.xml:2:1-9:12
+MERGED from [com.google.android.gms:play-services-basement:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-basement-17.0.0.aar/239bb79b03bee647ddad5a0d63bb08f0/AndroidManifest.xml:17:1-28:12
+MERGED from [androidx.fragment:fragment:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/fragment-1.0.0.aar/923744022847297daf6f3a1a13cf6086/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/legacy-support-core-ui-1.0.0.aar/86c0b580aa3cf0fca412f8fce9bc726d/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/legacy-support-core-utils-1.0.0.aar/0cc9e80fb798302c500a93d623c1ddda/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.loader:loader:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/loader-1.0.0.aar/957105cf37be8f60d24b02d4c7421580/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.viewpager:viewpager:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/viewpager-1.0.0.aar/fb8273aa5194007a1df4f533c62a539b/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/coordinatorlayout-1.0.0.aar/b1a57edbdb27e16c2a901a6535d44702/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/drawerlayout-1.0.0.aar/73b196349937d2ec6845928689af49aa/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/slidingpanelayout-1.0.0.aar/fc140ec18867a0031805180481d0b8e1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.customview:customview:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/customview-1.0.0.aar/57f5950eacabeae1066af97466e35628/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/swiperefreshlayout-1.0.0.aar/4f17901ac6be87e26cf6c1f51b2c5edf/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/asynclayoutinflater-1.0.0.aar/74ae832e32548185d04dc1dc342065d8/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/core-1.0.0.aar/33e7e91a027a70ebb5ba15928bf6c550/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/versionedparcelable-1.0.0.aar/dd21e5213b1d91e7a169e5c6bdeca3db/AndroidManifest.xml:17:1-25:12
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/lifecycle-runtime-2.0.0.aar/01097e80f308c542e07f3646e118d2b8/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/lifecycle-livedata-2.0.0.aar/f193d9bb540dad33c9e46253bc2101c0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/lifecycle-livedata-core-2.0.0.aar/d901694a4f26421ee5dff23b26533e31/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.arch.core:core-runtime:2.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/core-runtime-2.0.0.aar/f6177fcdef9cd7b43b25ecc449a05d39/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/lifecycle-viewmodel-2.0.0.aar/985f424e5cc03816f4dd93afded14d9e/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/cursoradapter-1.0.0.aar/145b6951f4689140a085925026d47297/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/interpolator-1.0.0.aar/3f4680fb8db59722e14b2252753a24f9/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.documentfile:documentfile:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/documentfile-1.0.0.aar/8590704182d3941fcfe1a3c35cc450bf/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/localbroadcastmanager-1.0.0.aar/798dc1fac1f960bcc49622dd61d87d82/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.print:print:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/print-1.0.0.aar/94abab6c9d5797bb8f0a165e03ff7d9e/AndroidManifest.xml:17:1-22:12
+INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:2:1-34:12
+INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:2:1-34:12
+INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:2:1-34:12
+	package
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:3:11-40
+		INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml
+		INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:2:1-34:12
+		INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml
+	android:versionCode
+		INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:2:1-34:12
+		INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:2:11-69
+uses-permission#android.permission.BLUETOOTH
+ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:5:5-68
+	android:name
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:5:22-65
+uses-permission#android.permission.BLUETOOTH_ADMIN
+ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:6:5-74
+	android:name
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:6:22-71
+uses-permission#android.permission.ACCESS_WIFI_STATE
+ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:7:5-76
+	android:name
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:7:22-73
+uses-permission#android.permission.CHANGE_WIFI_STATE
+ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:8:5-76
+	android:name
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:8:22-73
+uses-permission#android.permission.ACCESS_COARSE_LOCATION
+ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:9:5-81
+	android:name
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:9:22-78
+uses-permission#android.permission.ACCESS_FINE_LOCATION
+ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:10:5-79
+	android:name
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:10:22-76
+uses-permission#android.permission.READ_EXTERNAL_STORAGE
+ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:13:5-79
+	android:name
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:13:22-77
+application
+ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:15:5-32:19
+MERGED from [com.google.android.material:material:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/material-1.0.0-beta01.aar/0186b60ef0945181e68471d74aac5c52/AndroidManifest.xml:22:5-20
+MERGED from [com.google.android.material:material:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/material-1.0.0-beta01.aar/0186b60ef0945181e68471d74aac5c52/AndroidManifest.xml:22:5-20
+MERGED from [androidx.constraintlayout:constraintlayout:1.1.2] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/constraintlayout-1.1.2.aar/1ec972140e7e5d1cee6981cd1003e23d/AndroidManifest.xml:9:5-20
+MERGED from [androidx.constraintlayout:constraintlayout:1.1.2] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/constraintlayout-1.1.2.aar/1ec972140e7e5d1cee6981cd1003e23d/AndroidManifest.xml:9:5-20
+MERGED from [com.google.android.gms:play-services-nearby:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-nearby-17.0.0.aar/b3c77b85032a2716ea26368a63e53b04/AndroidManifest.xml:9:5-20
+MERGED from [com.google.android.gms:play-services-nearby:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-nearby-17.0.0.aar/b3c77b85032a2716ea26368a63e53b04/AndroidManifest.xml:9:5-20
+MERGED from [com.google.android.gms:play-services-base:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-base-17.0.0.aar/e264fb46f16f6298d9a895611d2d0498/AndroidManifest.xml:22:5-27:19
+MERGED from [com.google.android.gms:play-services-base:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-base-17.0.0.aar/e264fb46f16f6298d9a895611d2d0498/AndroidManifest.xml:22:5-27:19
+MERGED from [com.google.android.gms:play-services-tasks:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-tasks-17.0.0.aar/ce666d127cf6904a552b0088b845c084/AndroidManifest.xml:7:5-20
+MERGED from [com.google.android.gms:play-services-tasks:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-tasks-17.0.0.aar/ce666d127cf6904a552b0088b845c084/AndroidManifest.xml:7:5-20
+MERGED from [com.google.android.gms:play-services-basement:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-basement-17.0.0.aar/239bb79b03bee647ddad5a0d63bb08f0/AndroidManifest.xml:22:5-26:19
+MERGED from [com.google.android.gms:play-services-basement:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-basement-17.0.0.aar/239bb79b03bee647ddad5a0d63bb08f0/AndroidManifest.xml:22:5-26:19
+MERGED from [androidx.core:core:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/core-1.0.0.aar/33e7e91a027a70ebb5ba15928bf6c550/AndroidManifest.xml:22:5-89
+MERGED from [androidx.core:core:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/core-1.0.0.aar/33e7e91a027a70ebb5ba15928bf6c550/AndroidManifest.xml:22:5-89
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/versionedparcelable-1.0.0.aar/dd21e5213b1d91e7a169e5c6bdeca3db/AndroidManifest.xml:22:5-23:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/versionedparcelable-1.0.0.aar/dd21e5213b1d91e7a169e5c6bdeca3db/AndroidManifest.xml:22:5-23:19
+	android:appComponentFactory
+		ADDED from [androidx.core:core:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/core-1.0.0.aar/33e7e91a027a70ebb5ba15928bf6c550/AndroidManifest.xml:22:18-86
+	android:supportsRtl
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:20:13-39
+	android:label
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:18:13-45
+	android:roundIcon
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:19:13-58
+	android:icon
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:17:13-47
+	android:allowBackup
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:16:13-39
+	android:theme
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:21:13-44
+activity#com.example.meshnet.MainActivity
+ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:22:9-31:20
+	android:screenOrientation
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:26:17-53
+	android:label
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:24:17-49
+	android:theme
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:25:17-60
+	android:name
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:23:17-45
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:27:13-30:29
+action#android.intent.action.MAIN
+ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:28:17-68
+	android:name
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:28:25-66
+category#android.intent.category.LAUNCHER
+ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:29:17-76
+	android:name
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml:29:27-74
+uses-sdk
+INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml
+INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml
+MERGED from [com.google.android.material:material:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/material-1.0.0-beta01.aar/0186b60ef0945181e68471d74aac5c52/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.material:material:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/material-1.0.0-beta01.aar/0186b60ef0945181e68471d74aac5c52/AndroidManifest.xml:20:5-44
+MERGED from [androidx.appcompat:appcompat:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/appcompat-1.0.0-beta01.aar/18585bfdeddaaac6f922bc0e685fd0ff/AndroidManifest.xml:20:5-44
+MERGED from [androidx.appcompat:appcompat:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/appcompat-1.0.0-beta01.aar/18585bfdeddaaac6f922bc0e685fd0ff/AndroidManifest.xml:20:5-44
+MERGED from [androidx.constraintlayout:constraintlayout:1.1.2] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/constraintlayout-1.1.2.aar/1ec972140e7e5d1cee6981cd1003e23d/AndroidManifest.xml:5:5-7:41
+MERGED from [androidx.constraintlayout:constraintlayout:1.1.2] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/constraintlayout-1.1.2.aar/1ec972140e7e5d1cee6981cd1003e23d/AndroidManifest.xml:5:5-7:41
+MERGED from [com.google.android.gms:play-services-nearby:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-nearby-17.0.0.aar/b3c77b85032a2716ea26368a63e53b04/AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-nearby:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-nearby-17.0.0.aar/b3c77b85032a2716ea26368a63e53b04/AndroidManifest.xml:5:5-44
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/vectordrawable-animated-1.0.0-beta01.aar/8a0fe454c87fa30ac0f163122b750862/AndroidManifest.xml:20:5-44
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/vectordrawable-animated-1.0.0-beta01.aar/8a0fe454c87fa30ac0f163122b750862/AndroidManifest.xml:20:5-44
+MERGED from [androidx.vectordrawable:vectordrawable:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/vectordrawable-1.0.0-beta01.aar/d4ba42ad82fbee014777990e865c4903/AndroidManifest.xml:20:5-44
+MERGED from [androidx.vectordrawable:vectordrawable:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/vectordrawable-1.0.0-beta01.aar/d4ba42ad82fbee014777990e865c4903/AndroidManifest.xml:20:5-44
+MERGED from [androidx.transition:transition:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/transition-1.0.0-beta01.aar/4a5824917f63592035e51719ab43e31e/AndroidManifest.xml:20:5-44
+MERGED from [androidx.transition:transition:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/transition-1.0.0-beta01.aar/4a5824917f63592035e51719ab43e31e/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cardview:cardview:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/cardview-1.0.0-beta01.aar/f14fb71701f04e058ef1b08b273dc8d3/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cardview:cardview:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/cardview-1.0.0-beta01.aar/f14fb71701f04e058ef1b08b273dc8d3/AndroidManifest.xml:20:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/recyclerview-1.0.0-beta01.aar/7315d17c3675b61cf5892c2a64a8e18d/AndroidManifest.xml:20:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.0.0-beta01] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/recyclerview-1.0.0-beta01.aar/7315d17c3675b61cf5892c2a64a8e18d/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.gms:play-services-base:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-base-17.0.0.aar/e264fb46f16f6298d9a895611d2d0498/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.gms:play-services-base:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-base-17.0.0.aar/e264fb46f16f6298d9a895611d2d0498/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.gms:play-services-tasks:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-tasks-17.0.0.aar/ce666d127cf6904a552b0088b845c084/AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-tasks:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-tasks-17.0.0.aar/ce666d127cf6904a552b0088b845c084/AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-basement:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-basement-17.0.0.aar/239bb79b03bee647ddad5a0d63bb08f0/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.gms:play-services-basement:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-basement-17.0.0.aar/239bb79b03bee647ddad5a0d63bb08f0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.fragment:fragment:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/fragment-1.0.0.aar/923744022847297daf6f3a1a13cf6086/AndroidManifest.xml:20:5-44
+MERGED from [androidx.fragment:fragment:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/fragment-1.0.0.aar/923744022847297daf6f3a1a13cf6086/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/legacy-support-core-ui-1.0.0.aar/86c0b580aa3cf0fca412f8fce9bc726d/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/legacy-support-core-ui-1.0.0.aar/86c0b580aa3cf0fca412f8fce9bc726d/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/legacy-support-core-utils-1.0.0.aar/0cc9e80fb798302c500a93d623c1ddda/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/legacy-support-core-utils-1.0.0.aar/0cc9e80fb798302c500a93d623c1ddda/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/loader-1.0.0.aar/957105cf37be8f60d24b02d4c7421580/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/loader-1.0.0.aar/957105cf37be8f60d24b02d4c7421580/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/viewpager-1.0.0.aar/fb8273aa5194007a1df4f533c62a539b/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/viewpager-1.0.0.aar/fb8273aa5194007a1df4f533c62a539b/AndroidManifest.xml:20:5-44
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/coordinatorlayout-1.0.0.aar/b1a57edbdb27e16c2a901a6535d44702/AndroidManifest.xml:20:5-44
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/coordinatorlayout-1.0.0.aar/b1a57edbdb27e16c2a901a6535d44702/AndroidManifest.xml:20:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/drawerlayout-1.0.0.aar/73b196349937d2ec6845928689af49aa/AndroidManifest.xml:20:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/drawerlayout-1.0.0.aar/73b196349937d2ec6845928689af49aa/AndroidManifest.xml:20:5-44
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/slidingpanelayout-1.0.0.aar/fc140ec18867a0031805180481d0b8e1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/slidingpanelayout-1.0.0.aar/fc140ec18867a0031805180481d0b8e1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/customview-1.0.0.aar/57f5950eacabeae1066af97466e35628/AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/customview-1.0.0.aar/57f5950eacabeae1066af97466e35628/AndroidManifest.xml:20:5-44
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/swiperefreshlayout-1.0.0.aar/4f17901ac6be87e26cf6c1f51b2c5edf/AndroidManifest.xml:20:5-44
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/swiperefreshlayout-1.0.0.aar/4f17901ac6be87e26cf6c1f51b2c5edf/AndroidManifest.xml:20:5-44
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/asynclayoutinflater-1.0.0.aar/74ae832e32548185d04dc1dc342065d8/AndroidManifest.xml:20:5-44
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/asynclayoutinflater-1.0.0.aar/74ae832e32548185d04dc1dc342065d8/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/core-1.0.0.aar/33e7e91a027a70ebb5ba15928bf6c550/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/core-1.0.0.aar/33e7e91a027a70ebb5ba15928bf6c550/AndroidManifest.xml:20:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/versionedparcelable-1.0.0.aar/dd21e5213b1d91e7a169e5c6bdeca3db/AndroidManifest.xml:20:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/versionedparcelable-1.0.0.aar/dd21e5213b1d91e7a169e5c6bdeca3db/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/lifecycle-runtime-2.0.0.aar/01097e80f308c542e07f3646e118d2b8/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/lifecycle-runtime-2.0.0.aar/01097e80f308c542e07f3646e118d2b8/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/lifecycle-livedata-2.0.0.aar/f193d9bb540dad33c9e46253bc2101c0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/lifecycle-livedata-2.0.0.aar/f193d9bb540dad33c9e46253bc2101c0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/lifecycle-livedata-core-2.0.0.aar/d901694a4f26421ee5dff23b26533e31/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/lifecycle-livedata-core-2.0.0.aar/d901694a4f26421ee5dff23b26533e31/AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/core-runtime-2.0.0.aar/f6177fcdef9cd7b43b25ecc449a05d39/AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/core-runtime-2.0.0.aar/f6177fcdef9cd7b43b25ecc449a05d39/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/lifecycle-viewmodel-2.0.0.aar/985f424e5cc03816f4dd93afded14d9e/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/lifecycle-viewmodel-2.0.0.aar/985f424e5cc03816f4dd93afded14d9e/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/cursoradapter-1.0.0.aar/145b6951f4689140a085925026d47297/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/cursoradapter-1.0.0.aar/145b6951f4689140a085925026d47297/AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/interpolator-1.0.0.aar/3f4680fb8db59722e14b2252753a24f9/AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/interpolator-1.0.0.aar/3f4680fb8db59722e14b2252753a24f9/AndroidManifest.xml:20:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/documentfile-1.0.0.aar/8590704182d3941fcfe1a3c35cc450bf/AndroidManifest.xml:20:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/documentfile-1.0.0.aar/8590704182d3941fcfe1a3c35cc450bf/AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/localbroadcastmanager-1.0.0.aar/798dc1fac1f960bcc49622dd61d87d82/AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/localbroadcastmanager-1.0.0.aar/798dc1fac1f960bcc49622dd61d87d82/AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/print-1.0.0.aar/94abab6c9d5797bb8f0a165e03ff7d9e/AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/print-1.0.0.aar/94abab6c9d5797bb8f0a165e03ff7d9e/AndroidManifest.xml:20:5-44
+INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml
+INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml
+		INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml
+		ADDED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml
+		INJECTED from /Users/connerverret/IntelliJIDEAProjects/MeshNet/app/src/main/AndroidManifest.xml
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from [com.google.android.gms:play-services-nearby:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-nearby-17.0.0.aar/b3c77b85032a2716ea26368a63e53b04/AndroidManifest.xml:7:5-79
+	android:name
+		ADDED from [com.google.android.gms:play-services-nearby:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-nearby-17.0.0.aar/b3c77b85032a2716ea26368a63e53b04/AndroidManifest.xml:7:22-76
+activity#com.google.android.gms.common.api.GoogleApiActivity
+ADDED from [com.google.android.gms:play-services-base:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-base-17.0.0.aar/e264fb46f16f6298d9a895611d2d0498/AndroidManifest.xml:23:9-26:75
+	android:exported
+		ADDED from [com.google.android.gms:play-services-base:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-base-17.0.0.aar/e264fb46f16f6298d9a895611d2d0498/AndroidManifest.xml:25:13-37
+	android:theme
+		ADDED from [com.google.android.gms:play-services-base:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-base-17.0.0.aar/e264fb46f16f6298d9a895611d2d0498/AndroidManifest.xml:26:13-72
+	android:name
+		ADDED from [com.google.android.gms:play-services-base:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-base-17.0.0.aar/e264fb46f16f6298d9a895611d2d0498/AndroidManifest.xml:24:13-79
+meta-data#com.google.android.gms.version
+ADDED from [com.google.android.gms:play-services-basement:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-basement-17.0.0.aar/239bb79b03bee647ddad5a0d63bb08f0/AndroidManifest.xml:23:9-25:69
+	android:value
+		ADDED from [com.google.android.gms:play-services-basement:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-basement-17.0.0.aar/239bb79b03bee647ddad5a0d63bb08f0/AndroidManifest.xml:25:13-66
+	android:name
+		ADDED from [com.google.android.gms:play-services-basement:17.0.0] /Users/connerverret/.gradle/caches/transforms-1/files-1.1/play-services-basement-17.0.0.aar/239bb79b03bee647ddad5a0d63bb08f0/AndroidManifest.xml:24:13-58

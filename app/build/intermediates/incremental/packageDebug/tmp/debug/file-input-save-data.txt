@@ -1,0 +1,7 @@
+#Internal package file, do not edit.
+#Thu Oct 17 20:52:34 PDT 2019
+0.base=/Users/connerverret/IntelliJIDEAProjects/MeshNet/app/build/intermediates/transforms/dexMerger/debug/0
+0.path=classes.dex
+count=1
+0.baseType=DIRECTORY
+0.set=DEX
