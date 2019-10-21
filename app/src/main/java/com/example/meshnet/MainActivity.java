@@ -40,6 +40,9 @@ public class MainActivity extends AppCompatActivity {
 
     private ConnectionsClient connectionsClient;
     private TextView statusText;
+
+    private TextView logs;
+
     private Button findNodesButton;
     private String otherNodeEndpointId;
     // Our randomly generated unique name for advertising
@@ -66,13 +69,13 @@ public class MainActivity extends AppCompatActivity {
             new EndpointDiscoveryCallback() {
                 @Override
                 public void onEndpointFound(String endpointId, DiscoveredEndpointInfo info) {
-                    Log.i(TAG, "onEndpointFound: endpointId " + endpointId + " found, connecting");
+                    logs.append("onEndpointFound: endpointId " + endpointId + " found, connecting\n");
                     connectionsClient.requestConnection("ENDPOINT", endpointId, connectionLifecycleCallback);
                 }
 
                 @Override
                 public void onEndpointLost(String endpointId) {
-                    Log.i(TAG, "onEndpointLost: endpointId " + endpointId + " disconnected");
+                    logs.append("onEndpointLost: endpointId " + endpointId + " disconnected\n");
                 }
             };
 
@@ -81,24 +84,24 @@ public class MainActivity extends AppCompatActivity {
             new ConnectionLifecycleCallback() {
                 @Override
                 public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo) {
-                    Log.i(TAG, "onConnectionInitiated: accepting connection with endpointId " + endpointId);
+                    logs.append("onConnectionInitiated: accepting connection with endpointId \n" + endpointId);
                     connectionsClient.acceptConnection(endpointId, payloadCallback);
                 }
 
                 @Override
                 public void onConnectionResult(String endpointId, ConnectionResolution result) {
                     if (result.getStatus().isSuccess()) {
-                        Log.i(TAG, "onConnectionResult: connection successful with endpointId " + endpointId);
+                        logs.append("onConnectionResult: connection successful with endpointId \n" + endpointId);
                         otherNodeEndpointId = endpointId;
                         setStatusText(getString(R.string.status_connected));
                     } else {
-                        Log.i(TAG, "onConnectionResult: connection failed with endpointId " + endpointId);
+                        logs.append("onConnectionResult: connection failed with endpointId \n" + endpointId);
                     }
                 }
 
                 @Override
                 public void onDisconnected(String endpointId) {
-                    Log.i(TAG, "onDisconnected: disconnected from endpointId " + endpointId);
+                    logs.append("onDisconnected: disconnected from endpointId \n" + endpointId);
                 }
             };
 
@@ -138,6 +141,10 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+
+        this.logs = findViewById(R.id.textView);
+
     }
 
     public void findNodes(View view) {
