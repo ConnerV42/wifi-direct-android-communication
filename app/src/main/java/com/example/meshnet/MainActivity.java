@@ -91,26 +91,26 @@ public class MainActivity extends AppCompatActivity {
             new ConnectionLifecycleCallback() {
                 @Override
                 public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo) {
-                    logs.append("onConnectionInitiated: accepting connection with endpointId \n" + endpointId);
+                    logs.append("onConnectionInitiated: accepting connection with endpointId " + endpointId + "\n");
                     connectionsClient.acceptConnection(endpointId, payloadCallback);
                 }
 
                 @Override
                 public void onConnectionResult(String endpointId, ConnectionResolution result) {
                     if (result.getStatus().isSuccess()) {
-                        logs.append("onConnectionResult: connection successful with endpointId \n" + endpointId);
+                        logs.append("onConnectionResult: connection successful with endpointId " + endpointId + "\n");
 
                         connectedNodes.add(endpointId);
 
                         setStatusText(getString(R.string.status_connected));
                     } else {
-                        logs.append("onConnectionResult: connection failed with endpointId \n" + endpointId);
+                        logs.append("onConnectionResult: connection failed with endpointId " + endpointId + "\n");
                     }
                 }
 
                 @Override
                 public void onDisconnected(String endpointId) {
-                    logs.append("onDisconnected: disconnected from endpointId \n" + endpointId);
+                    logs.append("onDisconnected: disconnected from endpointId " + endpointId + "\n");
                     connectedNodes.remove(endpointId);
                 }
             };
@@ -146,12 +146,13 @@ public class MainActivity extends AppCompatActivity {
         sendMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) { // send message
+
                 EditText messageBox = findViewById(R.id.editText);
                 String messageBoxText = messageBox.getText().toString();
+
                 Snackbar.make(view, "Message Sent!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-
-
+                
                 for(String id : connectedNodes) {
                     connectionsClient.sendPayload(id, Payload.fromBytes(messageBoxText.getBytes()));
                 }
