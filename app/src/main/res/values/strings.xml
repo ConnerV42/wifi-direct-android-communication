@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MeshNet</string>
+    <string name="app_name">Breeze</string>
     <string name="action_settings">Settings</string>
     <string name="status_searching">Searching</string>
     <string name="action_find_opponents">Find Nodes</string>

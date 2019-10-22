@@ -4,7 +4,7 @@
             "outputFile": "C:\\Users\\zachz\\Documents\\Eastern\\2019 - 2020\\wifi-direct-android-communication\\app\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-v16\\values-v16.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\zachz\\.gradle\\caches\\transforms-1\\files-1.1\\appcompat-1.0.0-beta01.aar\\92e11ae8c885579c3ded91bd085a241a\\res\\values-v16\\values-v16.xml",
+                    "source": "C:\\Users\\zachz\\.gradle\\caches\\transforms-2\\files-2.1\\92fc686c79095aeabb3f5c7d7118a2fd\\appcompat-1.0.0-beta01\\res\\values-v16\\values-v16.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
@@ -23,7 +23,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\zachz\\.gradle\\caches\\transforms-1\\files-1.1\\core-1.0.0.aar\\f355890c747a5744c7fc2de17b8d90c2\\res\\values-v16\\values-v16.xml",
+                    "source": "C:\\Users\\zachz\\.gradle\\caches\\transforms-2\\files-2.1\\4de34232979cbe134bd28b81339a3afe\\core-1.0.0\\res\\values-v16\\values-v16.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

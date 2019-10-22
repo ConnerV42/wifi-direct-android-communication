@@ -1,4 +1,7 @@
-#Mon Oct 21 15:05:59 PDT 2019
-base.0=C\:\\Users\\zachz\\Documents\\Eastern\\2019 - 2020\\wifi-direct-android-communication\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\0
+#Tue Oct 22 16:24:35 PDT 2019
+base.0=C\:\\Users\\zachz\\Documents\\Eastern\\2019 - 2020\\wifi-direct-android-communication\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\out\\classes.dex
+path.1=classes.dex
+renamed.1=classes2.dex
 path.0=classes.dex
 renamed.0=classes.dex
+base.1=C\:\\Users\\zachz\\Documents\\Eastern\\2019 - 2020\\wifi-direct-android-communication\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\out\\classes.dex
