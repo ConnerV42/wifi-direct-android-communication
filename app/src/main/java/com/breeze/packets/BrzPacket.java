@@ -1,7 +1,10 @@
 package com.breeze.packets;
 
+import android.util.Base64;
 import android.util.Log;
 import org.json.JSONObject;
+
+import java.nio.charset.StandardCharsets;
 
 public class BrzPacket implements BrzSerializable {
 
@@ -33,7 +36,9 @@ public class BrzPacket implements BrzSerializable {
         try {
             json.put("to", this.to);
             json.put("type", this.type);
-            json.put("body", this.body);
+
+            String body64 = Base64.encodeToString(this.body.getBytes(), Base64.DEFAULT);
+            json.put("body", body64);
         } catch (Exception e) {
             Log.i("SERIALIZATION ERROR", e.toString());
         }
@@ -48,7 +53,10 @@ public class BrzPacket implements BrzSerializable {
 
             this.to = jObj.getString("to");
             this.type = BrzPacketType.valueOf(jObj.getString("type"));
-            this.body = jObj.getString("body");
+
+            String body64 = jObj.getString("body");
+            byte[] bodyBytes = Base64.decode(body64, Base64.DEFAULT);
+            this.body = new String(bodyBytes, StandardCharsets.UTF_8);
 
         } catch (Exception e) {
             Log.i("DESERIALIZATION ERROR", e.toString());

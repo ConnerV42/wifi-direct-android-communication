@@ -11,28 +11,22 @@ import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
-import com.breeze.packets.BrzBodyMessage;
 import com.breeze.packets.BrzPacket;
+import com.breeze.packets.BrzPacketBuilder;
+import com.breeze.router.BrzRouter;
+
 import com.google.android.gms.nearby.Nearby;
-import com.google.android.gms.nearby.connection.*;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.util.ArrayList;
-import java.util.Date;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 public class MainActivity extends AppCompatActivity {
 
-    // Tag for logging endpoint connects + disconnects
-    private static final String TAG = "MeshNet";
-    private static final Strategy STRATEGY = Strategy.P2P_CLUSTER;
+    private TextView logs;
+    private BrzRouter router;
+
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
     private static final String[] REQUIRED_PERMISSIONS =
             new String[] {
@@ -41,79 +35,6 @@ public class MainActivity extends AppCompatActivity {
                     Manifest.permission.ACCESS_WIFI_STATE,
                     Manifest.permission.CHANGE_WIFI_STATE,
                     Manifest.permission.ACCESS_COARSE_LOCATION,
-            };
-
-    private ConnectionsClient connectionsClient;
-
-    private TextView logs;
-
-    private Button findNodesButton;
-
-    private ArrayList<String> connectedNodes = new ArrayList<String>();
-
-    // Our randomly generated unique name for advertising
-    private final String codeName = CodenameGenerator.generate();
-
-    // Callback for receiving payloads
-    private final PayloadCallback payloadCallback =
-            new PayloadCallback() {
-                @Override
-                public void onPayloadReceived(String endpointId, Payload payload) {
-
-                    String json = new String(payload.asBytes(), UTF_8);
-                    BrzPacket packet = new BrzPacket(json);
-                    BrzBodyMessage message = packet.message();
-
-                    logs.append("Received message: " + message.message + " from " + message.userName + "\n");
-                }
-
-                @Override
-                public void onPayloadTransferUpdate(String endpointId, PayloadTransferUpdate update) {
-                    if(update.getStatus() == PayloadTransferUpdate.Status.SUCCESS) {
-                        //display message to UI
-                    }
-                }
-            };
-
-    // Callback for finding other devices
-    private final EndpointDiscoveryCallback endpointDiscoveryCallback =
-            new EndpointDiscoveryCallback() {
-                @Override
-                public void onEndpointFound(String endpointId, DiscoveredEndpointInfo info) {
-                    logs.append("onEndpointFound: endpointId " + endpointId + " found, connecting\n");
-                    connectionsClient.requestConnection(codeName, endpointId, connectionLifecycleCallback);
-                }
-
-                @Override
-                public void onEndpointLost(String endpointId) {
-                    logs.append("onEndpointLost: endpointId " + endpointId + " disconnected\n");
-                }
-            };
-
-    // Callbacks for connections to other devices
-    private final ConnectionLifecycleCallback connectionLifecycleCallback =
-            new ConnectionLifecycleCallback() {
-                @Override
-                public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo) {
-                    logs.append("onConnectionInitiated: accepting connection with endpointId " + endpointId + "\n");
-                    connectionsClient.acceptConnection(endpointId, payloadCallback);
-                }
-
-                @Override
-                public void onConnectionResult(String endpointId, ConnectionResolution result) {
-                    if (result.getStatus().isSuccess()) {
-                        logs.append("onConnectionResult: connection successful with endpointId " + endpointId + "\n");
-                        connectedNodes.add(endpointId);
-                    } else {
-                        logs.append("onConnectionResult: connection failed with endpointId " + endpointId + "\n");
-                    }
-                }
-
-                @Override
-                public void onDisconnected(String endpointId) {
-                    logs.append("onDisconnected: disconnected from endpointId " + endpointId + "\n");
-                    connectedNodes.remove(endpointId);
-                }
             };
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -128,18 +49,24 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        connectionsClient.stopAllEndpoints();
+        router.disconnect();
         super.onStop();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        connectionsClient = Nearby.getConnectionsClient(this);
+
+        this.logs = findViewById(R.id.textView);
+        logs.append("Searching for Breeze nodes...\n");
+
+        this.router = new BrzRouter(Nearby.getConnectionsClient(this), getPackageName(), logs);
 
         Button sendMessage = findViewById(R.id.sendMessage);
         sendMessage.setOnClickListener(new View.OnClickListener() {
@@ -152,34 +79,11 @@ public class MainActivity extends AppCompatActivity {
                 // Reset message box
                 messageBox.setText("");
 
-                // Make a packet
-                BrzBodyMessage body = new BrzBodyMessage();
-                body.message = messageBoxText;
-                body.userName = "Zach";
-                body.datestamp = System.currentTimeMillis();
-
-                BrzPacket packet = new BrzPacket(body);
-
-                for(String id : connectedNodes) {
-                    packet.to = id;
-                    Payload p = Payload.fromBytes(packet.toJSON().getBytes());
-
-                    connectionsClient.sendPayload(id, p);
-
-                    logs.append("You sent \"" + messageBoxText + "\" to " + id + "\n");
-                }
-
+                BrzPacket packet = BrzPacketBuilder.message(messageBoxText);
+                router.broadcast(packet);
             }
         });
 
-
-        this.logs = findViewById(R.id.textView);
-
-        // Begin discovery!
-        startAdvertising();
-        startDiscovery();
-
-        logs.append("Searching for Breeze nodes...\n");
     }
 
     @Override
@@ -214,14 +118,4 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private void startAdvertising() {
-        connectionsClient.startAdvertising(codeName,
-                getPackageName(), connectionLifecycleCallback,
-                new AdvertisingOptions.Builder().setStrategy(STRATEGY).build());
-    }
-    private void startDiscovery() {
-        connectionsClient.startDiscovery(
-                getPackageName(), endpointDiscoveryCallback,
-                new DiscoveryOptions.Builder().setStrategy(STRATEGY).build());
-    }
 }
