@@ -25,11 +25,4 @@
         android:id="@+id/include"
         layout="@layout/content_main" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:layout_anchor="@+id/include"
-        app:layout_anchorGravity="start|top"></LinearLayout>
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

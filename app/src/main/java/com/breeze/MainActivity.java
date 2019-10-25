@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
@@ -15,16 +16,18 @@ import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;
 
+import com.breeze.views.MessageList;
 import com.google.android.gms.nearby.Nearby;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView logs;
     private BrzRouter router;
 
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
@@ -62,11 +65,11 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        MessageList msgList = new MessageList(this);
+        ListView msgView = (ListView) findViewById(R.id.messageList);
+        msgView.setAdapter(msgList);
 
-        this.logs = findViewById(R.id.textView);
-        logs.append("Searching for Breeze nodes...\n");
-
-        this.router = new BrzRouter(Nearby.getConnectionsClient(this), getPackageName(), logs);
+        this.router = new BrzRouter(Nearby.getConnectionsClient(this), getPackageName());
 
         Button sendMessage = findViewById(R.id.sendMessage);
         sendMessage.setOnClickListener(new View.OnClickListener() {

@@ -5,6 +5,8 @@ import android.widget.TextView;
 import com.breeze.CodenameGenerator;
 import com.breeze.packets.BrzBodyMessage;
 import com.breeze.packets.BrzPacket;
+import com.breeze.packets.BrzPacketBuilder;
+import com.breeze.state.BrzStateStore;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
 import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
@@ -29,16 +31,30 @@ public class BrzRouter {
     private ArrayList<String> connectedNodes = new ArrayList<String>();
 
     private String pkgName = "";
-    private TextView logs;
 
     // Our randomly generated unique name for advertising
     private final String codeName = CodenameGenerator.generate();
 
 
-    public BrzRouter(ConnectionsClient cc, String pkgName, TextView logs) {
+    public BrzRouter(ConnectionsClient cc, String pkgName) {
         this.connectionsClient = cc;
         this.pkgName = pkgName;
-        this.logs = logs;
+
+        BrzStateStore store = BrzStateStore.getStore();
+        ArrayList<BrzBodyMessage> messages = (ArrayList) store.getVal("messages/messages");
+
+        if(messages == null) {
+            messages = new ArrayList<BrzBodyMessage>();
+            store.setVal("messages/messages", messages);
+        }
+
+        for(int i = 0; i < 5; i++) {
+            BrzBodyMessage message = new BrzBodyMessage();
+            message.userName = "" + i;
+            message.message = "yeet";
+            messages.add(message);
+        }
+        store.setVal("messages/messages", messages);
 
         // Begin discovery!
         startAdvertising();
@@ -79,17 +95,25 @@ public class BrzRouter {
             new PayloadCallback() {
                 @Override
                 public void onPayloadReceived(String endpointId, Payload payload) {
+                    byte[] payloadBody = payload.asBytes();
+                    if(payloadBody == null) return;
 
-                    String json = new String(payload.asBytes(), UTF_8);
+                    String json = new String(payloadBody, UTF_8);
                     BrzPacket packet = new BrzPacket(json);
                     BrzBodyMessage message = packet.message();
 
-                    logs.append("Received message: " + message.message + " from " + message.userName + "\n");
+                    BrzStateStore store = BrzStateStore.getStore();
+                    ArrayList<BrzBodyMessage> messages = (ArrayList) store.getVal("messages/messages");
+                    messages.add(message);
+                    store.setVal("messages/messages", messages);
+
+                    //logs.append("Received message: " + message.message + " from " + message.userName + "\n");
                 }
 
                 @Override
                 public void onPayloadTransferUpdate(String endpointId, PayloadTransferUpdate update) {
                     if(update.getStatus() == PayloadTransferUpdate.Status.SUCCESS) {
+                        //logs.append("Sent message to: " + endpointId + "\n");
                         //display message to UI
                     }
                 }
@@ -100,13 +124,13 @@ public class BrzRouter {
             new EndpointDiscoveryCallback() {
                 @Override
                 public void onEndpointFound(String endpointId, DiscoveredEndpointInfo info) {
-                    logs.append("onEndpointFound: endpointId " + endpointId + " found, connecting\n");
+                    //logs.append("onEndpointFound: endpointId " + endpointId + " found, connecting\n");
                     connectionsClient.requestConnection(codeName, endpointId, connectionLifecycleCallback);
                 }
 
                 @Override
                 public void onEndpointLost(String endpointId) {
-                    logs.append("onEndpointLost: endpointId " + endpointId + " disconnected\n");
+                    //logs.append("onEndpointLost: endpointId " + endpointId + " disconnected\n");
                 }
             };
 
@@ -115,23 +139,23 @@ public class BrzRouter {
             new ConnectionLifecycleCallback() {
                 @Override
                 public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo) {
-                    logs.append("onConnectionInitiated: accepting connection with endpointId " + endpointId + "\n");
+                    //logs.append("onConnectionInitiated: accepting connection with endpointId " + endpointId + "\n");
                     connectionsClient.acceptConnection(endpointId, payloadCallback);
                 }
 
                 @Override
                 public void onConnectionResult(String endpointId, ConnectionResolution result) {
                     if (result.getStatus().isSuccess()) {
-                        logs.append("onConnectionResult: connection successful with endpointId " + endpointId + "\n");
+                        //logs.append("onConnectionResult: connection successful with endpointId " + endpointId + "\n");
                         connectedNodes.add(endpointId);
                     } else {
-                        logs.append("onConnectionResult: connection failed with endpointId " + endpointId + "\n");
+                        //logs.append("onConnectionResult: connection failed with endpointId " + endpointId + "\n");
                     }
                 }
 
                 @Override
                 public void onDisconnected(String endpointId) {
-                    logs.append("onDisconnected: disconnected from endpointId " + endpointId + "\n");
+                    //logs.append("onDisconnected: disconnected from endpointId " + endpointId + "\n");
                     connectedNodes.remove(endpointId);
                 }
             };
