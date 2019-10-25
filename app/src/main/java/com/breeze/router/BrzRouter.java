@@ -30,6 +30,8 @@ public class BrzRouter {
     private ConnectionsClient connectionsClient;
     private ArrayList<String> connectedNodes = new ArrayList<String>();
 
+    private boolean running = false;
+
     private String pkgName = "";
 
     // Our randomly generated unique name for advertising
@@ -48,20 +50,26 @@ public class BrzRouter {
             store.setVal("messages/messages", messages);
         }
 
-        for(int i = 0; i < 5; i++) {
+        /*for(int i = 0; i < 5; i++) {
             BrzBodyMessage message = new BrzBodyMessage();
             message.userName = "" + i;
             message.message = "yeet";
             messages.add(message);
         }
         store.setVal("messages/messages", messages);
-
+*/
         // Begin discovery!
-        startAdvertising();
-        startDiscovery();
+        this.start();
     }
 
     public void broadcast(BrzPacket packet) {
+
+        BrzBodyMessage message = packet.message();
+        message.userName = "You";
+
+        BrzStateStore store = BrzStateStore.getStore();
+        store.addMessage(message);
+
         for(String id : connectedNodes) {
             packet.to = id;
             this.send(packet);
@@ -73,16 +81,31 @@ public class BrzRouter {
         connectionsClient.sendPayload(packet.to, p);
     }
 
-    public void disconnect() {
-        connectionsClient.stopAllEndpoints();
+    public void start() {
+        if(running) return;
+        running = true;
+
+        startAdvertising();
+        startDiscovery();
+
+        BrzStateStore store = BrzStateStore.getStore();
+        store.addMessage(new BrzBodyMessage("Searching for Breeze nodes...", true));
     }
 
+    public void stop() {
+        running = false;
+
+        connectionsClient.stopAllEndpoints();
+        connectionsClient.stopAdvertising();
+        connectionsClient.stopDiscovery();
+    }
 
     private void startAdvertising() {
         connectionsClient.startAdvertising(codeName,
                 pkgName, connectionLifecycleCallback,
                 new AdvertisingOptions.Builder().setStrategy(STRATEGY).build());
     }
+
     private void startDiscovery() {
         connectionsClient.startDiscovery(
                 pkgName, endpointDiscoveryCallback,
@@ -103,9 +126,7 @@ public class BrzRouter {
                     BrzBodyMessage message = packet.message();
 
                     BrzStateStore store = BrzStateStore.getStore();
-                    ArrayList<BrzBodyMessage> messages = (ArrayList) store.getVal("messages/messages");
-                    messages.add(message);
-                    store.setVal("messages/messages", messages);
+                    store.addMessage(message);
 
                     //logs.append("Received message: " + message.message + " from " + message.userName + "\n");
                 }
@@ -146,6 +167,10 @@ public class BrzRouter {
                 @Override
                 public void onConnectionResult(String endpointId, ConnectionResolution result) {
                     if (result.getStatus().isSuccess()) {
+
+                        BrzStateStore store = BrzStateStore.getStore();
+                        store.addMessage(new BrzBodyMessage("Found device: " + endpointId, true));
+
                         //logs.append("onConnectionResult: connection successful with endpointId " + endpointId + "\n");
                         connectedNodes.add(endpointId);
                     } else {

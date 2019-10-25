@@ -8,11 +8,16 @@ public class BrzBodyMessage implements BrzSerializable {
 
     public String message = "";
     public String userName = "";
+    public boolean isStatus = false;
     public Long datestamp = (long) 0;
 
     public BrzBodyMessage() {}
     public BrzBodyMessage(String json) {
       this.fromJSON(json);
+    }
+    public BrzBodyMessage(String message, boolean isStatus) {
+      this.message = message;
+      this.isStatus = isStatus;
     }
 
     @Override

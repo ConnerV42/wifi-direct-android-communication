@@ -19,8 +19,8 @@ import java.util.ArrayList;
 
 public class MessageList extends BaseAdapter implements BrzStateObserver {
 
-    ArrayList<BrzBodyMessage> messages = new ArrayList<>();
-    Context ctx;
+    private ArrayList<BrzBodyMessage> messages = new ArrayList<>();
+    private Context ctx;
 
     public MessageList(Context ctx) {
         this.ctx = ctx;
@@ -55,26 +55,52 @@ public class MessageList extends BaseAdapter implements BrzStateObserver {
 
     @Override
     public View getView(int i, View convertView, ViewGroup viewGroup) {
-
-        MessageViewHolder holder = new MessageViewHolder();
-
-        LayoutInflater messageInflater = (LayoutInflater) ctx.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         BrzBodyMessage message = messages.get(i);
+        LayoutInflater messageInflater = (LayoutInflater) ctx.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
 
-        convertView = messageInflater.inflate(R.layout.message_item, null);
-        convertView.setTag(holder);
+        if(message.isStatus){
+            StatusComponent msgCmp = new StatusComponent();
 
-        holder.messageBody = (TextView) convertView.findViewById(R.id.messageBody);
-        holder.messageName = (TextView) convertView.findViewById(R.id.messageName);
+            convertView = messageInflater.inflate(R.layout.status_item, null);
+            convertView.setTag(msgCmp);
 
-        holder.messageName.setText(message.userName);
-        holder.messageBody.setText(message.message);
+            msgCmp.statusBody = (TextView) convertView.findViewById(R.id.statusBody);
+            msgCmp.statusBody.setText(message.message);
+
+        } else if( message.userName.equals("You")) {
+            OutgoingMessageComponent msgCmp = new OutgoingMessageComponent();
+
+            convertView = messageInflater.inflate(R.layout.outgoing_message_item, null);
+            convertView.setTag(msgCmp);
+
+            msgCmp.messageBody = (TextView) convertView.findViewById(R.id.messageBody);
+            msgCmp.messageBody.setText(message.message);
+        } else {
+            MessageComponent msgCmp = new MessageComponent();
+
+            convertView = messageInflater.inflate(R.layout.message_item, null);
+            convertView.setTag(msgCmp);
+
+            msgCmp.messageBody = (TextView) convertView.findViewById(R.id.messageBody);
+            msgCmp.messageName = (TextView) convertView.findViewById(R.id.messageName);
+            msgCmp.messageName.setText(message.userName);
+            msgCmp.messageBody.setText(message.message);
+        }
+
 
         return convertView;
     }
 }
 
-class MessageViewHolder {
+class MessageComponent {
     public TextView messageName;
     public TextView messageBody;
+}
+
+class OutgoingMessageComponent {
+    public TextView messageBody;
+}
+
+class StatusComponent {
+    public TextView statusBody;
 }

@@ -1,5 +1,7 @@
 package com.breeze.state;
 
+import com.breeze.packets.BrzBodyMessage;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -54,6 +56,15 @@ public class BrzStateStore {
 
         return this.store.get(pathParts[0]).get(pathParts[1]);
     }
+
+
+
+    public void addMessage(BrzBodyMessage msg) {
+        ArrayList<BrzBodyMessage> messages = (ArrayList) this.getVal("messages/messages");
+        messages.add(msg);
+        this.setVal("messages/messages", messages);
+    }
+
 
 
 }

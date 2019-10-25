@@ -51,8 +51,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        router.start();
+    }
+
+    @Override
     protected void onStop() {
-        router.disconnect();
+        router.stop();
         super.onStop();
     }
 
