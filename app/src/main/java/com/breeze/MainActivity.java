@@ -5,24 +5,15 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
-import com.breeze.packets.BrzPacket;
-import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;
 
-import com.breeze.views.MessageList;
 import com.google.android.gms.nearby.Nearby;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -71,28 +62,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        MessageList msgList = new MessageList(this);
-        ListView msgView = (ListView) findViewById(R.id.messageList);
-        msgView.setAdapter(msgList);
-
-        this.router = new BrzRouter(Nearby.getConnectionsClient(this), getPackageName());
-
-        Button sendMessage = findViewById(R.id.sendMessage);
-        sendMessage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) { // send message
-
-                EditText messageBox = findViewById(R.id.editText);
-                String messageBoxText = messageBox.getText().toString();
-
-                // Reset message box
-                messageBox.setText("");
-
-                BrzPacket packet = BrzPacketBuilder.message(messageBoxText);
-                router.broadcast(packet);
-            }
-        });
-
+        this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), getPackageName());
     }
 
     @Override

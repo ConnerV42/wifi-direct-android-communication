@@ -31,14 +31,14 @@ public class BrzRouter {
     private ArrayList<String> connectedNodes = new ArrayList<String>();
 
     private boolean running = false;
-
     private String pkgName = "";
 
     // Our randomly generated unique name for advertising
     private final String codeName = CodenameGenerator.generate();
 
+    private static BrzRouter instance;
 
-    public BrzRouter(ConnectionsClient cc, String pkgName) {
+    private BrzRouter(ConnectionsClient cc, String pkgName) {
         this.connectionsClient = cc;
         this.pkgName = pkgName;
 
@@ -60,6 +60,15 @@ public class BrzRouter {
 */
         // Begin discovery!
         this.start();
+    }
+
+    public static BrzRouter getInstance(ConnectionsClient cc, String pkgName) {
+        if(instance == null) instance = new BrzRouter(cc, pkgName);
+        return instance;
+    }
+
+    public static BrzRouter getInstance() {
+        return instance;
     }
 
     public void broadcast(BrzPacket packet) {

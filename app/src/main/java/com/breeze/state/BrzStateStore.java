@@ -1,6 +1,7 @@
 package com.breeze.state;
 
 import com.breeze.packets.BrzBodyMessage;
+import com.breeze.packets.BrzChat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,10 +62,17 @@ public class BrzStateStore {
 
     public void addMessage(BrzBodyMessage msg) {
         ArrayList<BrzBodyMessage> messages = (ArrayList) this.getVal("messages/messages");
+        if(messages == null)
+            messages = new ArrayList<>();
         messages.add(msg);
         this.setVal("messages/messages", messages);
     }
 
-
-
+    public void addChat(BrzChat chat) {
+        ArrayList<BrzChat> chats = (ArrayList) this.getVal("chats/chats");
+        if(chats == null)
+            chats = new ArrayList<>();
+        chats.add(chat);
+        this.setVal("chats/chats", chats);
+    }
 }

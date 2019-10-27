@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/contactView">
+    <fragment
+        android:id="@+id/contactView"
+        android:name="com.breeze.ContactView"
+        android:label="fragment_contact_view"
+        tools:layout="@layout/fragment_contact_view" >
+        <action
+            android:id="@+id/action_contactView_to_chatView"
+            app:destination="@id/chatView" />
+    </fragment>
+    <fragment
+        android:id="@+id/chatView"
+        android:name="com.breeze.ChatView"
+        android:label="fragment_chat"
+        tools:layout="@layout/fragment_chat" />
+</navigation>
