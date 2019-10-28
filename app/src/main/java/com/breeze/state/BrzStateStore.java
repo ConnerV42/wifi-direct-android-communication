@@ -8,71 +8,80 @@ import java.util.HashMap;
 
 public class BrzStateStore {
 
-    private HashMap<String, HashMap<String, Object>> store = new HashMap<>();
-    private HashMap<String, ArrayList<BrzStateObserver>> pathListeners = new HashMap<>();
+    private HashMap<String, BrzChat> chats = new HashMap<>();
+    private HashMap<String, ArrayList<BrzBodyMessage>> messages = new HashMap<>();
+
+    private HashMap<String, ArrayList<BrzStateObserver>> mlisteners = new HashMap<>();
+    private HashMap<String, ArrayList<BrzStateObserver>> clisteners = new HashMap<>();
 
     private static BrzStateStore instance = new BrzStateStore();
     public static BrzStateStore getStore() {
         return instance;
     }
 
-    public void listen(BrzStateObserver listener, String path) {
-        if(listener == null || path == null || path.compareTo("") == 0)
-            throw new RuntimeException("Invalid params");
-
-        ArrayList<BrzStateObserver> pathList = this.pathListeners.get(path);
-        if(pathList == null) {
-            pathList = new ArrayList<BrzStateObserver>();
-            this.pathListeners.put(path, pathList);
-        }
-
-        pathList.add(listener);
-        listener.stateChange(new BrzStateChangeEvent(path, this.getVal(path)));
+    public void getAllChats(BrzStateObserver listener) {
+        ArrayList<BrzStateObserver> listeners =  this.clisteners.get("all");
+        if(listeners == null) listeners = new ArrayList<>();
+        listeners.add(listener);
+        this.clisteners.put("all", listeners);
+        listener.stateChange(new ArrayList(this.chats.values()));
+    }
+    public ArrayList<BrzChat> getAllChats() {
+        return new ArrayList(this.chats.values());
     }
 
-    public void setVal(String path, Object value) {
-        String[] pathParts = path.split("/");
-        if(pathParts.length != 2) throw new RuntimeException("Invalid path");
+    public void getChat(BrzStateObserver listener, String chatId) {
+        ArrayList<BrzStateObserver> listeners =  this.clisteners.get(chatId);
+        if(listeners == null) listeners = new ArrayList<>();
+        listeners.add(listener);
+        this.clisteners.put(chatId, listeners);
 
-        HashMap<String, Object> map = this.store.get(pathParts[0]);
-        if(this.store.get(pathParts[0]) == null) {
-            map = new HashMap<String, Object>();
-            this.store.put(pathParts[0], map);
-        }
-
-        map.put(pathParts[1], value);
-
-        BrzStateChangeEvent e = new BrzStateChangeEvent(path, value);
-        ArrayList<BrzStateObserver> pl = pathListeners.get(path);
-
-        if(pl != null)
-            for(BrzStateObserver o : pl) o.stateChange(e);
+        ArrayList<BrzChat> val = new ArrayList<BrzChat>();
+        val.add(this.chats.get(chatId));
+        listener.stateChange(val);
+    }
+    public BrzChat getChat(String chatId) {
+        return this.chats.get(chatId);
     }
 
-    public Object getVal(String path) {
-        String[] pathParts = path.split("/");
+    public void getMessages(BrzStateObserver listener, String chatId) {
+        ArrayList<BrzStateObserver> listeners =  this.mlisteners.get(chatId);
+        if(listeners == null) listeners = new ArrayList<>();
+        listeners.add(listener);
+        this.mlisteners.put(chatId, listeners);
 
-        if(pathParts.length != 2) return null;
-        if(this.store.get(pathParts[0]) == null) return null;
-
-        return this.store.get(pathParts[0]).get(pathParts[1]);
+        listener.stateChange(this.messages.get(chatId));
+    }
+    public ArrayList<BrzBodyMessage> getMessages(String chatId) {
+        return this.messages.get(chatId);
     }
 
-
-
-    public void addMessage(BrzBodyMessage msg) {
-        ArrayList<BrzBodyMessage> messages = (ArrayList) this.getVal("messages/messages");
-        if(messages == null)
-            messages = new ArrayList<>();
+    public void addMessage(String chatId, BrzBodyMessage msg) {
+        ArrayList<BrzBodyMessage> messages = this.messages.get(chatId);
+        if(messages == null) messages = new ArrayList<>();
         messages.add(msg);
-        this.setVal("messages/messages", messages);
+        this.messages.put(chatId, messages);
+
+        ArrayList<BrzStateObserver> mListeners = this.mlisteners.get(chatId);
+        if(mListeners != null)
+        for(BrzStateObserver o : mListeners)
+            o.stateChange(messages);
     }
 
     public void addChat(BrzChat chat) {
-        ArrayList<BrzChat> chats = (ArrayList) this.getVal("chats/chats");
-        if(chats == null)
-            chats = new ArrayList<>();
-        chats.add(chat);
-        this.setVal("chats/chats", chats);
+        this.chats.put(chat.id, chat);
+
+        ArrayList<BrzStateObserver> allListeners = this.clisteners.get("all");
+        if(allListeners != null)
+        for(BrzStateObserver o : allListeners)
+            o.stateChange(new ArrayList(this.chats.values()));
+
+        ArrayList<BrzStateObserver> chatListeners = this.clisteners.get(chat.id);
+        ArrayList<BrzChat> val = new ArrayList<BrzChat>();
+        val.add(chat);
+
+        if(chatListeners != null)
+        for(BrzStateObserver o : chatListeners)
+            o.stateChange(val);
     }
 }

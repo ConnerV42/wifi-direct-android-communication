@@ -10,11 +10,9 @@ import android.widget.TextView;
 
 import com.breeze.R;
 import com.breeze.packets.BrzBodyMessage;
-import com.breeze.state.BrzStateChangeEvent;
 import com.breeze.state.BrzStateObserver;
 import com.breeze.state.BrzStateStore;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class MessageList extends BaseAdapter implements BrzStateObserver {
@@ -22,20 +20,19 @@ public class MessageList extends BaseAdapter implements BrzStateObserver {
     private ArrayList<BrzBodyMessage> messages = new ArrayList<>();
     private Context ctx;
 
-    public MessageList(Context ctx) {
+    public MessageList(Context ctx, String chatId) {
         this.ctx = ctx;
 
         BrzStateStore store = BrzStateStore.getStore();
-        if(store.getVal("messages/messages") == null)
-            store.setVal("messages/messages", new ArrayList<BrzBodyMessage>());
-
-        store.listen(this, "messages/messages");
+        store.getMessages(this, chatId);
     }
 
     @Override
-    public void stateChange(BrzStateChangeEvent event) {
-        this.messages = (ArrayList) event.value;
-        notifyDataSetChanged();
+    public void stateChange(ArrayList messages) {
+        if(messages != null) {
+            this.messages = messages;
+            notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -61,7 +58,7 @@ public class MessageList extends BaseAdapter implements BrzStateObserver {
         if(message.isStatus){
             StatusComponent msgCmp = new StatusComponent();
 
-            convertView = messageInflater.inflate(R.layout.status_item, null);
+            convertView = messageInflater.inflate(R.layout.li_message_status, null);
             convertView.setTag(msgCmp);
 
             msgCmp.statusBody = (TextView) convertView.findViewById(R.id.statusBody);
@@ -70,7 +67,7 @@ public class MessageList extends BaseAdapter implements BrzStateObserver {
         } else if( message.userName.equals("You")) {
             OutgoingMessageComponent msgCmp = new OutgoingMessageComponent();
 
-            convertView = messageInflater.inflate(R.layout.outgoing_message_item, null);
+            convertView = messageInflater.inflate(R.layout.li_message_outgoing, null);
             convertView.setTag(msgCmp);
 
             msgCmp.messageBody = (TextView) convertView.findViewById(R.id.messageBody);
@@ -78,7 +75,7 @@ public class MessageList extends BaseAdapter implements BrzStateObserver {
         } else {
             MessageComponent msgCmp = new MessageComponent();
 
-            convertView = messageInflater.inflate(R.layout.message_item, null);
+            convertView = messageInflater.inflate(R.layout.li_message, null);
             convertView.setTag(msgCmp);
 
             msgCmp.messageBody = (TextView) convertView.findViewById(R.id.messageBody);

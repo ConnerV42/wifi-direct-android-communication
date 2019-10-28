@@ -8,8 +8,10 @@ import android.os.Bundle;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
+import com.breeze.packets.BrzChat;
 import com.breeze.router.BrzRouter;
 
+import com.breeze.state.BrzStateStore;
 import com.google.android.gms.nearby.Nearby;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;

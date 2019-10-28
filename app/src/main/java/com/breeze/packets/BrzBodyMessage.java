@@ -8,6 +8,7 @@ public class BrzBodyMessage implements BrzSerializable {
 
     public String message = "";
     public String userName = "";
+
     public boolean isStatus = false;
     public Long datestamp = (long) 0;
 

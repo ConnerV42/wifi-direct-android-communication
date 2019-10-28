@@ -1,11 +1,11 @@
 package com.breeze.router;
 
-import android.widget.TextView;
+import android.util.Log;
 
 import com.breeze.CodenameGenerator;
 import com.breeze.packets.BrzBodyMessage;
+import com.breeze.packets.BrzChat;
 import com.breeze.packets.BrzPacket;
-import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.state.BrzStateStore;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
@@ -42,22 +42,6 @@ public class BrzRouter {
         this.connectionsClient = cc;
         this.pkgName = pkgName;
 
-        BrzStateStore store = BrzStateStore.getStore();
-        ArrayList<BrzBodyMessage> messages = (ArrayList) store.getVal("messages/messages");
-
-        if(messages == null) {
-            messages = new ArrayList<BrzBodyMessage>();
-            store.setVal("messages/messages", messages);
-        }
-
-        /*for(int i = 0; i < 5; i++) {
-            BrzBodyMessage message = new BrzBodyMessage();
-            message.userName = "" + i;
-            message.message = "yeet";
-            messages.add(message);
-        }
-        store.setVal("messages/messages", messages);
-*/
         // Begin discovery!
         this.start();
     }
@@ -77,16 +61,24 @@ public class BrzRouter {
         message.userName = "You";
 
         BrzStateStore store = BrzStateStore.getStore();
-        store.addMessage(message);
 
         for(String id : connectedNodes) {
             packet.to = id;
+            store.addMessage(id, message);
             this.send(packet);
         }
     }
 
     public void send(BrzPacket packet) {
         Payload p = Payload.fromBytes(packet.toJSON().getBytes());
+
+        BrzStateStore store = BrzStateStore.getStore();
+        BrzBodyMessage message = packet.message();
+        message.userName = "You";
+        store.addMessage(packet.to, message);
+
+        Log.i("Yeet", packet.to + " " + message.message);
+
         connectionsClient.sendPayload(packet.to, p);
     }
 
@@ -96,9 +88,6 @@ public class BrzRouter {
 
         startAdvertising();
         startDiscovery();
-
-        BrzStateStore store = BrzStateStore.getStore();
-        store.addMessage(new BrzBodyMessage("Searching for Breeze nodes...", true));
     }
 
     public void stop() {
@@ -134,10 +123,10 @@ public class BrzRouter {
                     BrzPacket packet = new BrzPacket(json);
                     BrzBodyMessage message = packet.message();
 
-                    BrzStateStore store = BrzStateStore.getStore();
-                    store.addMessage(message);
+                    Log.i("Yeet", endpointId + " " + message.message);
 
-                    //logs.append("Received message: " + message.message + " from " + message.userName + "\n");
+                    BrzStateStore store = BrzStateStore.getStore();
+                    store.addMessage(endpointId, message);
                 }
 
                 @Override
@@ -178,7 +167,7 @@ public class BrzRouter {
                     if (result.getStatus().isSuccess()) {
 
                         BrzStateStore store = BrzStateStore.getStore();
-                        store.addMessage(new BrzBodyMessage("Found device: " + endpointId, true));
+                        store.addChat(new BrzChat(endpointId, endpointId));
 
                         //logs.append("onConnectionResult: connection successful with endpointId " + endpointId + "\n");
                         connectedNodes.add(endpointId);

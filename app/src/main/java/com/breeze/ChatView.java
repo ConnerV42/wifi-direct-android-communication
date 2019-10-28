@@ -41,7 +41,7 @@ public class ChatView extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param chatId The chat id to view.
+     * @param chatId The li_chat id to view.
      * @return A new instance of fragment ChatView.
      */
     public static ChatView newInstance(String chatId) {
@@ -56,7 +56,7 @@ public class ChatView extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            chatId = getArguments().getString(ARG_CHAT_ID);
+            chatId = getArguments().getString("ARG_CHAT_ID");
         }
     }
 
@@ -71,10 +71,9 @@ public class ChatView extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
         final BrzRouter router = BrzRouter.getInstance();
 
-        MessageList msgList = new MessageList(getActivity());
+        MessageList msgList = new MessageList(getActivity(), chatId);
         ListView msgView = (ListView) getView().findViewById(R.id.messageList);
         msgView.setAdapter(msgList);
 
@@ -89,8 +88,8 @@ public class ChatView extends Fragment {
                 // Reset message box
                 messageBox.setText("");
 
-                BrzPacket packet = BrzPacketBuilder.message(messageBoxText);
-                router.broadcast(packet);
+                BrzPacket packet = BrzPacketBuilder.message(chatId, messageBoxText);
+                router.send(packet);
             }
         });
     }

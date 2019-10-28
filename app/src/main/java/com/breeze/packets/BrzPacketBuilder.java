@@ -8,6 +8,7 @@ public class BrzPacketBuilder {
 
     public static BrzPacket message(String msgTo, String msgBody) {
         BrzBodyMessage body = new BrzBodyMessage();
+
         body.message = msgBody;
         body.userName = "Zach";
         body.datestamp = System.currentTimeMillis();

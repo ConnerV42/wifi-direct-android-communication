@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import com.breeze.R;
 import com.breeze.packets.BrzChat;
-import com.breeze.state.BrzStateChangeEvent;
 import com.breeze.state.BrzStateObserver;
 import com.breeze.state.BrzStateStore;
 
@@ -25,17 +24,15 @@ public class ChatList extends BaseAdapter implements BrzStateObserver {
         this.ctx = ctx;
 
         BrzStateStore store = BrzStateStore.getStore();
-        if(store.getVal("chats/chats") == null)
-            store.setVal("chats/chats", new ArrayList<BrzChat>());
-
-        store.listen(this, "chats/chats");
-
+        store.getAllChats(this);
     }
 
     @Override
-    public void stateChange(BrzStateChangeEvent event) {
-        this.chats = (ArrayList) event.value;
-        notifyDataSetChanged();
+    public void stateChange(ArrayList chats) {
+        if(chats != null) {
+            this.chats = chats;
+            notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -46,6 +43,10 @@ public class ChatList extends BaseAdapter implements BrzStateObserver {
     @Override
     public Object getItem(int i) {
         return chats.get(i);
+    }
+
+    public String getChatId(int i) {
+        return chats.get(i).id;
     }
 
     @Override
@@ -60,7 +61,7 @@ public class ChatList extends BaseAdapter implements BrzStateObserver {
 
         ChatComponent chatCmp = new ChatComponent();
 
-        convertView = chatInflater.inflate(R.layout.chat, null);
+        convertView = chatInflater.inflate(R.layout.li_chat, null);
         convertView.setTag(chatCmp);
 
         chatCmp.chatName = (TextView) convertView.findViewById(R.id.chatName);

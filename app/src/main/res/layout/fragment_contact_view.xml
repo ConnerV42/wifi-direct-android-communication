@@ -9,10 +9,16 @@
     <ListView
         android:id="@+id/contactList"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
         android:paddingLeft="4dp"
         android:paddingRight="4dp"
         />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:padding="10dp"/>
 
 </LinearLayout>

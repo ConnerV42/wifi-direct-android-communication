@@ -71,18 +71,12 @@ public class ContactView extends Fragment {
         msgView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView parentView, View childView, int position, long id) {
                 NavController nav = findNavController(getView());
-                //Bundle args = new Bundle();
-                //args.putString("ARG_CHAT_ID", ((BrzChat) chatList.getItem(position)).id);
-                //nav.navigate(R.id.chatView, args);
-                nav.navigate(R.id.chatView);
+
+                Bundle args = new Bundle();
+                args.putString("ARG_CHAT_ID", chatList.getChatId(position));
+                nav.navigate(R.id.chatView, args);
             }
         });
-
-        BrzStateStore store = BrzStateStore.getStore();
-        store.addChat(new BrzChat("0", "Zach"));
-        store.addChat(new BrzChat("1", "Conner"));
-        store.addChat(new BrzChat("2", "Paul"));
-        store.addChat(new BrzChat("3", "Jake"));
     }
 
     @Override
