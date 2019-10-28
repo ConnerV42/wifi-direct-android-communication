@@ -11,7 +11,9 @@
         tools:layout="@layout/fragment_contact_view" >
         <action
             android:id="@+id/action_contactView_to_chatView"
-            app:destination="@id/chatView" />
+            app:destination="@id/chatView"
+            app:enterAnim="@animator/from_left"
+            />
     </fragment>
     <fragment
         android:id="@+id/chatView"

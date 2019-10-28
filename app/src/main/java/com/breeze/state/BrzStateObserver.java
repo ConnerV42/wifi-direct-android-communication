@@ -2,5 +2,5 @@ package com.breeze.state;
 import java.util.ArrayList;
 
 public interface BrzStateObserver {
-    public void stateChange(ArrayList value);
+    public void stateChange(Object value);
 }

@@ -28,9 +28,9 @@ public class ChatList extends BaseAdapter implements BrzStateObserver {
     }
 
     @Override
-    public void stateChange(ArrayList chats) {
+    public void stateChange(Object chats) {
         if(chats != null) {
-            this.chats = chats;
+            this.chats = (ArrayList) chats;
             notifyDataSetChanged();
         }
     }

@@ -65,6 +65,11 @@ public class ContactView extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        BrzStateStore store = BrzStateStore.getStore();
+        store.setTitle("Breeze");
+
+        store.addChat(new BrzChat("hello", "hello"));
+
         final ChatList chatList = new ChatList(getActivity());
         ListView msgView = (ListView) view.findViewById(R.id.contactList);
         msgView.setAdapter(chatList);
@@ -85,7 +90,5 @@ public class ContactView extends Fragment {
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-    }
+    public void onDetach() { super.onDetach(); }
 }

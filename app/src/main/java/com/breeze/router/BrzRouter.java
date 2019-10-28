@@ -132,8 +132,6 @@ public class BrzRouter {
                 @Override
                 public void onPayloadTransferUpdate(String endpointId, PayloadTransferUpdate update) {
                     if(update.getStatus() == PayloadTransferUpdate.Status.SUCCESS) {
-                        //logs.append("Sent message to: " + endpointId + "\n");
-                        //display message to UI
                     }
                 }
             };
@@ -143,13 +141,11 @@ public class BrzRouter {
             new EndpointDiscoveryCallback() {
                 @Override
                 public void onEndpointFound(String endpointId, DiscoveredEndpointInfo info) {
-                    //logs.append("onEndpointFound: endpointId " + endpointId + " found, connecting\n");
                     connectionsClient.requestConnection(codeName, endpointId, connectionLifecycleCallback);
                 }
 
                 @Override
                 public void onEndpointLost(String endpointId) {
-                    //logs.append("onEndpointLost: endpointId " + endpointId + " disconnected\n");
                 }
             };
 
@@ -158,27 +154,24 @@ public class BrzRouter {
             new ConnectionLifecycleCallback() {
                 @Override
                 public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo) {
-                    //logs.append("onConnectionInitiated: accepting connection with endpointId " + endpointId + "\n");
                     connectionsClient.acceptConnection(endpointId, payloadCallback);
                 }
 
                 @Override
                 public void onConnectionResult(String endpointId, ConnectionResolution result) {
                     if (result.getStatus().isSuccess()) {
-
                         BrzStateStore store = BrzStateStore.getStore();
                         store.addChat(new BrzChat(endpointId, endpointId));
 
-                        //logs.append("onConnectionResult: connection successful with endpointId " + endpointId + "\n");
                         connectedNodes.add(endpointId);
-                    } else {
-                        //logs.append("onConnectionResult: connection failed with endpointId " + endpointId + "\n");
                     }
                 }
 
                 @Override
                 public void onDisconnected(String endpointId) {
-                    //logs.append("onDisconnected: disconnected from endpointId " + endpointId + "\n");
+                    BrzStateStore store = BrzStateStore.getStore();
+                    store.removeChat(endpointId);
+
                     connectedNodes.remove(endpointId);
                 }
             };

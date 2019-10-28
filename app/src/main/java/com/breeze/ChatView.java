@@ -18,6 +18,7 @@ import android.widget.ListView;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;
+import com.breeze.state.BrzStateStore;
 import com.breeze.views.MessageList;
 
 
@@ -72,6 +73,9 @@ public class ChatView extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         final BrzRouter router = BrzRouter.getInstance();
+
+        BrzStateStore store = BrzStateStore.getStore();
+        store.setTitle(chatId);
 
         MessageList msgList = new MessageList(getActivity(), chatId);
         ListView msgView = (ListView) getView().findViewById(R.id.messageList);

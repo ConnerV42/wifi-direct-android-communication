@@ -28,9 +28,9 @@ public class MessageList extends BaseAdapter implements BrzStateObserver {
     }
 
     @Override
-    public void stateChange(ArrayList messages) {
+    public void stateChange(Object messages) {
         if(messages != null) {
-            this.messages = messages;
+            this.messages = (ArrayList) messages;
             notifyDataSetChanged();
         }
     }
