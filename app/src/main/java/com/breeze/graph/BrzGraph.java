@@ -9,10 +9,11 @@ public class BrzGraph {
 
     private static BrzGraph instance;
     private String localCodeName;
-    private Map<BrzVertex, List<BrzVertex>> adjVertices;
+    private Map<String, List<String>> adjVertices;
 
     private BrzGraph(String localCodeName) {
-        this.adjVertices = new HashMap<>(); // Implicit for: HashMap<Vertex, List<Vertex>>
+        this.adjVertices = new HashMap<>(); // Implicit for: HashMap<String, List<String>>
+        this.localCodeName = localCodeName;
         this.addVertex(localCodeName);
     }
 
@@ -30,37 +31,30 @@ public class BrzGraph {
     }
 
     public void addVertex(String codeName) {
-        adjVertices.putIfAbsent(new BrzVertex(codeName), new ArrayList<>());
+        adjVertices.putIfAbsent(codeName, new ArrayList<>());
     }
 
     public void removeVertex(String codeName) {
-        BrzVertex v = new BrzVertex(codeName);
-        adjVertices.values().stream().forEach(e -> e.remove(v));
-        adjVertices.remove(new BrzVertex(codeName));
+        adjVertices.values().stream().forEach(e -> e.remove(codeName));
+        adjVertices.remove(codeName);
     }
 
     public void addEdge(String codeName1, String codeName2) {
-        BrzVertex v1 = new BrzVertex(codeName1);
-        BrzVertex v2 = new BrzVertex(codeName2);
-
-        adjVertices.get(v1).add(v2);
-        adjVertices.get(v2).add(v1);
+        adjVertices.get(codeName1).add(codeName2);
+        adjVertices.get(codeName2).add(codeName1);
     }
 
     public void removeEdge(String codeName1, String codeName2) {
-        BrzVertex v1 = new BrzVertex(codeName1);
-        BrzVertex v2 = new BrzVertex(codeName2);
-
-        List<BrzVertex> edgeV1 = adjVertices.get(v1);
-        List<BrzVertex> edgeV2 = adjVertices.get(v2);
+        List<String> edgeV1 = adjVertices.get(codeName1);
+        List<String> edgeV2 = adjVertices.get(codeName2);
 
         if (edgeV1 != null)
-            edgeV1.remove(v2);
+            edgeV1.remove(codeName2);
         if (edgeV2 != null)
-            edgeV2.remove(v1);
+            edgeV2.remove(codeName1);
     }
 
-    List<BrzVertex> getAdjVertices(String codeName) {
-        return adjVertices.get(new BrzVertex(codeName));
+    List<String> getAdjVertices(String codeName) {
+        return adjVertices.get(codeName);
     }
 }
