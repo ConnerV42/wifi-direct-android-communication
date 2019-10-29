@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements BrzStateObserver 
         store.setTitle("Breeze");
         store.getTitle(this);
 
-        this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), getPackageName());
+        this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), getPackageName(), codeName);
         this.graph = BrzGraph.getInstance(codeName);
     }
 

@@ -32,22 +32,21 @@ public class BrzRouter {
 
     private boolean running = false;
     private String pkgName = "";
-
-    // Our randomly generated unique name for advertising
-    private final String codeName = CodenameGenerator.generate();
+    private String codeName = "";
 
     private static BrzRouter instance;
 
-    private BrzRouter(ConnectionsClient cc, String pkgName) {
+    private BrzRouter(ConnectionsClient cc, String pkgName, String codeName) {
         this.connectionsClient = cc;
         this.pkgName = pkgName;
+        this.codeName = codeName;
 
         // Begin discovery!
         this.start();
     }
 
-    public static BrzRouter getInstance(ConnectionsClient cc, String pkgName) {
-        if(instance == null) instance = new BrzRouter(cc, pkgName);
+    public static BrzRouter getInstance(ConnectionsClient cc, String pkgName, String codeName) {
+        if(instance == null) instance = new BrzRouter(cc, pkgName, codeName);
         return instance;
     }
 
