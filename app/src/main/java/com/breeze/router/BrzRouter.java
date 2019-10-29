@@ -3,6 +3,7 @@ package com.breeze.router;
 import android.util.Log;
 
 import com.breeze.CodenameGenerator;
+import com.breeze.graph.BrzGraph;
 import com.breeze.packets.BrzBodyMessage;
 import com.breeze.packets.BrzChat;
 import com.breeze.packets.BrzPacket;
@@ -33,6 +34,7 @@ public class BrzRouter {
     private boolean running = false;
     private String pkgName = "";
     private String codeName = "";
+    private BrzGraph graph;
 
     private static BrzRouter instance;
 
@@ -40,6 +42,7 @@ public class BrzRouter {
         this.connectionsClient = cc;
         this.pkgName = pkgName;
         this.codeName = codeName;
+        this.graph = BrzGraph.getInstance(codeName);
 
         // Begin discovery!
         this.start();
@@ -163,6 +166,8 @@ public class BrzRouter {
                         store.addChat(new BrzChat(endpointId, endpointId));
 
                         connectedNodes.add(endpointId);
+                        graph.addVertex(endpointId);
+                        graph.addEdge(codeName, endpointId);
                     }
                 }
 
@@ -172,6 +177,8 @@ public class BrzRouter {
                     store.removeChat(endpointId);
 
                     connectedNodes.remove(endpointId);
+                    graph.removeEdge(codeName, endpointId);
+                    graph.removeVertex(endpointId);
                 }
             };
 

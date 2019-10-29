@@ -8,7 +8,6 @@ import android.os.Bundle;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
-import com.breeze.graph.BrzGraph;
 import com.breeze.packets.BrzChat;
 import com.breeze.router.BrzRouter;
 
@@ -25,7 +24,6 @@ public class MainActivity extends AppCompatActivity implements BrzStateObserver 
 
     private Toolbar toolbar;
     private BrzRouter router;
-    private BrzGraph graph;
     private final String codeName = CodenameGenerator.generate();
 
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
@@ -38,9 +36,8 @@ public class MainActivity extends AppCompatActivity implements BrzStateObserver 
                     Manifest.permission.ACCESS_COARSE_LOCATION,
             };
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
-    protected void onStart() { // Might want to bump up the minimum required API to 23
+    protected void onStart() {
         super.onStart();
 
         if(!hasPermissions(this, REQUIRED_PERMISSIONS)) {
@@ -73,7 +70,6 @@ public class MainActivity extends AppCompatActivity implements BrzStateObserver 
         store.getTitle(this);
 
         this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), getPackageName(), codeName);
-        this.graph = BrzGraph.getInstance(codeName);
     }
 
     @Override
