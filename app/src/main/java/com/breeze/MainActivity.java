@@ -3,12 +3,9 @@ package com.breeze;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
-import com.breeze.packets.BrzChat;
 import com.breeze.router.BrzRouter;
 
 import com.breeze.state.BrzStateObserver;
@@ -24,7 +21,6 @@ public class MainActivity extends AppCompatActivity implements BrzStateObserver 
 
     private Toolbar toolbar;
     private BrzRouter router;
-    private final String codeName = CodenameGenerator.generate();
 
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
     private static final String[] REQUIRED_PERMISSIONS =
@@ -69,7 +65,8 @@ public class MainActivity extends AppCompatActivity implements BrzStateObserver 
         store.setTitle("Breeze");
         store.getTitle(this);
 
-        this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), getPackageName(), codeName);
+        //this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), getPackageName());
+        this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), "BREEZE_MESSENGER");
     }
 
     @Override

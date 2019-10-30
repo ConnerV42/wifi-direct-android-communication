@@ -2,14 +2,20 @@ package com.breeze.packets;
 
 import android.util.Base64;
 import android.util.Log;
+
+import com.breeze.packets.graph.BrzGraphEvent;
+import com.breeze.packets.graph.BrzGraphQuery;
+
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
 
 public class BrzPacket implements BrzSerializable {
 
-    enum BrzPacketType {
-        MESSAGE, CONN_UPDATE
+    public enum BrzPacketType {
+        MESSAGE,
+        GRAPH_QUERY,
+        GRAPH_EVENT,
     }
 
     public String to = "BROADCAST";
@@ -23,9 +29,14 @@ public class BrzPacket implements BrzSerializable {
         this.fromJSON(json);
     }
 
-
-    public BrzBodyMessage message() {
-        return new BrzBodyMessage(this.body);
+    public BrzMessage message() {
+        return new BrzMessage(this.body);
+    }
+    public BrzGraphQuery graphQuery() {
+        return new BrzGraphQuery(this.body);
+    }
+    public BrzGraphEvent graphEvent() {
+        return new BrzGraphEvent(this.body);
     }
 
     @Override

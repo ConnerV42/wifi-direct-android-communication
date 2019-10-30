@@ -9,7 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.breeze.R;
-import com.breeze.packets.BrzBodyMessage;
+import com.breeze.packets.BrzMessage;
 import com.breeze.state.BrzStateObserver;
 import com.breeze.state.BrzStateStore;
 
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 public class MessageList extends BaseAdapter implements BrzStateObserver {
 
-    private ArrayList<BrzBodyMessage> messages = new ArrayList<>();
+    private ArrayList<BrzMessage> messages = new ArrayList<>();
     private Context ctx;
 
     public MessageList(Context ctx, String chatId) {
@@ -52,7 +52,7 @@ public class MessageList extends BaseAdapter implements BrzStateObserver {
 
     @Override
     public View getView(int i, View convertView, ViewGroup viewGroup) {
-        BrzBodyMessage message = messages.get(i);
+        BrzMessage message = messages.get(i);
         LayoutInflater messageInflater = (LayoutInflater) ctx.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
 
         if(message.isStatus){

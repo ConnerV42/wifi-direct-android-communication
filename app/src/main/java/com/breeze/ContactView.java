@@ -68,8 +68,6 @@ public class ContactView extends Fragment {
         BrzStateStore store = BrzStateStore.getStore();
         store.setTitle("Breeze");
 
-        store.addChat(new BrzChat("hello", "hello"));
-
         final ChatList chatList = new ChatList(getActivity());
         ListView msgView = (ListView) view.findViewById(R.id.contactList);
         msgView.setAdapter(chatList);

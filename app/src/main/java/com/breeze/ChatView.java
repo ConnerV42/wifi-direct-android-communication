@@ -92,7 +92,7 @@ public class ChatView extends Fragment {
                 // Reset message box
                 messageBox.setText("");
 
-                BrzPacket packet = BrzPacketBuilder.message(chatId, messageBoxText);
+                BrzPacket packet = BrzPacketBuilder.message(router.id, chatId, messageBoxText);
                 router.send(packet);
             }
         });

@@ -1,6 +1,6 @@
 package com.breeze.state;
 
-import com.breeze.packets.BrzBodyMessage;
+import com.breeze.packets.BrzMessage;
 import com.breeze.packets.BrzChat;
 
 import java.util.ArrayList;
@@ -9,7 +9,7 @@ import java.util.HashMap;
 public class BrzStateStore {
 
     private HashMap<String, BrzChat> chats = new HashMap<>();
-    private HashMap<String, ArrayList<BrzBodyMessage>> messages = new HashMap<>();
+    private HashMap<String, ArrayList<BrzMessage>> messages = new HashMap<>();
 
     String title = "";
     private ArrayList<BrzStateObserver> titleListeners = new ArrayList<>();
@@ -70,7 +70,7 @@ public class BrzStateStore {
 
         listener.stateChange(this.messages.get(chatId));
     }
-    public ArrayList<BrzBodyMessage> getMessages(String chatId) {
+    public ArrayList<BrzMessage> getMessages(String chatId) {
         return this.messages.get(chatId);
     }
 
@@ -80,8 +80,8 @@ public class BrzStateStore {
      *
      */
 
-    public void addMessage(String chatId, BrzBodyMessage msg) {
-        ArrayList<BrzBodyMessage> messages = this.messages.get(chatId);
+    public void addMessage(String chatId, BrzMessage msg) {
+        ArrayList<BrzMessage> messages = this.messages.get(chatId);
         if(messages == null) messages = new ArrayList<>();
         messages.add(msg);
         this.messages.put(chatId, messages);
