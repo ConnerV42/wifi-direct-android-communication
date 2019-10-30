@@ -95,9 +95,6 @@ public class BrzGraph implements BrzSerializable {
 
     @Override
     public void fromJSON(String json) {
-        adjList = new HashMap<>();
-        vertexList = new HashMap<>();
-
         try {
             JSONObject jObj = new JSONObject(json);
 
