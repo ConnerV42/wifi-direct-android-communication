@@ -8,6 +8,7 @@ import android.os.Bundle;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
+import com.breeze.database.DatabaseHandler;
 import com.breeze.packets.BrzChat;
 import com.breeze.router.BrzRouter;
 
@@ -24,6 +25,8 @@ public class MainActivity extends AppCompatActivity implements BrzStateObserver 
 
     private Toolbar toolbar;
     private BrzRouter router;
+    private DatabaseHandler dbHelper;
+
 
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
     private static final String[] REQUIRED_PERMISSIONS =
@@ -62,6 +65,8 @@ public class MainActivity extends AppCompatActivity implements BrzStateObserver 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        dbHelper = new DatabaseHandler(this);
+        dbHelper.getReadableDatabase();
         this.toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
