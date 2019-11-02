@@ -32,21 +32,24 @@ import java.util.UUID;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class BrzRouter {
-
     private static final Strategy STRATEGY = Strategy.P2P_CLUSTER;
     private ConnectionsClient connectionsClient;
 
+    HashMap<String, BrzPacket> packetMap = new HashMap<>();
+
     private List<String> connectedEndpoints = new ArrayList<>();
     private Map<String, String> endpointNames = new HashMap<>();
+
 
     private boolean running = false;
     private String pkgName = "";
     public final String id = UUID.randomUUID().toString();
     private BrzGraph graph;
 
-    private boolean waitingForGraph = false;
 
+    private boolean waitingForGraph = false;
     private static BrzRouter instance;
+
 
     private BrzRouter(ConnectionsClient cc, String pkgName) {
         this.connectionsClient = cc;

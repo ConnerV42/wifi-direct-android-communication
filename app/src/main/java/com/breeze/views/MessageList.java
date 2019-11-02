@@ -10,29 +10,38 @@ import android.widget.TextView;
 
 import com.breeze.R;
 import com.breeze.packets.BrzMessage;
-import com.breeze.state.BrzStateObserver;
 import com.breeze.state.BrzStateStore;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class MessageList extends BaseAdapter implements BrzStateObserver {
+public class MessageList extends BaseAdapter {
 
-    private ArrayList<BrzMessage> messages = new ArrayList<>();
+    private class MessageComponent {
+        TextView messageName;
+        TextView messageBody;
+    }
+
+    private class OutgoingMessageComponent {
+        TextView messageBody;
+    }
+
+    private class StatusComponent {
+        TextView statusBody;
+    }
+
+    private List<BrzMessage> messages = new ArrayList<>();
     private Context ctx;
 
     public MessageList(Context ctx, String chatId) {
         this.ctx = ctx;
 
-        BrzStateStore store = BrzStateStore.getStore();
-        store.getMessages(this, chatId);
-    }
-
-    @Override
-    public void stateChange(Object messages) {
-        if(messages != null) {
-            this.messages = (ArrayList) messages;
-            notifyDataSetChanged();
-        }
+        BrzStateStore.getStore().getMessages(chatId, messages -> {
+            if(messages != null) {
+                this.messages = messages;
+                notifyDataSetChanged();
+            }
+        });
     }
 
     @Override
@@ -61,7 +70,7 @@ public class MessageList extends BaseAdapter implements BrzStateObserver {
             convertView = messageInflater.inflate(R.layout.li_message_status, null);
             convertView.setTag(msgCmp);
 
-            msgCmp.statusBody = (TextView) convertView.findViewById(R.id.statusBody);
+            msgCmp.statusBody = convertView.findViewById(R.id.statusBody);
             msgCmp.statusBody.setText(message.message);
 
         } else if( message.userName.equals("You")) {
@@ -70,7 +79,7 @@ public class MessageList extends BaseAdapter implements BrzStateObserver {
             convertView = messageInflater.inflate(R.layout.li_message_outgoing, null);
             convertView.setTag(msgCmp);
 
-            msgCmp.messageBody = (TextView) convertView.findViewById(R.id.messageBody);
+            msgCmp.messageBody = convertView.findViewById(R.id.messageBody);
             msgCmp.messageBody.setText(message.message);
         } else {
             MessageComponent msgCmp = new MessageComponent();
@@ -78,8 +87,8 @@ public class MessageList extends BaseAdapter implements BrzStateObserver {
             convertView = messageInflater.inflate(R.layout.li_message, null);
             convertView.setTag(msgCmp);
 
-            msgCmp.messageBody = (TextView) convertView.findViewById(R.id.messageBody);
-            msgCmp.messageName = (TextView) convertView.findViewById(R.id.messageName);
+            msgCmp.messageBody = convertView.findViewById(R.id.messageBody);
+            msgCmp.messageName = convertView.findViewById(R.id.messageName);
             msgCmp.messageName.setText(message.userName);
             msgCmp.messageBody.setText(message.message);
         }
@@ -89,15 +98,3 @@ public class MessageList extends BaseAdapter implements BrzStateObserver {
     }
 }
 
-class MessageComponent {
-    public TextView messageName;
-    public TextView messageBody;
-}
-
-class OutgoingMessageComponent {
-    public TextView messageBody;
-}
-
-class StatusComponent {
-    public TextView statusBody;
-}

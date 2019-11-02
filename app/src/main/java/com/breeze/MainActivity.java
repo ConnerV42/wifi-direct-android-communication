@@ -8,7 +8,6 @@ import androidx.core.content.ContextCompat;
 
 import com.breeze.router.BrzRouter;
 
-import com.breeze.state.BrzStateObserver;
 import com.breeze.state.BrzStateStore;
 import com.google.android.gms.nearby.Nearby;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,7 +16,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity implements BrzStateObserver {
+public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private BrzRouter router;
@@ -63,15 +62,10 @@ public class MainActivity extends AppCompatActivity implements BrzStateObserver 
 
         BrzStateStore store = BrzStateStore.getStore();
         store.setTitle("Breeze");
-        store.getTitle(this);
+        store.getTitle(title -> this.toolbar.setTitle(title));
 
         //this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), getPackageName());
         this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), "BREEZE_MESSENGER");
-    }
-
-    @Override
-    public void stateChange(Object value) {
-        this.toolbar.setTitle((String) value);
     }
 
     @Override

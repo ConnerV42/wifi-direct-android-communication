@@ -5,118 +5,120 @@ import com.breeze.packets.BrzChat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class BrzStateStore {
-
-    private HashMap<String, BrzChat> chats = new HashMap<>();
-    private HashMap<String, ArrayList<BrzMessage>> messages = new HashMap<>();
-
-    String title = "";
-    private ArrayList<BrzStateObserver> titleListeners = new ArrayList<>();
-
-    private HashMap<String, ArrayList<BrzStateObserver>> mlisteners = new HashMap<>();
-    private HashMap<String, ArrayList<BrzStateObserver>> clisteners = new HashMap<>();
 
     private static BrzStateStore instance = new BrzStateStore();
     public static BrzStateStore getStore() {
         return instance;
     }
 
-    public void getTitle(BrzStateObserver listener) {
-        this.titleListeners.add(listener);
-        listener.stateChange(this.title);
+    //
+    //
+    //  Title
+    //
+    //
+
+    private String title = "";
+    private List<Consumer<String>> titleListeners = new ArrayList<>();
+
+    public void getTitle(Consumer<String> callback) {
+        this.titleListeners.add(callback);
+        callback.accept(this.title);
     }
     public String getTitle() { return this.title; }
+
     public void setTitle(String title) {
         this.title = title;
-        for(BrzStateObserver o : this.titleListeners) o.stateChange(this.title);
+        for(Consumer<String> c : this.titleListeners) c.accept(this.title);
     }
 
+    //
+    //
+    //  Chats
+    //
+    //
 
-    public void getAllChats(BrzStateObserver listener) {
-        ArrayList<BrzStateObserver> listeners =  this.clisteners.get("all");
-        if(listeners == null) listeners = new ArrayList<>();
-        listeners.add(listener);
-        this.clisteners.put("all", listeners);
-        listener.stateChange(new ArrayList(this.chats.values()));
+    private HashMap<String, BrzChat> chats = new HashMap<>();
+    private List<Consumer<List<BrzChat>>> chatListListeners = new ArrayList<>();
+    private HashMap<String, List<Consumer<BrzChat>>> chatListeners = new HashMap<>();
+
+    public void getAllChats(Consumer<List<BrzChat>> callback) {
+        chatListListeners.add(callback);
+        callback.accept(new ArrayList<>(this.chats.values()));
     }
-    public ArrayList<BrzChat> getAllChats() {
-        return new ArrayList(this.chats.values());
+    public List<BrzChat> getAllChats() {
+        return new ArrayList<>(this.chats.values());
     }
 
-    public void getChat(BrzStateObserver listener, String chatId) {
-        ArrayList<BrzStateObserver> listeners =  this.clisteners.get(chatId);
-        if(listeners == null) listeners = new ArrayList<>();
-        listeners.add(listener);
-        this.clisteners.put(chatId, listeners);
-
-        listener.stateChange(this.chats.get(chatId));
+    public void getChat(String chatId, Consumer<BrzChat> callback) {
+        List<Consumer<BrzChat>> listeners =  this.chatListeners.get(chatId);
+        if(listeners == null) {
+            listeners = new ArrayList<>();
+            this.chatListeners.put(chatId, listeners);
+        }
+        listeners.add(callback);
+        callback.accept(this.chats.get(chatId));
     }
     public BrzChat getChat(String chatId) {
         return this.chats.get(chatId);
     }
 
-    /**
-     *  Messages
-     *
-     * @param listener
-     * @param chatId
-     */
-    public void getMessages(BrzStateObserver listener, String chatId) {
-        ArrayList<BrzStateObserver> listeners =  this.mlisteners.get(chatId);
-        if(listeners == null) listeners = new ArrayList<>();
-        listeners.add(listener);
-        this.mlisteners.put(chatId, listeners);
-
-        listener.stateChange(this.messages.get(chatId));
-    }
-    public ArrayList<BrzMessage> getMessages(String chatId) {
-        return this.messages.get(chatId);
-    }
-
-    /**
-     *
-     *      Activities
-     *
-     */
-
-    public void addMessage(String chatId, BrzMessage msg) {
-        ArrayList<BrzMessage> messages = this.messages.get(chatId);
-        if(messages == null) messages = new ArrayList<>();
-        messages.add(msg);
-        this.messages.put(chatId, messages);
-
-        ArrayList<BrzStateObserver> mListeners = this.mlisteners.get(chatId);
-        if(mListeners != null)
-        for(BrzStateObserver o : mListeners)
-            o.stateChange(messages);
-    }
-
     public void addChat(BrzChat chat) {
         this.chats.put(chat.id, chat);
 
-        ArrayList<BrzStateObserver> allListeners = this.clisteners.get("all");
-        if(allListeners != null)
-        for(BrzStateObserver o : allListeners)
-            o.stateChange(new ArrayList(this.chats.values()));
+        List<BrzChat> allChats = new ArrayList<>(this.chats.values());
+        for(Consumer<List<BrzChat>> c : this.chatListListeners) c.accept(allChats);
 
-        ArrayList<BrzStateObserver> chatListeners = this.clisteners.get(chat.id);
-        if(chatListeners != null)
-        for(BrzStateObserver o : chatListeners)
-            o.stateChange(chat);
+        List<Consumer<BrzChat>> cl = this.chatListeners.get(chat.id);
+        if(cl != null) for(Consumer<BrzChat> c : cl) c.accept(chat);
     }
     public void removeChat(String chatId) {
         this.chats.remove(chatId);
 
-        ArrayList<BrzStateObserver> allListeners = this.clisteners.get("all");
-        if(allListeners != null)
-            for(BrzStateObserver o : allListeners)
-                o.stateChange(new ArrayList(this.chats.values()));
+        List<BrzChat> allChats = new ArrayList<>(this.chats.values());
+        for(Consumer<List<BrzChat>> c : this.chatListListeners) c.accept(allChats);
 
-        ArrayList<BrzStateObserver> chatListeners = this.clisteners.get(chatId);
-        if(chatListeners != null)
-            for(BrzStateObserver o : chatListeners)
-                o.stateChange(null);
+        List<Consumer<BrzChat>> cl = this.chatListeners.get(chatId);
+        if(cl != null) for(Consumer<BrzChat> c : cl) c.accept(null);
     }
+
+    //
+    //
+    //  Messages
+    //
+    //
+
+    private HashMap<String, List<BrzMessage>> messages = new HashMap<>();
+    private HashMap<String, List<Consumer<List<BrzMessage>>>> mlisteners = new HashMap<>();
+
+    public void getMessages(String chatId, Consumer<List<BrzMessage>> callback) {
+        List<Consumer<List<BrzMessage>>> listeners =  this.mlisteners.get(chatId);
+        if(listeners == null) {
+            listeners = new ArrayList<>();
+            this.mlisteners.put(chatId, listeners);
+        }
+        listeners.add(callback);
+        callback.accept(this.messages.get(chatId));
+    }
+    public List<BrzMessage> getMessages(String chatId) {
+        return this.messages.get(chatId);
+    }
+
+    public void addMessage(String chatId, BrzMessage msg) {
+        List<BrzMessage> messages = this.messages.get(chatId);
+        if(messages == null) {
+            messages = new ArrayList<>();
+            this.messages.put(chatId, messages);
+        }
+        messages.add(msg);
+
+        List<Consumer<List<BrzMessage>>> cl = this.mlisteners.get(chatId);
+        if(cl != null) for(Consumer<List<BrzMessage>> c : cl) c.accept(messages);
+    }
+
+
 
 }
