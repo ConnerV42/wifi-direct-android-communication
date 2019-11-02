@@ -87,14 +87,6 @@ public class BrzRouter {
     public void send(BrzPacket packet) {
         Payload p = Payload.fromBytes(packet.toJSON().getBytes());
         connectionsClient.sendPayload(this.graph.getVertex(packet.to).endpointId, p);
-
-        // Add message to store
-        if(packet.type == BrzPacket.BrzPacketType.MESSAGE) {
-            BrzStateStore store = BrzStateStore.getStore();
-            BrzMessage message = packet.message();
-            message.userName = "You";
-            store.addMessage(packet.to, message);
-        }
     }
 
     public void start() {

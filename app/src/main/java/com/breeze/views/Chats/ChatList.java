@@ -1,4 +1,4 @@
-package com.breeze.views;
+package com.breeze.views.Chats;
 
 import android.app.Activity;
 import android.content.Context;
