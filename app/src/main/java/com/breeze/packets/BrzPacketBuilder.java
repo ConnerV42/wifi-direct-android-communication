@@ -9,6 +9,16 @@ public class BrzPacketBuilder {
         return BrzPacketBuilder.message(id, msgBody);
     }
 
+    public static BrzPacket ack(BrzPacket packet, String to) {
+        BrzPacket ackPacket = new BrzPacket();
+
+        ackPacket.type = BrzPacket.BrzPacketType.ACK;
+        ackPacket.to = to;
+        ackPacket.id = packet.id;
+
+        return ackPacket;
+    }
+
     public static BrzPacket message(String id, String msgTo, String msgBody) {
         BrzMessage body = new BrzMessage();
 

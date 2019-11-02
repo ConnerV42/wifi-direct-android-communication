@@ -35,7 +35,7 @@ public class BrzRouter {
     private static final Strategy STRATEGY = Strategy.P2P_CLUSTER;
     private ConnectionsClient connectionsClient;
 
-    HashMap<String, BrzPacket> packetMap = new HashMap<>();
+    private BrzPacketBuffer buffer = new BrzPacketBuffer();
 
     private List<String> connectedEndpoints = new ArrayList<>();
     private Map<String, String> endpointNames = new HashMap<>();
@@ -49,7 +49,6 @@ public class BrzRouter {
 
     private boolean waitingForGraph = false;
     private static BrzRouter instance;
-
 
     private BrzRouter(ConnectionsClient cc, String pkgName) {
         this.connectionsClient = cc;
@@ -86,7 +85,22 @@ public class BrzRouter {
 
     public void send(BrzPacket packet) {
         Payload p = Payload.fromBytes(packet.toJSON().getBytes());
-        connectionsClient.sendPayload(this.graph.getVertex(packet.to).endpointId, p);
+        BrzNode toNode = this.graph.getVertex(packet.to);
+        if(toNode != null && !toNode.endpointId.equals("")) {
+            connectionsClient.sendPayload(toNode.endpointId, p);
+
+            buffer.addPacket(packet, 5000, 5, packResend -> {
+                connectionsClient.sendPayload(toNode.endpointId, p);
+            });
+
+        }
+    }
+    private void sendAck(BrzPacket packet) {
+        Payload p = Payload.fromBytes(packet.toJSON().getBytes());
+        BrzNode toNode = this.graph.getVertex(packet.to);
+        if(toNode != null && !toNode.endpointId.equals("")) {
+            connectionsClient.sendPayload(toNode.endpointId, p);
+        }
     }
 
     public void start() {
@@ -117,7 +131,15 @@ public class BrzRouter {
                 new DiscoveryOptions.Builder().setStrategy(STRATEGY).build());
     }
 
-    private void handlePacket(BrzPacket packet) {
+    private void handlePacket(BrzPacket packet, String fromEndpointId) {
+
+        if(packet.type != BrzPacket.BrzPacketType.ACK) {
+            BrzPacket ack = BrzPacketBuilder.ack(packet, this.endpointNames.get(fromEndpointId));
+            sendAck(ack);
+        } else {
+            this.buffer.removePacket(packet.id);
+        }
+
         if(packet.type == BrzPacket.BrzPacketType.MESSAGE) {
             if(packet.to.equals(this.id)) {
                 BrzMessage message = packet.message();
@@ -155,7 +177,7 @@ public class BrzRouter {
                     String json = new String(payloadBody, UTF_8);
                     BrzPacket packet = new BrzPacket(json);
 
-                    handlePacket(packet);
+                    handlePacket(packet, endpointId);
                 }
 
                 @Override

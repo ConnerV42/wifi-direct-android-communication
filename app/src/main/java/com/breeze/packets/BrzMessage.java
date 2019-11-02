@@ -21,6 +21,11 @@ public class BrzMessage implements BrzSerializable {
       this.message = message;
       this.isStatus = isStatus;
     }
+    public BrzMessage(String message, String from) {
+      this.message = message;
+      this.from = from;
+      this.isStatus = false;
+    }
 
     @Override
     public String toJSON() {

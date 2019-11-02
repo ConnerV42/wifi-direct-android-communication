@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.breeze.R;
+import com.breeze.packets.BrzChat;
 import com.breeze.packets.BrzMessage;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
@@ -32,7 +33,7 @@ import com.breeze.state.BrzStateStore;
 public class MessagesView extends Fragment {
 
     private static final String ARG_CHAT_ID = "";
-    private String chatId;
+    private BrzChat chat;
 
     public MessagesView() {
         // Required empty public constructor
@@ -57,7 +58,8 @@ public class MessagesView extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            chatId = getArguments().getString("ARG_CHAT_ID");
+            String chatId = getArguments().getString("ARG_CHAT_ID");
+            BrzStateStore.getStore().getChat(chatId, chat -> this.chat = chat);
         }
     }
 
@@ -74,10 +76,9 @@ public class MessagesView extends Fragment {
 
         final BrzRouter router = BrzRouter.getInstance();
 
-        BrzStateStore store = BrzStateStore.getStore();
-        store.setTitle(chatId);
+        BrzStateStore.getStore().setTitle(this.chat.name);
 
-        MessageList msgList = new MessageList(getActivity(), chatId);
+        MessageList msgList = new MessageList(getActivity(), this.chat.id);
         ListView msgView = (ListView) getView().findViewById(R.id.messageList);
         msgView.setAdapter(msgList);
 
@@ -92,7 +93,7 @@ public class MessagesView extends Fragment {
                 // Reset message box
                 messageBox.setText("");
 
-                BrzPacket packet = BrzPacketBuilder.message(router.id, chatId, messageBoxText);
+                BrzPacket packet = BrzPacketBuilder.message(router.id, chat.id, messageBoxText);
                 router.send(packet);
 
                 BrzStateStore.getStore().addMessage(packet.to, packet.message());
