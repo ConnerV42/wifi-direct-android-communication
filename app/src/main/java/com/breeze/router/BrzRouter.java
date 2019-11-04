@@ -11,6 +11,7 @@ import com.breeze.graph.BrzNode;
 import com.breeze.packets.BrzChat;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
+import com.breeze.packets.graph.BrzGraphEvent;
 import com.breeze.packets.graph.BrzGraphQuery;
 import com.breeze.state.BrzStateStore;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
@@ -42,6 +43,8 @@ public class BrzRouter {
 
     private List<String> connectedEndpoints = new ArrayList<>();
     private Map<String, String> endpointUUIDs = new HashMap<>();
+
+    private Map<String, String> seenPackets = new HashMap<>();
 
 
     private boolean running = false;
@@ -140,7 +143,7 @@ public class BrzRouter {
         if (packet.type != BrzPacket.BrzPacketType.ACK) {
             BrzPacket ack = BrzPacketBuilder.ack(packet, this.endpointUUIDs.get(fromEndpointId));
             forwardPacket(ack);
-        // Remove acknowledged packets from the buffer
+            // Remove acknowledged packets from the buffer
         } else {
             this.buffer.removePacket(packet.id);
         }
@@ -159,6 +162,30 @@ public class BrzRouter {
                 waitingForGraph = false;
                 this.graph.fromJSON(query.graph);
             }
+        }
+
+        // Respond to graph queries
+        if (packet.type == BrzPacket.BrzPacketType.GRAPH_EVENT) {
+
+            BrzGraphEvent ge = packet.graphEvent();
+            if (ge.type == BrzGraphEvent.BrzGEType.CONNECT) {
+                graph.addVertex(ge.node1);
+                graph.addVertex(ge.node2);
+                graph.addEdge(ge.node1.id, ge.node2.id);
+            } else {
+                graph.removeEdge(ge.node1.id, ge.node2.id);
+            }
+
+            if(seenPackets.get(packet.id) != null) return;
+            seenPackets.put(packet.id, "");
+
+            for(String id : connectedEndpoints) {
+                if(!id.equals(fromEndpointId)) {
+                    Payload p = Payload.fromBytes(packet.toJSON().getBytes());
+                    connectionsClient.sendPayload(id, p);
+                }
+            }
+
         }
 
         // forward packets that aren't for us onwards
@@ -223,8 +250,22 @@ public class BrzRouter {
                 public void onConnectionResult(@NonNull String endpointId, ConnectionResolution result) {
                     if (result.getStatus().isSuccess()) {
                         String endpointName = endpointUUIDs.get(endpointId);
-                        graph.addVertex(new BrzNode(endpointName, endpointId, "other_host", ""));
+
+                        BrzNode otherNode = new BrzNode(endpointName, endpointId, "other_host", "");
+
+                        // Add to our graph
+                        graph.addVertex(otherNode);
                         graph.addEdge(id, endpointName);
+
+                        // Broadcast connect event
+                        BrzGraphEvent ge = new BrzGraphEvent(true, graph.getVertex(id), otherNode);
+                        BrzPacket cp = new BrzPacket(ge);
+                        cp.type = BrzPacket.BrzPacketType.GRAPH_EVENT;
+
+                        for(String id : connectedEndpoints) {
+                                Payload p = Payload.fromBytes(cp.toJSON().getBytes());
+                                connectionsClient.sendPayload(id, p);
+                        }
 
                         if (connectedEndpoints.size() == 0) {
                             waitingForGraph = true;
@@ -241,6 +282,18 @@ public class BrzRouter {
                 @Override
                 public void onDisconnected(@NonNull String endpointId) {
                     connectedEndpoints.remove(endpointId);
+
+
+                    // Broadcast connect event
+                    String name = endpointUUIDs.get(endpointId);
+                    BrzGraphEvent ge = new BrzGraphEvent(false, graph.getVertex(id), graph.getVertex(name));
+                    BrzPacket cp = new BrzPacket(ge);
+                    cp.type = BrzPacket.BrzPacketType.GRAPH_EVENT;
+
+                    for(String id : connectedEndpoints) {
+                        Payload p = Payload.fromBytes(cp.toJSON().getBytes());
+                        connectionsClient.sendPayload(id, p);
+                    }
 
                     String endpointUUID = endpointUUIDs.get(endpointId);
                     graph.removeEdge(id, endpointUUID);

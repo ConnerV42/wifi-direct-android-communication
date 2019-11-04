@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         //this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), getPackageName());
-        this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), "BREEZE_MESSENGER");
+        this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), "BREEZE_MESSENGER", this);
 
         BrzStateStore store = BrzStateStore.getStore();
         store.setTitle("Breeze");

@@ -10,9 +10,9 @@ import org.json.JSONObject;
 public class BrzGraphEvent implements BrzSerializable {
     public enum BrzGEType { CONNECT, DISCONNECT }
 
-    BrzGEType type = BrzGEType.CONNECT;
-    BrzNode node1;
-    BrzNode node2;
+    public BrzGEType type = BrzGEType.CONNECT;
+    public BrzNode node1;
+    public BrzNode node2;
 
     public BrzGraphEvent() { }
     public BrzGraphEvent(String json) {
