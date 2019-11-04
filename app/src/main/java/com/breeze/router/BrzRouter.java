@@ -1,7 +1,12 @@
 package com.breeze.router;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.util.Log;
 
+import androidx.appcompat.app.AppCompatDialogFragment;
+
+import com.breeze.MainActivity;
 import com.breeze.packets.BrzMessage;
 import com.breeze.graph.BrzGraph;
 import com.breeze.graph.BrzNode;
@@ -47,6 +52,8 @@ public class BrzRouter {
     private BrzGraph graph;
 
 
+
+    private MainActivity mainActivity;
     private boolean waitingForGraph = false;
     private static BrzRouter instance;
 
@@ -117,6 +124,10 @@ public class BrzRouter {
         connectionsClient.stopAllEndpoints();
         connectionsClient.stopAdvertising();
         connectionsClient.stopDiscovery();
+    }
+
+    public void setMainActivity(MainActivity mainActivity) {
+        this.mainActivity = mainActivity;
     }
 
     private void startAdvertising() {
@@ -207,8 +218,28 @@ public class BrzRouter {
             new ConnectionLifecycleCallback() {
                 @Override
                 public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo) {
-                    endpointNames.put(endpointId, connectionInfo.getEndpointName());
-                    connectionsClient.acceptConnection(endpointId, payloadCallback);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
+                    builder.setTitle("Confirm Connection");
+                    builder.setMessage("Connect to following device?");
+
+                    final String endpoint = endpointId;
+                    final ConnectionInfo ci = connectionInfo;
+
+
+                    builder.setPositiveButton("Connect", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            endpointNames.put(endpoint, ci.getEndpointName());
+                            connectionsClient.acceptConnection(endpoint, payloadCallback);
+                        }
+                    });
+                    builder.setNegativeButton("Reject", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+                    builder.create();
                 }
 
                 @Override
