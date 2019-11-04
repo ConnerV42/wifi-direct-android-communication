@@ -5,7 +5,15 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.breeze.packets.BrzSerializable;
+
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 
 public class BrzContact implements BrzSerializable
@@ -15,6 +23,11 @@ public class BrzContact implements BrzSerializable
     private String name;
     private String alias;
     private String signature;
+
+    private String lastTalkedTo;
+    private boolean friend;
+    private boolean blocked;
+
 
     public BrzContact()
     {
@@ -26,6 +39,13 @@ public class BrzContact implements BrzSerializable
         this.name = name;
         this.alias = alias;
         this.signature = signature;
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'", Locale.US); // Quoted "Z" to indicate UTC, no timezone offset
+        df.setTimeZone(tz);
+        String isoDate = df.format(new Date());
+        this.friend = false;
+        this.blocked = false;
+        this.lastTalkedTo = isoDate;
     }
 
     public int getId() {
@@ -56,6 +76,31 @@ public class BrzContact implements BrzSerializable
         this.signature = signature;
     }
 
+    public String getLastTalkedTo() {
+        return lastTalkedTo;
+    }
+
+    public void setLastTalkedTo(String lastTalkedTo) {
+        this.lastTalkedTo = lastTalkedTo;
+    }
+
+    public boolean isFriend() {
+        return friend;
+    }
+
+    public void setFriend(boolean friend) {
+        this.friend = friend;
+    }
+
+    public boolean isBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
+    }
+
+    @NotNull
     @Override
     public String toString() {
         return "BrzContact{" +
