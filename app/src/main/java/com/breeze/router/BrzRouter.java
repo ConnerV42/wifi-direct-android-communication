@@ -147,6 +147,7 @@ public class BrzRouter {
                 store.addMessage(message.from, message);
             } else {
                 // forward the packet to next node
+                List<String> shortestPath = graph.bfs(this.id, packet.to);
             }
         }
 

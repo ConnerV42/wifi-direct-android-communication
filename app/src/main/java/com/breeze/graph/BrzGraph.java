@@ -1,5 +1,6 @@
 package com.breeze.graph;
 
+import android.os.Build;
 import android.util.Log;
 
 import com.breeze.packets.BrzSerializable;
@@ -7,11 +8,7 @@ import com.breeze.packets.BrzSerializable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
 public class BrzGraph implements BrzSerializable {
 
@@ -32,6 +29,39 @@ public class BrzGraph implements BrzSerializable {
     }
 
     // Graph manipulation methods
+
+    public List<String> bfs(String currentUUID, String destinationUUID) {
+
+        HashMap<String, Boolean> nodeVisited = new HashMap<String, Boolean>();
+        vertexList.keySet().forEach(id -> nodeVisited.put(id, false));
+
+        // List that holds the path through which a node has been reached
+        List<String> pathToNode = new ArrayList<>();
+        pathToNode.add(currentUUID);
+
+        Queue<List<String>> queue = new LinkedList<>();
+        queue.add(pathToNode);
+
+        while(!queue.isEmpty()) {
+            pathToNode = queue.poll();
+            String currId = pathToNode.get(pathToNode.size() - 1);
+
+            if(currId.equals(destinationUUID))
+                return pathToNode;
+
+            for (String neighbor : getNeighbors(currId)) {
+                if(neighbor != currId && !nodeVisited.get(neighbor)) {
+                    nodeVisited.put(neighbor, true);
+
+                    // Create new collection representing the path to the next node
+                    List<String> pathToNextNode = new ArrayList<>(pathToNode);
+                    pathToNextNode.add(neighbor);
+                    queue.add(pathToNextNode);
+                }
+            }
+        }
+        return null;
+    }
 
     public int getSize() {
         return vertexList.size();
@@ -64,8 +94,8 @@ public class BrzGraph implements BrzSerializable {
         if (edges2 != null) edges2.remove(id1);
     }
 
-    List<String> getAdjVertices(String codeName) {
-        return adjList.get(codeName);
+    List<String> getNeighbors(String id) {
+        return adjList.get(id);
     }
 
     @Override
