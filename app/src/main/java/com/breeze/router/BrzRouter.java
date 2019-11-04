@@ -172,6 +172,9 @@ public class BrzRouter {
                 graph.addVertex(ge.node1);
                 graph.addVertex(ge.node2);
                 graph.addEdge(ge.node1.id, ge.node2.id);
+
+                BrzStateStore.getStore().addChat(new BrzChat(ge.node1.id, ge.node1.id));
+                BrzStateStore.getStore().addChat(new BrzChat(ge.node2.id, ge.node2.id));
             } else {
                 graph.removeEdge(ge.node1.id, ge.node2.id);
             }
