@@ -1,6 +1,9 @@
 package com.breeze.router;
 
-import android.util.Log;
+import android.content.Context;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import com.breeze.packets.BrzMessage;
 import com.breeze.graph.BrzGraph;
@@ -38,7 +41,7 @@ public class BrzRouter {
     private BrzPacketBuffer buffer = new BrzPacketBuffer();
 
     private List<String> connectedEndpoints = new ArrayList<>();
-    private Map<String, String> endpointNames = new HashMap<>();
+    private Map<String, String> endpointUUIDs = new HashMap<>();
 
 
     private boolean running = false;
@@ -46,6 +49,7 @@ public class BrzRouter {
     public final String id = UUID.randomUUID().toString();
     private BrzGraph graph;
 
+    Context ctx;
 
     private boolean waitingForGraph = false;
     private static BrzRouter instance;
@@ -61,8 +65,9 @@ public class BrzRouter {
         this.start();
     }
 
-    public static BrzRouter getInstance(ConnectionsClient cc, String pkgName) {
-        if(instance == null) instance = new BrzRouter(cc, pkgName);
+    public static BrzRouter getInstance(ConnectionsClient cc, String pkgName, Context ctx) {
+        if (instance == null) instance = new BrzRouter(cc, pkgName);
+        instance.ctx = ctx;
         return instance;
     }
 
@@ -84,27 +89,25 @@ public class BrzRouter {
     }
 
     public void send(BrzPacket packet) {
-        Payload p = Payload.fromBytes(packet.toJSON().getBytes());
-        BrzNode toNode = this.graph.getVertex(packet.to);
-        if(toNode != null && !toNode.endpointId.equals("")) {
-            connectionsClient.sendPayload(toNode.endpointId, p);
-
-            buffer.addPacket(packet, 5000, 5, packResend -> {
-                connectionsClient.sendPayload(toNode.endpointId, p);
-            });
-
-        }
+        forwardPacket(packet);
+        buffer.addPacket(packet, 5000, 5, this::forwardPacket);
     }
-    private void sendAck(BrzPacket packet) {
+
+    private void forwardPacket(BrzPacket packet) {
         Payload p = Payload.fromBytes(packet.toJSON().getBytes());
-        BrzNode toNode = this.graph.getVertex(packet.to);
-        if(toNode != null && !toNode.endpointId.equals("")) {
-            connectionsClient.sendPayload(toNode.endpointId, p);
-        }
+
+        String nextHopUUID = graph.nextHop(this.id, packet.to);
+        BrzNode nextHopNode = this.graph.getVertex(nextHopUUID);
+
+        if (
+                nextHopNode != null &&
+                        !nextHopNode.endpointId.equals("") &&
+                        this.connectedEndpoints.contains(nextHopNode.endpointId)
+        ) connectionsClient.sendPayload(nextHopNode.endpointId, p);
     }
 
     public void start() {
-        if(running) return;
+        if (running) return;
         running = true;
 
         startAdvertising();
@@ -133,47 +136,52 @@ public class BrzRouter {
 
     private void handlePacket(BrzPacket packet, String fromEndpointId) {
 
-        if(packet.type != BrzPacket.BrzPacketType.ACK) {
-            BrzPacket ack = BrzPacketBuilder.ack(packet, this.endpointNames.get(fromEndpointId));
-            sendAck(ack);
+        // Acknowledge packets we receive
+        if (packet.type != BrzPacket.BrzPacketType.ACK) {
+            BrzPacket ack = BrzPacketBuilder.ack(packet, this.endpointUUIDs.get(fromEndpointId));
+            forwardPacket(ack);
+        // Remove acknowledged packets from the buffer
         } else {
             this.buffer.removePacket(packet.id);
         }
 
-        if(packet.type == BrzPacket.BrzPacketType.MESSAGE) {
-            if(packet.to.equals(this.id)) {
-                BrzMessage message = packet.message();
-                BrzStateStore store = BrzStateStore.getStore();
-                store.addMessage(message.from, message);
-            } else {
-                // forward the packet to next node
-                List<String> shortestPath = graph.bfs(this.id, packet.to);
-            }
-        }
-
-        else if(packet.type == BrzPacket.BrzPacketType.GRAPH_QUERY) {
+        // Respond to graph queries
+        if (packet.type == BrzPacket.BrzPacketType.GRAPH_QUERY) {
             BrzGraphQuery query = packet.graphQuery();
 
             // Respond to graph query
-            if(query.type == BrzGraphQuery.BrzGQType.REQUEST) {
+            if (query.type == BrzGraphQuery.BrzGQType.REQUEST) {
                 BrzPacket resPacket = BrzPacketBuilder.graphResponse(this.graph, query.from);
                 send(resPacket);
             }
             // Update graph
-            else if(waitingForGraph && !query.graph.equals("")) {
+            else if (waitingForGraph && !query.graph.equals("")) {
                 waitingForGraph = false;
                 this.graph.fromJSON(query.graph);
             }
         }
+
+        // forward packets that aren't for us onwards
+        else if (!packet.to.equals(this.id)) {
+            send(packet);
+            Toast.makeText(ctx, "Forwarded packet", Toast.LENGTH_LONG).show();
+        }
+
+        // If we got a message that is for us
+        else if (packet.type == BrzPacket.BrzPacketType.MESSAGE) {
+            BrzMessage message = packet.message();
+            BrzStateStore.getStore().addMessage(message.from, message);
+        }
+
     }
 
     // Callback for receiving payloads
     private final PayloadCallback payloadCallback =
             new PayloadCallback() {
                 @Override
-                public void onPayloadReceived(String endpointId, Payload payload) {
+                public void onPayloadReceived(@NonNull String endpointId, Payload payload) {
                     byte[] payloadBody = payload.asBytes();
-                    if(payloadBody == null) return;
+                    if (payloadBody == null) return;
 
                     String json = new String(payloadBody, UTF_8);
                     BrzPacket packet = new BrzPacket(json);
@@ -182,8 +190,8 @@ public class BrzRouter {
                 }
 
                 @Override
-                public void onPayloadTransferUpdate(String endpointId, PayloadTransferUpdate update) {
-                    if(update.getStatus() == PayloadTransferUpdate.Status.SUCCESS) {
+                public void onPayloadTransferUpdate(@NonNull String endpointId, PayloadTransferUpdate update) {
+                    if (update.getStatus() == PayloadTransferUpdate.Status.SUCCESS) {
                     }
                 }
             };
@@ -192,13 +200,13 @@ public class BrzRouter {
     private final EndpointDiscoveryCallback endpointDiscoveryCallback =
             new EndpointDiscoveryCallback() {
                 @Override
-                public void onEndpointFound(String endpointId, DiscoveredEndpointInfo info) {
-                    if(info.getServiceId().equals(pkgName))
+                public void onEndpointFound(@NonNull String endpointId, DiscoveredEndpointInfo info) {
+                    if (info.getServiceId().equals(pkgName) && connectedEndpoints.size() < 2)
                         connectionsClient.requestConnection(id, endpointId, connectionLifecycleCallback);
                 }
 
                 @Override
-                public void onEndpointLost(String endpointId) {
+                public void onEndpointLost(@NonNull String endpointId) {
                 }
             };
 
@@ -206,19 +214,19 @@ public class BrzRouter {
     private final ConnectionLifecycleCallback connectionLifecycleCallback =
             new ConnectionLifecycleCallback() {
                 @Override
-                public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo) {
-                    endpointNames.put(endpointId, connectionInfo.getEndpointName());
+                public void onConnectionInitiated(@NonNull String endpointId, ConnectionInfo connectionInfo) {
+                    endpointUUIDs.put(endpointId, connectionInfo.getEndpointName());
                     connectionsClient.acceptConnection(endpointId, payloadCallback);
                 }
 
                 @Override
-                public void onConnectionResult(String endpointId, ConnectionResolution result) {
+                public void onConnectionResult(@NonNull String endpointId, ConnectionResolution result) {
                     if (result.getStatus().isSuccess()) {
-                        String endpointName = endpointNames.get(endpointId);
+                        String endpointName = endpointUUIDs.get(endpointId);
                         graph.addVertex(new BrzNode(endpointName, endpointId, "other_host", ""));
                         graph.addEdge(id, endpointName);
 
-                        if(connectedEndpoints.size() == 0) {
+                        if (connectedEndpoints.size() == 0) {
                             waitingForGraph = true;
                             BrzPacket reqPacket = BrzPacketBuilder.graphQuery(endpointName, id);
                             send(reqPacket);
@@ -231,15 +239,12 @@ public class BrzRouter {
                 }
 
                 @Override
-                public void onDisconnected(String endpointId) {
+                public void onDisconnected(@NonNull String endpointId) {
                     connectedEndpoints.remove(endpointId);
 
-                    String endpointName = endpointNames.get(endpointId);
-                    graph.removeEdge(id, endpointName);
-                    graph.removeVertex(endpointName);
-
-                    BrzStateStore store = BrzStateStore.getStore();
-                    store.removeChat(endpointName);
+                    String endpointUUID = endpointUUIDs.get(endpointId);
+                    graph.removeEdge(id, endpointUUID);
+                    BrzStateStore.getStore().removeChat(endpointUUID);
                 }
             };
 }

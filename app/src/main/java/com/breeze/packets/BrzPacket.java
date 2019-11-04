@@ -25,9 +25,7 @@ public class BrzPacket implements BrzSerializable {
     public BrzPacketType type = BrzPacketType.MESSAGE;
     private String body = "";
 
-    public BrzPacket() {
-
-    }
+    public BrzPacket() {}
     public BrzPacket(BrzSerializable body) {
         this.body = body.toJSON();
     }

@@ -14,6 +14,9 @@ import com.breeze.state.BrzStateStore;
 import com.google.android.gms.nearby.Nearby;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -69,22 +72,25 @@ public class MainActivity extends AppCompatActivity {
         store.setTitle("Breeze");
         store.getTitle(title -> this.toolbar.setTitle(title));
 
-        store.addChat(new BrzChat("yeet1", "Zach"));
-        store.addChat(new BrzChat("yeet2", "Paul"));
-        store.addChat(new BrzChat("yeet3", "Conner"));
-        store.addChat(new BrzChat("yeet4", "Jake"));
+        NavController nav = Navigation.findNavController(this, R.id.nav_host_fragment);
+        nav.navigate(R.id.profileActivity);
 
-        store.addMessage("yeet1", new BrzMessage("hey", "yeet1"));
-        store.addMessage("yeet1", new BrzMessage("What's up?", router.id));
+        //store.addChat(new BrzChat("yeet1", "Zach"));
+        //store.addChat(new BrzChat("yeet2", "Paul"));
+        //store.addChat(new BrzChat("yeet3", "Conner"));
+        //store.addChat(new BrzChat("yeet4", "Jake"));
 
-        store.addMessage("yeet2", new BrzMessage("hey", "yeet2"));
-        store.addMessage("yeet2", new BrzMessage("What's up?", router.id));
+        //store.addMessage("yeet1", new BrzMessage("hey", "yeet1"));
+        //store.addMessage("yeet1", new BrzMessage("What's up?", router.id));
 
-        store.addMessage("yeet3", new BrzMessage("hey", "yeet3"));
-        store.addMessage("yeet3", new BrzMessage("What's up?", router.id));
+        //store.addMessage("yeet2", new BrzMessage("hey", "yeet2"));
+        //store.addMessage("yeet2", new BrzMessage("What's up?", router.id));
 
-        store.addMessage("yeet4", new BrzMessage("hey", "yeet4"));
-        store.addMessage("yeet4", new BrzMessage("What's up?", router.id));
+        //store.addMessage("yeet3", new BrzMessage("hey", "yeet3"));
+        //store.addMessage("yeet3", new BrzMessage("What's up?", router.id));
+
+        //store.addMessage("yeet4", new BrzMessage("hey", "yeet4"));
+        //store.addMessage("yeet4", new BrzMessage("What's up?", router.id));
     }
 
     @Override

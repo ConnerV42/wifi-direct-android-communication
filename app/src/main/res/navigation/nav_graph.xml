@@ -14,10 +14,18 @@
             app:destination="@id/chatView"
             app:enterAnim="@animator/from_left"
             />
+        <action
+            android:id="@+id/action_contactView_to_profileActivity"
+            app:destination="@id/profileActivity" />
     </fragment>
     <fragment
         android:id="@+id/chatView"
         android:name="com.breeze.views.Messages.MessagesView"
         android:label="fragment_chat"
         tools:layout="@layout/fragment_chat" />
+    <activity
+        android:id="@+id/profileActivity"
+        android:name="com.breeze.ProfileActivity"
+        android:label="activity_profile"
+        tools:layout="@layout/activity_profile" />
 </navigation>

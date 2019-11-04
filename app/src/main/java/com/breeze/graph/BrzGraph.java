@@ -50,7 +50,8 @@ public class BrzGraph implements BrzSerializable {
                 return pathToNode;
 
             for (String neighbor : getNeighbors(currId)) {
-                if(neighbor != currId && !nodeVisited.get(neighbor)) {
+                Boolean visited = nodeVisited.get(neighbor);
+                if(!neighbor.equals(currId) && (visited == null || !visited)) {
                     nodeVisited.put(neighbor, true);
 
                     // Create new collection representing the path to the next node
@@ -61,6 +62,11 @@ public class BrzGraph implements BrzSerializable {
             }
         }
         return null;
+    }
+
+    public String nextHop(String currentUUID, String destinationUUID) {
+        List<String> path = this.bfs(currentUUID, destinationUUID);
+        return path.get(1);
     }
 
     public int getSize() {
