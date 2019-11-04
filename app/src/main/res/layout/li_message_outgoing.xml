@@ -10,7 +10,7 @@
     <TextView
         android:id="@+id/messageBody"
         android:text="message body"
-        android:background="@drawable/message_bubble"
+        android:background="@drawable/status_bubble"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="8dp"

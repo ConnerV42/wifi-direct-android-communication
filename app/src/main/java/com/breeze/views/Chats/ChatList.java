@@ -1,4 +1,4 @@
-package com.breeze.views;
+package com.breeze.views.Chats;
 
 import android.app.Activity;
 import android.content.Context;
@@ -10,29 +10,29 @@ import android.widget.TextView;
 
 import com.breeze.R;
 import com.breeze.packets.BrzChat;
-import com.breeze.state.BrzStateObserver;
 import com.breeze.state.BrzStateStore;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class ChatList extends BaseAdapter implements BrzStateObserver {
+public class ChatList extends BaseAdapter {
 
-    private ArrayList<BrzChat> chats = new ArrayList<>();
+    private class ChatComponent {
+        TextView chatName;
+    }
+
     private Context ctx;
+    private List<BrzChat> chats = new ArrayList<>();
 
     public ChatList(Context ctx) {
         this.ctx = ctx;
 
-        BrzStateStore store = BrzStateStore.getStore();
-        store.getAllChats(this);
-    }
-
-    @Override
-    public void stateChange(Object chats) {
-        if(chats != null) {
-            this.chats = (ArrayList) chats;
-            notifyDataSetChanged();
-        }
+        BrzStateStore.getStore().getAllChats(brzChats -> {
+            if (chats != null) {
+                this.chats = brzChats;
+                notifyDataSetChanged();
+            }
+        });
     }
 
     @Override
@@ -69,8 +69,4 @@ public class ChatList extends BaseAdapter implements BrzStateObserver {
 
         return convertView;
     }
-}
-
-class ChatComponent {
-    public TextView chatName;
 }

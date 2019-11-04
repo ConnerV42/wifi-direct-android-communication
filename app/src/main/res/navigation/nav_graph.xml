@@ -6,7 +6,7 @@
     app:startDestination="@id/contactView">
     <fragment
         android:id="@+id/contactView"
-        android:name="com.breeze.ContactView"
+        android:name="com.breeze.views.Chats.ChatsView"
         android:label="fragment_contact_view"
         tools:layout="@layout/fragment_contact_view" >
         <action
@@ -17,7 +17,7 @@
     </fragment>
     <fragment
         android:id="@+id/chatView"
-        android:name="com.breeze.ChatView"
+        android:name="com.breeze.views.Messages.MessagesView"
         android:label="fragment_chat"
         tools:layout="@layout/fragment_chat" />
 </navigation>

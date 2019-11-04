@@ -3,16 +3,14 @@ package com.breeze;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
 import com.breeze.database.DatabaseHandler;
 import com.breeze.packets.BrzChat;
+import com.breeze.packets.BrzMessage;
 import com.breeze.router.BrzRouter;
 
-import com.breeze.state.BrzStateObserver;
 import com.breeze.state.BrzStateStore;
 import com.google.android.gms.nearby.Nearby;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,7 +19,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity implements BrzStateObserver {
+public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private BrzRouter router;
@@ -38,9 +36,8 @@ public class MainActivity extends AppCompatActivity implements BrzStateObserver 
                     Manifest.permission.ACCESS_COARSE_LOCATION,
             };
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
-    protected void onStart() { // Might want to bump up the minimum required API to 23
+    protected void onStart() {
         super.onStart();
 
         if(!hasPermissions(this, REQUIRED_PERMISSIONS)) {
@@ -70,16 +67,29 @@ public class MainActivity extends AppCompatActivity implements BrzStateObserver 
         this.toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), getPackageName());
+        this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), "BREEZE_MESSENGER");
+
         BrzStateStore store = BrzStateStore.getStore();
         store.setTitle("Breeze");
-        store.getTitle(this);
+        store.getTitle(title -> this.toolbar.setTitle(title));
 
-        this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), getPackageName());
-    }
+        store.addChat(new BrzChat("yeet1", "Zach"));
+        store.addChat(new BrzChat("yeet2", "Paul"));
+        store.addChat(new BrzChat("yeet3", "Conner"));
+        store.addChat(new BrzChat("yeet4", "Jake"));
 
-    @Override
-    public void stateChange(Object value) {
-        this.toolbar.setTitle((String) value);
+        store.addMessage("yeet1", new BrzMessage("hey", "yeet1"));
+        store.addMessage("yeet1", new BrzMessage("What's up?", router.id));
+
+        store.addMessage("yeet2", new BrzMessage("hey", "yeet2"));
+        store.addMessage("yeet2", new BrzMessage("What's up?", router.id));
+
+        store.addMessage("yeet3", new BrzMessage("hey", "yeet3"));
+        store.addMessage("yeet3", new BrzMessage("What's up?", router.id));
+
+        store.addMessage("yeet4", new BrzMessage("hey", "yeet4"));
+        store.addMessage("yeet4", new BrzMessage("What's up?", router.id));
     }
 
     @Override

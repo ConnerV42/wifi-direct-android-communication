@@ -1,14 +1,12 @@
-package com.breeze;
+package com.breeze.views.Chats;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,10 +14,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.breeze.packets.BrzChat;
+import com.breeze.R;
 import com.breeze.state.BrzStateStore;
-import com.breeze.views.ChatList;
-import com.breeze.views.MessageList;
 
 import static androidx.navigation.Navigation.findNavController;
 
@@ -28,11 +24,11 @@ import static androidx.navigation.Navigation.findNavController;
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
  * to handle interaction events.
- * Use the {@link ContactView#newInstance} factory method to
+ * Use the {@link ChatsView#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ContactView extends Fragment {
-    public ContactView() {
+public class ChatsView extends Fragment {
+    public ChatsView() {
         // Required empty public constructor
     }
 
@@ -40,10 +36,10 @@ public class ContactView extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @return A new instance of fragment ContactView.
+     * @return A new instance of fragment ChatsView.
      */
-    public static ContactView newInstance() {
-        ContactView fragment = new ContactView();
+    public static ChatsView newInstance() {
+        ChatsView fragment = new ChatsView();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -67,8 +63,6 @@ public class ContactView extends Fragment {
 
         BrzStateStore store = BrzStateStore.getStore();
         store.setTitle("Breeze");
-
-        store.addChat(new BrzChat("hello", "hello"));
 
         final ChatList chatList = new ChatList(getActivity());
         ListView msgView = (ListView) view.findViewById(R.id.contactList);

@@ -1,7 +1,6 @@
-package com.breeze;
+package com.breeze.views.Messages;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -15,26 +14,28 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.breeze.R;
+import com.breeze.packets.BrzChat;
+import com.breeze.packets.BrzMessage;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
-import com.breeze.views.MessageList;
 
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
  * to handle interaction events.
- * Use the {@link ChatView#newInstance} factory method to
+ * Use the {@link MessagesView#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ChatView extends Fragment {
+public class MessagesView extends Fragment {
 
     private static final String ARG_CHAT_ID = "";
-    private String chatId;
+    private BrzChat chat;
 
-    public ChatView() {
+    public MessagesView() {
         // Required empty public constructor
     }
 
@@ -43,10 +44,10 @@ public class ChatView extends Fragment {
      * this fragment using the provided parameters.
      *
      * @param chatId The li_chat id to view.
-     * @return A new instance of fragment ChatView.
+     * @return A new instance of fragment MessagesView.
      */
-    public static ChatView newInstance(String chatId) {
-        ChatView fragment = new ChatView();
+    public static MessagesView newInstance(String chatId) {
+        MessagesView fragment = new MessagesView();
         Bundle args = new Bundle();
         args.putString(ARG_CHAT_ID, chatId);
         fragment.setArguments(args);
@@ -57,7 +58,8 @@ public class ChatView extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            chatId = getArguments().getString("ARG_CHAT_ID");
+            String chatId = getArguments().getString("ARG_CHAT_ID");
+            BrzStateStore.getStore().getChat(chatId, chat -> this.chat = chat);
         }
     }
 
@@ -74,10 +76,9 @@ public class ChatView extends Fragment {
 
         final BrzRouter router = BrzRouter.getInstance();
 
-        BrzStateStore store = BrzStateStore.getStore();
-        store.setTitle(chatId);
+        BrzStateStore.getStore().setTitle(this.chat.name);
 
-        MessageList msgList = new MessageList(getActivity(), chatId);
+        MessageList msgList = new MessageList(getActivity(), this.chat.id);
         ListView msgView = (ListView) getView().findViewById(R.id.messageList);
         msgView.setAdapter(msgList);
 
@@ -92,8 +93,10 @@ public class ChatView extends Fragment {
                 // Reset message box
                 messageBox.setText("");
 
-                BrzPacket packet = BrzPacketBuilder.message(chatId, messageBoxText);
+                BrzPacket packet = BrzPacketBuilder.message(router.id, chat.id, messageBoxText);
                 router.send(packet);
+
+                BrzStateStore.getStore().addMessage(packet.to, packet.message());
             }
         });
     }

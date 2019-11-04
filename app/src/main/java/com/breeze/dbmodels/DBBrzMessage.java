@@ -10,12 +10,21 @@ public class DBBrzMessage implements BrzSerializable {
 
     private int id;
     private int from;
+    private String username;
     private String body;
     private String datetime;
     private String encryption;
 
     public DBBrzMessage() {
 
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public int getFrom() {
