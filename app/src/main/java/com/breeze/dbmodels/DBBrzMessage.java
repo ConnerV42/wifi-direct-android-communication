@@ -1,16 +1,12 @@
-package com.breeze.models;
+package com.breeze.dbmodels;
 
 import android.util.Log;
-
-import androidx.annotation.NonNull;
 
 import com.breeze.packets.BrzSerializable;
 
 import org.json.JSONObject;
 
-import java.util.Date;
-
-public class BrzMessage implements BrzSerializable {
+public class DBBrzMessage implements BrzSerializable {
 
     private int id;
     private int from;
@@ -18,7 +14,7 @@ public class BrzMessage implements BrzSerializable {
     private String datetime;
     private String encryption;
 
-    public BrzMessage() {
+    public DBBrzMessage() {
 
     }
 
@@ -60,7 +56,7 @@ public class BrzMessage implements BrzSerializable {
     
     @Override
     public String toString() {
-        return "BrzMessage{" +
+        return "DBBrzMessage{" +
                 "id=" + id +
                 ", from=" + from +
                 ", body='" + body + '\'' +

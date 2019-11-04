@@ -6,16 +6,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.breeze.models.BrzContact;
-import com.breeze.models.BrzMessage;
-import com.breeze.models.BrzPreference;
+import com.breeze.dbmodels.DBBrzContact;
+import com.breeze.dbmodels.DBBrzMessage;
+import com.breeze.dbmodels.DBBrzPreference;
 
 import org.jetbrains.annotations.NotNull;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
@@ -24,7 +19,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
 
     private static final String CONTACTS_TABLE_NAME = "Contacts";
-    private static final String MESSAGES_TABLE_NAME = "BrzMessage";
+    private static final String MESSAGES_TABLE_NAME = "DBBrzMessage";
     private static final String PREFERENCES_TABLE_NAME = "Preferences";
 
 
@@ -53,21 +48,21 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL(DROP_PREFS_TABLE);
         this.onCreate(db);
     }
-    public void addContact(@org.jetbrains.annotations.NotNull BrzContact brzContact)
+    public void addContact(@org.jetbrains.annotations.NotNull DBBrzContact DBBrzContact)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues vals = new ContentValues();
-        vals.put("id", brzContact.getId());
-        vals.put("name", brzContact.getName());
-        vals.put("alias", brzContact.getAlias());
-        vals.put("signature", brzContact.getSignature());
-        vals.put("lasttalkedto", brzContact.getLastTalkedTo());
-        vals.put("friend", brzContact.isFriend());
-        vals.put("blocked", brzContact.isBlocked());
+        vals.put("id", DBBrzContact.getId());
+        vals.put("name", DBBrzContact.getName());
+        vals.put("alias", DBBrzContact.getAlias());
+        vals.put("signature", DBBrzContact.getSignature());
+        vals.put("lasttalkedto", DBBrzContact.getLastTalkedTo());
+        vals.put("friend", DBBrzContact.isFriend());
+        vals.put("blocked", DBBrzContact.isBlocked());
         db.insert(CONTACTS_TABLE_NAME, null, vals);
         db.close();
     }
-    public void addMessage(@NotNull BrzMessage message)
+    public void addMessage(@NotNull DBBrzMessage message)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues vals = new ContentValues();
@@ -78,7 +73,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.insert(MESSAGES_TABLE_NAME, null, vals);
         db.close();
     }
-    public void addPreference(@NotNull BrzPreference preference)
+    public void addPreference(@NotNull DBBrzPreference preference)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues vals = new ContentValues();
@@ -88,36 +83,36 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.insert(PREFERENCES_TABLE_NAME, null, vals);
         db.close();
     }
-    public void deleteOneContact(@NotNull BrzContact contact)
+    public void deleteOneContact(@NotNull DBBrzContact contact)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(CONTACTS_TABLE_NAME, "id = ?", new String[]{ String.valueOf(contact.getId())});
         db.close();
     }
-    public void deleteOneMessage(@NotNull BrzMessage message)
+    public void deleteOneMessage(@NotNull DBBrzMessage message)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(MESSAGES_TABLE_NAME, "id = ?", new String[]{ String.valueOf(message.getId())});
         db.close();
     }
-    public void deleteOnePreference(@NotNull BrzPreference preference)
+    public void deleteOnePreference(@NotNull DBBrzPreference preference)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(PREFERENCES_TABLE_NAME, "id = ?", new String[]{ String.valueOf(preference.getId())});
         db.close();
     }
 
-    public int updateContact(BrzContact contact)
+    public int updateContact(DBBrzContact contact)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         return -1;
     }
-    public int updateMessage(BrzMessage message)
+    public int updateMessage(DBBrzMessage message)
     {
         return -1;
     }
-    public int updatePreference(BrzPreference preference)
+    public int updatePreference(DBBrzPreference preference)
     {
         return -1;
     }

@@ -1,4 +1,4 @@
-package com.breeze.models;
+package com.breeze.dbmodels;
 
 import android.util.Log;
 
@@ -6,12 +6,12 @@ import com.breeze.packets.BrzSerializable;
 
 import org.json.JSONObject;
 
-public class BrzPreference implements BrzSerializable {
+public class DBBrzPreference implements BrzSerializable {
     private int id;
     private String name;
     private String setting;
 
-    public BrzPreference(int id, String name, String setting) {
+    public DBBrzPreference(int id, String name, String setting) {
         this.id = id;
         this.name = name;
         this.setting = setting;
@@ -39,7 +39,7 @@ public class BrzPreference implements BrzSerializable {
 
     @Override
     public String toString() {
-        return "BrzPreference{" +
+        return "DBBrzPreference{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", setting='" + setting + '\'' +

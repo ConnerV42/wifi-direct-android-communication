@@ -1,8 +1,6 @@
-package com.breeze.models;
+package com.breeze.dbmodels;
 
 import android.util.Log;
-
-import androidx.annotation.NonNull;
 
 import com.breeze.packets.BrzSerializable;
 
@@ -16,7 +14,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 
-public class BrzContact implements BrzSerializable
+public class DBBrzContact implements BrzSerializable
 {
 
     private int id;
@@ -29,12 +27,12 @@ public class BrzContact implements BrzSerializable
     private boolean blocked;
 
 
-    public BrzContact()
+    public DBBrzContact()
     {
 
     }
 
-    public BrzContact(int id, String name, String alias, String signature) {
+    public DBBrzContact(int id, String name, String alias, String signature) {
         this.id = id;
         this.name = name;
         this.alias = alias;
@@ -103,7 +101,7 @@ public class BrzContact implements BrzSerializable
     @NotNull
     @Override
     public String toString() {
-        return "BrzContact{" +
+        return "DBBrzContact{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", alias='" + alias + '\'' +

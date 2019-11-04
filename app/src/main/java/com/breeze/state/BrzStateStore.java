@@ -57,7 +57,7 @@ public class BrzStateStore {
     }
 
     /**
-     *  BrzMessage
+     *  DBBrzMessage
      *
      * @param listener
      * @param chatId
