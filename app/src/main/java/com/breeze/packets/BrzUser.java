@@ -15,6 +15,13 @@ public class BrzUser implements BrzSerializable {
     public String alias = "";
     public String profileImage = "";
 
+    public BrzUser() {
+    }
+
+    public BrzUser(String json) {
+        this.fromJSON(json);
+    }
+
     public void setProfileImage(Bitmap image) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         image.compress(Bitmap.CompressFormat.PNG, 100, stream);

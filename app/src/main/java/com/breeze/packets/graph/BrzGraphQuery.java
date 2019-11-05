@@ -15,7 +15,10 @@ public class BrzGraphQuery implements BrzSerializable {
 
     public BrzGQType type = BrzGQType.REQUEST;
     public String from = "";
+
+    // If it's a response
     public String graph = "";
+    public String hostNode = "";
 
     public BrzGraphQuery () {}
     public BrzGraphQuery (String json) { this.fromJSON(json); }
@@ -23,11 +26,14 @@ public class BrzGraphQuery implements BrzSerializable {
         this.type = BrzGQType.REQUEST;
         this.from = from;
     }
-    public BrzGraphQuery (Boolean isRequest, String from, String graphJSON) {
+    public BrzGraphQuery (Boolean isRequest, String from, String graphJSON, String hostNodeJSON) {
         this.type = BrzGQType.RESPONSE;
         this.from = from;
         this.graph = graphJSON;
+        this.hostNode = hostNodeJSON;
     }
+
+
 
     @Override
     public void fromJSON(String json) {
@@ -35,8 +41,12 @@ public class BrzGraphQuery implements BrzSerializable {
             JSONObject jObj = new JSONObject(json);
             this.from = jObj.getString("from");
             this.type = BrzGQType.valueOf(jObj.getString("type"));
+
             this.graph = jObj.getString("graph");
             if(this.graph == null) this.graph = "";
+
+            this.hostNode = jObj.getString("hostNode");
+            if(this.hostNode == null) this.hostNode = "";
         } catch (Exception e) {
             Log.i("DESERIALIZATION ERROR", e.toString());
         }
@@ -50,6 +60,7 @@ public class BrzGraphQuery implements BrzSerializable {
             jObj.put("from", this.from);
             jObj.put("type", this.type);
             if(!this.graph.equals("")) jObj.put("graph", this.graph);
+            if(!this.hostNode.equals("")) jObj.put("hostNode", this.hostNode);
         } catch (Exception e) {
             Log.i("DESERIALIZATION ERROR", e.toString());
         }

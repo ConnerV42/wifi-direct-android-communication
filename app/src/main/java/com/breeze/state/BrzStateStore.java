@@ -2,6 +2,7 @@ package com.breeze.state;
 
 import com.breeze.packets.BrzMessage;
 import com.breeze.packets.BrzChat;
+import com.breeze.packets.BrzUser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +34,26 @@ public class BrzStateStore {
     public void setTitle(String title) {
         this.title = title;
         for(Consumer<String> c : this.titleListeners) c.accept(this.title);
+    }
+
+    //
+    //
+    //  User
+    //
+    //
+
+    private BrzUser user = new BrzUser();
+    private List<Consumer<BrzUser>> userListeners = new ArrayList<>();
+
+    public void getUser(Consumer<BrzUser> callback) {
+        this.userListeners.add(callback);
+        callback.accept(this.user);
+    }
+    public BrzUser getUser() { return this.user; }
+
+    public void setUser(BrzUser user) {
+        this.user = user;
+        for(Consumer<BrzUser> c : this.userListeners) c.accept(this.user);
     }
 
     //

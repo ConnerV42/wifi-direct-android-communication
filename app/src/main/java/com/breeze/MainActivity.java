@@ -65,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
         this.toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), getPackageName());
         this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), "BREEZE_MESSENGER", this);
 
         BrzStateStore store = BrzStateStore.getStore();
@@ -74,23 +73,6 @@ public class MainActivity extends AppCompatActivity {
 
         NavController nav = Navigation.findNavController(this, R.id.nav_host_fragment);
         nav.navigate(R.id.profileActivity);
-
-        //store.addChat(new BrzChat("yeet1", "Zach"));
-        //store.addChat(new BrzChat("yeet2", "Paul"));
-        //store.addChat(new BrzChat("yeet3", "Conner"));
-        //store.addChat(new BrzChat("yeet4", "Jake"));
-
-        //store.addMessage("yeet1", new BrzMessage("hey", "yeet1"));
-        //store.addMessage("yeet1", new BrzMessage("What's up?", router.id));
-
-        //store.addMessage("yeet2", new BrzMessage("hey", "yeet2"));
-        //store.addMessage("yeet2", new BrzMessage("What's up?", router.id));
-
-        //store.addMessage("yeet3", new BrzMessage("hey", "yeet3"));
-        //store.addMessage("yeet3", new BrzMessage("What's up?", router.id));
-
-        //store.addMessage("yeet4", new BrzMessage("hey", "yeet4"));
-        //store.addMessage("yeet4", new BrzMessage("What's up?", router.id));
     }
 
     @Override

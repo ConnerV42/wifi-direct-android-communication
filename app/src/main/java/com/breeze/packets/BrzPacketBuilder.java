@@ -1,6 +1,8 @@
 package com.breeze.packets;
 
 import com.breeze.graph.BrzGraph;
+import com.breeze.graph.BrzNode;
+import com.breeze.packets.graph.BrzGraphEvent;
 import com.breeze.packets.graph.BrzGraphQuery;
 
 public class BrzPacketBuilder {
@@ -40,10 +42,20 @@ public class BrzPacketBuilder {
         return packet;
     }
 
-    public static BrzPacket graphResponse(BrzGraph graph, String to) {
-        BrzGraphQuery body = new BrzGraphQuery(false, "", graph.toJSON());
+    public static BrzPacket graphResponse(BrzGraph graph, BrzNode hostNode, String to) {
+        BrzGraphQuery body = new BrzGraphQuery(false, "", graph.toJSON(), hostNode.toJSON());
         BrzPacket packet = new BrzPacket(body);
         packet.to = to;
+        return packet;
+    }
+
+    public static BrzPacket graphEvent(Boolean connection, BrzNode node1, BrzNode node2) {
+        BrzGraphEvent body = new BrzGraphEvent(connection, node1, node2);
+        BrzPacket packet = new BrzPacket(body);
+
+        packet.type = BrzPacket.BrzPacketType.GRAPH_EVENT;
+        packet.to = "BROADCAST";
+
         return packet;
     }
 }

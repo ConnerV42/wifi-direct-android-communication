@@ -2,6 +2,7 @@ package com.breeze;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.navigation.NavController;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -11,11 +12,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.breeze.packets.BrzUser;
+import com.breeze.state.BrzStateStore;
 
 import java.io.File;
+
+import static androidx.navigation.Navigation.findNavController;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -34,6 +40,20 @@ public class ProfileActivity extends AppCompatActivity {
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.setType("image/*");
             startActivityForResult(intent, READ_REQUEST_CODE);
+        });
+
+        Button setProfBtn = findViewById(R.id.profile_set_button);
+        setProfBtn.setOnClickListener(e -> {
+            EditText profName = findViewById(R.id.profile_name);
+            this.user.name = profName.getText().toString();
+
+            EditText profAlias = findViewById(R.id.profile_alias);
+            this.user.alias = profAlias.getText().toString();
+
+            BrzStateStore.getStore().setUser(this.user);
+
+            // Navigate back to main activity
+            finish();
         });
     }
 
