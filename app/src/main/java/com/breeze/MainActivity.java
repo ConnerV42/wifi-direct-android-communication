@@ -4,19 +4,18 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+
 import androidx.core.content.ContextCompat;
 
-import com.breeze.packets.BrzChat;
-import com.breeze.packets.BrzMessage;
 import com.breeze.router.BrzRouter;
 
 import com.breeze.state.BrzStateStore;
 import com.google.android.gms.nearby.Nearby;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
     private static final String[] REQUIRED_PERMISSIONS =
-            new String[] {
+            new String[]{
                     Manifest.permission.BLUETOOTH,
                     Manifest.permission.BLUETOOTH_ADMIN,
                     Manifest.permission.ACCESS_WIFI_STATE,
@@ -40,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        if(!hasPermissions(this, REQUIRED_PERMISSIONS)) {
+        if (!hasPermissions(this, REQUIRED_PERMISSIONS)) {
             requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_REQUIRED_PERMISSIONS);
         }
     }
@@ -53,8 +52,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        router.stop();
         super.onStop();
+        router.stop();
     }
 
     @Override
@@ -65,11 +64,12 @@ public class MainActivity extends AppCompatActivity {
         this.toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), "BREEZE_MESSENGER", this);
 
         BrzStateStore store = BrzStateStore.getStore();
         store.setTitle("Breeze");
         store.getTitle(title -> this.toolbar.setTitle(title));
+
+        this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), "BREEZE_MESSENGER");
 
         NavController nav = Navigation.findNavController(this, R.id.nav_host_fragment);
         nav.navigate(R.id.profileActivity);

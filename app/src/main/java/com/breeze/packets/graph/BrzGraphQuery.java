@@ -62,7 +62,7 @@ public class BrzGraphQuery implements BrzSerializable {
             if(!this.graph.equals("")) jObj.put("graph", this.graph);
             if(!this.hostNode.equals("")) jObj.put("hostNode", this.hostNode);
         } catch (Exception e) {
-            Log.i("DESERIALIZATION ERROR", e.toString());
+            Log.i("SERIALIZATION ERROR", e.toString());
         }
 
         return jObj.toString();

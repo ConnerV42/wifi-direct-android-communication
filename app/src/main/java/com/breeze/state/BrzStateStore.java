@@ -42,7 +42,7 @@ public class BrzStateStore {
     //
     //
 
-    private BrzUser user = new BrzUser();
+    private BrzUser user = null;
     private List<Consumer<BrzUser>> userListeners = new ArrayList<>();
 
     public void getUser(Consumer<BrzUser> callback) {

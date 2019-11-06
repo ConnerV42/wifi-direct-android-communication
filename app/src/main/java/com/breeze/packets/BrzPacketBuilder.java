@@ -39,6 +39,7 @@ public class BrzPacketBuilder {
         BrzGraphQuery body = new BrzGraphQuery(true, id);
         BrzPacket packet = new BrzPacket(body);
         packet.to = to;
+        packet.type = BrzPacket.BrzPacketType.GRAPH_QUERY;
         return packet;
     }
 
@@ -46,6 +47,7 @@ public class BrzPacketBuilder {
         BrzGraphQuery body = new BrzGraphQuery(false, "", graph.toJSON(), hostNode.toJSON());
         BrzPacket packet = new BrzPacket(body);
         packet.to = to;
+        packet.type = BrzPacket.BrzPacketType.GRAPH_QUERY;
         return packet;
     }
 
