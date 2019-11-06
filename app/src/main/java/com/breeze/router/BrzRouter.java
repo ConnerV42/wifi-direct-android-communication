@@ -220,6 +220,11 @@ public class BrzRouter {
         if (packet.type == BrzPacket.BrzPacketType.GRAPH_EVENT) {
 
             BrzGraphEvent ge = packet.graphEvent();
+
+            // Don't accept events involving yourself
+            if (ge.node1.id.equals(id) || ge.node2.id.equals(id)) return;
+
+            // If it's a new connection
             if (ge.type == BrzGraphEvent.BrzGEType.CONNECT) {
                 graph.addVertex(ge.node1);
                 graph.addVertex(ge.node2);
@@ -231,6 +236,7 @@ public class BrzRouter {
                         BrzStateStore.getStore().addChat(new BrzChat(n.id, n.user.name));
                 }
 
+                // If it's a disconnect
             } else {
                 graph.removeEdge(ge.node1.id, ge.node2.id);
             }
@@ -270,9 +276,7 @@ public class BrzRouter {
                 }
 
                 @Override
-                public void onPayloadTransferUpdate(@NonNull String endpointId, PayloadTransferUpdate update) {
-                    if (update.getStatus() == PayloadTransferUpdate.Status.SUCCESS) {
-                    }
+                public void onPayloadTransferUpdate(@NonNull String endpointId, @NonNull PayloadTransferUpdate update) {
                 }
             };
 
