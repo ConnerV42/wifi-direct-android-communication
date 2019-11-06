@@ -34,9 +34,6 @@ public class ProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        ((EditText)findViewById(R.id.profile_name)).getText().append("Zach");
-        ((EditText)findViewById(R.id.profile_alias)).getText().append("CilantroEternal");
-
         ImageView profileImage = findViewById(R.id.profile_image);
         profileImage.setOnClickListener(e -> {
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);

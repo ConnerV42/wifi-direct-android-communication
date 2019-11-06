@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -59,6 +60,8 @@ public class BrzRouter {
         this.connectionsClient = cc;
         this.pkgName = pkgName;
         this.graph = BrzGraph.getInstance();
+
+        Log.i("ENDOPINT", "Endpoint UUID is " + id);
 
         // When we log in, add our own node to the graph
         BrzStateStore.getStore().getUser(brzUser -> {
@@ -221,6 +224,13 @@ public class BrzRouter {
                 graph.addVertex(ge.node1);
                 graph.addVertex(ge.node2);
                 graph.addEdge(ge.node1.id, ge.node2.id);
+
+                // TEMP: Create a chat for each graph node
+                for (BrzNode n : this.graph) {
+                    if (!n.id.equals(id))
+                        BrzStateStore.getStore().addChat(new BrzChat(n.id, n.user.name));
+                }
+
             } else {
                 graph.removeEdge(ge.node1.id, ge.node2.id);
             }
@@ -234,6 +244,7 @@ public class BrzRouter {
         // forward packets that aren't for us onwards
         else if (!packet.to.equals(this.id)) {
             send(packet);
+            Log.i("ENDPOINT", "Relaying message from " + fromEndpointId + " to " + packet.to);
         }
 
         // If we got a message that is for us
@@ -260,7 +271,8 @@ public class BrzRouter {
 
                 @Override
                 public void onPayloadTransferUpdate(@NonNull String endpointId, PayloadTransferUpdate update) {
-                    if (update.getStatus() == PayloadTransferUpdate.Status.SUCCESS) {}
+                    if (update.getStatus() == PayloadTransferUpdate.Status.SUCCESS) {
+                    }
                 }
             };
 
@@ -285,8 +297,11 @@ public class BrzRouter {
                 @Override
                 public void onConnectionInitiated(@NonNull String endpointId, ConnectionInfo connectionInfo) {
                     Log.i("ENDPOINT", "Endpoint initiated connection");
-                    endpointUUIDs.put(endpointId, connectionInfo.getEndpointName());
-                    connectionsClient.acceptConnection(endpointId, payloadCallback);
+
+                    if (connectedEndpoints.size() < 2) {
+                        endpointUUIDs.put(endpointId, connectionInfo.getEndpointName());
+                        connectionsClient.acceptConnection(endpointId, payloadCallback);
+                    }
                 }
 
                 @Override
@@ -310,6 +325,8 @@ public class BrzRouter {
                     connectedEndpoints.remove(endpointId);
                     String endpointUUID = endpointUUIDs.get(endpointId);
                     graph.removeEdge(id, endpointUUID);
+
+                    BrzStateStore.getStore().removeChat(endpointUUID);
 
                     // Broadcast disconnect event
                     String name = endpointUUIDs.get(endpointId);
