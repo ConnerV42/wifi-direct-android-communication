@@ -10,6 +10,7 @@ import com.breeze.packets.BrzChat;
 import com.breeze.packets.BrzMessage;
 import com.breeze.router.BrzRouter;
 
+import com.breeze.OffBox.*;
 import com.breeze.state.BrzStateStore;
 import com.google.android.gms.nearby.Nearby;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +18,8 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -53,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         router.stop();
         super.onStop();
     }
-
+    private Button ConfirmButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,8 +88,25 @@ public class MainActivity extends AppCompatActivity {
 
         store.addMessage("yeet4", new BrzMessage("hey", "yeet4"));
         store.addMessage("yeet4", new BrzMessage("What's up?", router.id));
-    }
 
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        ConfirmButton = findViewById(R.id.ConfirmButton);
+        ConfirmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                openDialog();
+            }
+        });
+
+    }
+    public void openDialog()
+    {
+        BrzVerifyDialog dConfirmation = new BrzVerifyDialog();
+        dConfirmation.show(getSupportFragmentManager(), "anything");
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

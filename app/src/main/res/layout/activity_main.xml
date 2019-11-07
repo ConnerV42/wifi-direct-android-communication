@@ -39,4 +39,17 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/appBarLayout"
         app:navGraph="@navigation/nav_graph" />
+
+    <Button
+        android:id="@+id/ConfirmButton"
+        android:layout_width="180dp"
+        android:layout_height="70dp"
+        android:text="Verify Connection"
+        app:layout_constraintBottom_toBottomOf="@+id/nav_host_fragment"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.454"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/appBarLayout"
+        app:layout_constraintVertical_bias="0.868" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
