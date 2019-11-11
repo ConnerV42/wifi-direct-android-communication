@@ -302,10 +302,8 @@ public class BrzRouter {
                 public void onConnectionInitiated(@NonNull String endpointId, ConnectionInfo connectionInfo) {
                     Log.i("ENDPOINT", "Endpoint initiated connection");
 
-                    if (connectedEndpoints.size() < 2) {
-                        endpointUUIDs.put(endpointId, connectionInfo.getEndpointName());
-                        connectionsClient.acceptConnection(endpointId, payloadCallback);
-                    }
+                    endpointUUIDs.put(endpointId, connectionInfo.getEndpointName());
+                    connectionsClient.acceptConnection(endpointId, payloadCallback);
                 }
 
                 @Override

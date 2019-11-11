@@ -7,9 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
-    <!-- Optional: only required for FILE payloads -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- Optional: only required for FILE payloads -->
     <!-- File payloads will be implemented in a future iteration -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
@@ -20,7 +18,8 @@
         android:roundIcon="@drawable/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ProfileActivity"></activity>
+        <activity android:name=".views.UserSelection.UserSelection"></activity>
+        <activity android:name=".ProfileActivity" />
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"

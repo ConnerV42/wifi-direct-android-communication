@@ -16,6 +16,7 @@ import android.widget.ListView;
 
 import com.breeze.R;
 import com.breeze.state.BrzStateStore;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import static androidx.navigation.Navigation.findNavController;
 
@@ -76,6 +77,9 @@ public class ChatsView extends Fragment {
                 nav.navigate(R.id.chatView, args);
             }
         });
+
+        FloatingActionButton fab = view.findViewById(R.id.chat_view_fab);
+
     }
 
     @Override

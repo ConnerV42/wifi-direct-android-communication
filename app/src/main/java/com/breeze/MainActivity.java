@@ -65,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
         this.toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
         BrzStateStore store = BrzStateStore.getStore();
         store.setTitle("Breeze");
         store.getTitle(title -> this.toolbar.setTitle(title));
