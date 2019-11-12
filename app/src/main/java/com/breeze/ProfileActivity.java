@@ -36,9 +36,9 @@ public class ProfileActivity extends AppCompatActivity {
 
         ImageView profileImage = findViewById(R.id.profile_image);
         profileImage.setOnClickListener(e -> {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("image/*");
+            Intent intent = new Intent(Intent.ACTION_PICK,
+                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            //intent.addCategory(Intent.CATEGORY_OPENABLE);
             startActivityForResult(intent, READ_REQUEST_CODE);
         });
 
@@ -65,7 +65,7 @@ public class ProfileActivity extends AppCompatActivity {
                 Uri imageUri = data.getData();
 
                 BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inSampleSize = 50;
+                options.inSampleSize = 10;
                 Bitmap bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageUri), null, options);
 
                 // Set image for ui
@@ -79,5 +79,11 @@ public class ProfileActivity extends AppCompatActivity {
                 Log.e("FILE_ACCESS", "Failure ", e);
             }
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        getSupportActionBar().setTitle("Setup Profile");
     }
 }

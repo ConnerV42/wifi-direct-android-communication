@@ -5,6 +5,7 @@ import android.util.Log;
 import org.json.JSONObject;
 
 public class BrzChat implements BrzSerializable{
+
     public String id = "";
     public String name = "";
 

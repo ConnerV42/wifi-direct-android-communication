@@ -6,10 +6,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.breeze.R;
 import com.breeze.packets.BrzChat;
+import com.breeze.packets.BrzUser;
 import com.breeze.state.BrzStateStore;
 
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ import java.util.List;
 public class ChatList extends BaseAdapter {
 
     private class ChatComponent {
+        ImageView chatImage;
         TextView chatName;
     }
 
@@ -64,8 +67,12 @@ public class ChatList extends BaseAdapter {
         convertView = chatInflater.inflate(R.layout.li_chat, null);
         convertView.setTag(chatCmp);
 
-        chatCmp.chatName = (TextView) convertView.findViewById(R.id.chatName);
+        chatCmp.chatName = convertView.findViewById(R.id.chat_name);
         chatCmp.chatName.setText(chat.name);
+
+        BrzUser chatU = BrzStateStore.getStore().getUser(chat.id);
+        chatCmp.chatImage = convertView.findViewById(R.id.chat_image);
+        chatCmp.chatImage.setImageBitmap(chatU.getProfileImage());
 
         return convertView;
     }

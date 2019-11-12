@@ -62,9 +62,6 @@ public class ChatsView extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        BrzStateStore store = BrzStateStore.getStore();
-        store.setTitle("Breeze");
-
         final ChatList chatList = new ChatList(getActivity());
         ListView msgView = (ListView) view.findViewById(R.id.contactList);
         msgView.setAdapter(chatList);
@@ -79,7 +76,18 @@ public class ChatsView extends Fragment {
         });
 
         FloatingActionButton fab = view.findViewById(R.id.chat_view_fab);
+        fab.setOnClickListener(e -> {
+            NavController nav = findNavController(getView());
+            nav.navigate(R.id.userSelection);
+        });
 
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        BrzStateStore.getStore().setTitle("Breeze");
     }
 
     @Override

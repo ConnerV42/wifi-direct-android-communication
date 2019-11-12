@@ -8,13 +8,15 @@
     android:paddingEnd="5dp"
     >
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/user_image"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_marginEnd="10dp"
+        android:layout_marginEnd="20dp"
         android:src="@drawable/ic_person_black_24dp"
-        />
+        app:civ_border_width="2dp"
+        app:civ_border_color="#000"/>
 
     <LinearLayout
         android:layout_width="match_parent"

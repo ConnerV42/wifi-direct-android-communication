@@ -68,7 +68,7 @@ public class UserList extends BaseAdapter {
         userComponent.name.setText(user.name);
 
         userComponent.alias = convertView.findViewById(R.id.user_alias);
-        userComponent.alias.setText(user.alias);
+        userComponent.alias.setText("@" + user.alias);
 
         userComponent.image = convertView.findViewById(R.id.user_image);
         userComponent.image.setImageBitmap(user.getProfileImage());

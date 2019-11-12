@@ -76,28 +76,23 @@ public class MessagesView extends Fragment {
 
         final BrzRouter router = BrzRouter.getInstance();
 
-        BrzStateStore.getStore().setTitle(this.chat.name);
-
         MessageList msgList = new MessageList(getActivity(), this.chat.id);
         ListView msgView = (ListView) getView().findViewById(R.id.messageList);
         msgView.setAdapter(msgList);
 
         Button sendMessage = getView().findViewById(R.id.sendMessage);
-        sendMessage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) { // send message
+        sendMessage.setOnClickListener(view1 -> { // send message
 
-                EditText messageBox = getView().findViewById(R.id.editText);
-                String messageBoxText = messageBox.getText().toString();
+            EditText messageBox = getView().findViewById(R.id.editText);
+            String messageBoxText = messageBox.getText().toString();
 
-                // Reset message box
-                messageBox.setText("");
+            // Reset message box
+            messageBox.setText("");
 
-                BrzPacket packet = BrzPacketBuilder.message(router.id, chat.id, messageBoxText);
-                router.send(packet);
+            BrzPacket packet = BrzPacketBuilder.message(router.id, chat.id, messageBoxText);
+            router.send(packet);
 
-                BrzStateStore.getStore().addMessage(packet.to, packet.message());
-            }
+            BrzStateStore.getStore().addMessage(packet.to, packet.message());
         });
     }
 
@@ -109,5 +104,11 @@ public class MessagesView extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        BrzStateStore.getStore().setTitle(this.chat.name);
     }
 }

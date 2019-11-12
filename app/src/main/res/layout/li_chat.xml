@@ -1,18 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:paddingStart="10dp"
+    android:paddingEnd="5dp"
     >
 
-    <TextView
-        android:id="@+id/chatName"
-        android:text="status"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_gravity="start"
-        android:padding="10dp"
-        android:textColor="#000000"
-        />
+    <de.hdodenhof.circleimageview.CircleImageView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/chat_image"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="20dp"
+        android:src="@drawable/ic_person_black_24dp"
+        app:civ_border_width="2dp"
+        app:civ_border_color="#000"/>
+
+        <TextView
+            android:id="@+id/chat_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="name"
+            android:textColor="#000000"
+            android:textSize="9pt"
+            android:layout_gravity="center_vertical"
+            />
+
+        <!--<TextView
+            android:id="@+id/user_alias"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:text="\@alias"
+            android:textColor="#555" />-->
+
 </LinearLayout>

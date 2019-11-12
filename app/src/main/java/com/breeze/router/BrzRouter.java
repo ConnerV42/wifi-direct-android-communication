@@ -47,7 +47,6 @@ public class BrzRouter {
 
     private Map<String, String> seenPackets = new HashMap<>();
 
-
     private boolean running = false;
     private String pkgName = "";
     public final String id = UUID.randomUUID().toString();
@@ -72,6 +71,8 @@ public class BrzRouter {
 
             BrzNode hostNode = new BrzNode(id, "", "", brzUser);
             this.graph.addVertex(hostNode);
+
+            BrzStateStore.getStore().setUser(this.id, this.user);
 
             this.start();
         });
@@ -211,7 +212,7 @@ public class BrzRouter {
                 // TEMP: Create a chat for each graph node
                 for (BrzNode n : this.graph) {
                     if (!n.id.equals(id))
-                        BrzStateStore.getStore().addChat(new BrzChat(n.id, n.user.name));
+                        BrzStateStore.getStore().setUser(n.id, n.user);
                 }
             }
         }
@@ -230,10 +231,10 @@ public class BrzRouter {
                 graph.addVertex(ge.node2);
                 graph.addEdge(ge.node1.id, ge.node2.id);
 
-                // TEMP: Create a chat for each graph node
+                // TEMP: Add users from each node to store
                 for (BrzNode n : this.graph) {
                     if (!n.id.equals(id))
-                        BrzStateStore.getStore().addChat(new BrzChat(n.id, n.user.name));
+                        BrzStateStore.getStore().setUser(n.id, n.user);
                 }
 
                 // If it's a disconnect
