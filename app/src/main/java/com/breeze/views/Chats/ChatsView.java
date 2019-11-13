@@ -1,6 +1,7 @@
 package com.breeze.views.Chats;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -16,6 +17,7 @@ import android.widget.ListView;
 
 import com.breeze.R;
 import com.breeze.state.BrzStateStore;
+import com.breeze.views.UserSelection.UserSelection;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import static androidx.navigation.Navigation.findNavController;
@@ -77,11 +79,9 @@ public class ChatsView extends Fragment {
 
         FloatingActionButton fab = view.findViewById(R.id.chat_view_fab);
         fab.setOnClickListener(e -> {
-            NavController nav = findNavController(getView());
-            nav.navigate(R.id.userSelection);
+            Intent i = new Intent(this.getContext(), UserSelection.class);
+            this.startActivity(i);
         });
-
-
     }
 
     @Override

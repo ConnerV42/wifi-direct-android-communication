@@ -38,7 +38,6 @@ public class ProfileActivity extends AppCompatActivity {
         profileImage.setOnClickListener(e -> {
             Intent intent = new Intent(Intent.ACTION_PICK,
                     android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            //intent.addCategory(Intent.CATEGORY_OPENABLE);
             startActivityForResult(intent, READ_REQUEST_CODE);
         });
 
@@ -48,7 +47,13 @@ public class ProfileActivity extends AppCompatActivity {
             this.user.name = profName.getText().toString();
 
             EditText profAlias = findViewById(R.id.profile_alias);
-            this.user.alias = profAlias.getText().toString();
+            this.user.alias = "@" + profAlias.getText().toString();
+
+            if (this.user.profileImage.isEmpty()) {
+                Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.ic_person_black_24dp);
+                if (bm != null)
+                    this.user.setProfileImage(bm);
+            }
 
             BrzStateStore.getStore().setUser(this.user);
 
