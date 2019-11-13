@@ -70,7 +70,7 @@ public class ProfileActivity extends AppCompatActivity {
                 Uri imageUri = data.getData();
 
                 BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inSampleSize = 10;
+                options.inSampleSize = 100;
                 Bitmap bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageUri), null, options);
 
                 // Set image for ui

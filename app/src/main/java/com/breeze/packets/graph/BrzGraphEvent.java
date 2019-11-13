@@ -37,7 +37,7 @@ public class BrzGraphEvent implements BrzSerializable {
 
             this.type = BrzGEType.valueOf(jObj.getString("type"));
         } catch (Exception e) {
-            Log.i("DESERIALIZATION ERROR", e.toString());
+            Log.i("DESERIALIZATION ERROR", "err", e);
         }
     }
 
@@ -50,7 +50,7 @@ public class BrzGraphEvent implements BrzSerializable {
             jObj.put("node1", new JSONObject(this.node1.toJSON()));
             jObj.put("node2", new JSONObject(this.node2.toJSON()));
         } catch (Exception e) {
-            Log.e("SERIALIZATION ERROR", e.toString());
+            Log.e("SERIALIZATION ERROR", "err", e);
         }
 
         return jObj.toString();

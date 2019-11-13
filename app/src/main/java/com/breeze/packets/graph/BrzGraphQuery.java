@@ -42,13 +42,20 @@ public class BrzGraphQuery implements BrzSerializable {
             this.from = jObj.getString("from");
             this.type = BrzGQType.valueOf(jObj.getString("type"));
 
-            this.graph = jObj.getString("graph");
-            if(this.graph == null) this.graph = "";
+            try {
+                this.graph = jObj.getString("graph");
+            } catch (Exception e) {
+                this.graph = "";
+            }
 
-            this.hostNode = jObj.getString("hostNode");
-            if(this.hostNode == null) this.hostNode = "";
+            try {
+                this.hostNode = jObj.getString("hostNode");
+            } catch (Exception e) {
+                this.hostNode = "";
+            }
+
         } catch (Exception e) {
-            Log.i("DESERIALIZATION ERROR", e.toString());
+            Log.i("DESERIALIZATION ERROR", "err", e);
         }
     }
 
@@ -62,7 +69,7 @@ public class BrzGraphQuery implements BrzSerializable {
             if(!this.graph.equals("")) jObj.put("graph", this.graph);
             if(!this.hostNode.equals("")) jObj.put("hostNode", this.hostNode);
         } catch (Exception e) {
-            Log.i("SERIALIZATION ERROR", e.toString());
+            Log.i("SERIALIZATION ERROR", "err", e);
         }
 
         return jObj.toString();

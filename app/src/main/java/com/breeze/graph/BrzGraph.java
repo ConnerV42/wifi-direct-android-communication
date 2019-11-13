@@ -173,13 +173,15 @@ public class BrzGraph implements BrzSerializable, Iterable<BrzNode> {
 
             JSONObject vertexMap = new JSONObject();
             for (String key : vertexList.keySet()) {
-                vertexMap.put(key, new JSONObject(vertexList.get(key).toJSON()));
+                BrzNode vertex = vertexList.get(key);
+                if (vertex != null)
+                    vertexMap.put(key, new JSONObject(vertex.toJSON()));
             }
 
             json.put("adjList", adjMap);
             json.put("vertexList", vertexMap);
         } catch (Exception e) {
-            Log.i("SERIALIZATION ERROR", e.toString());
+            Log.i("SERIALIZATION ERROR", "err", e);
         }
 
         return json.toString();
@@ -215,7 +217,7 @@ public class BrzGraph implements BrzSerializable, Iterable<BrzNode> {
                 vertexList.put(key, new BrzNode(vertexJSON.toString()));
             }
         } catch (Exception e) {
-            Log.i("DESERIALIZATION ERROR", e.toString());
+            Log.i("DESERIALIZATION ERROR", "err", e);
         }
     }
 }
