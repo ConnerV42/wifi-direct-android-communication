@@ -27,7 +27,15 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             >
-
+            <Button
+                    android:id="@+id/sendPhoto"
+                    style="@style/Widget.AppCompat.Button.Small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@android:drawable/ic_menu_camera"
+                    android:layout_marginStart="5dp"
+                    android:layout_gravity="center"
+            />
             <EditText
                 android:id="@+id/editText"
                 android:layout_width="0dp"
@@ -44,14 +52,13 @@
                 android:paddingEnd="20dp"
                 android:layout_gravity="center"
                 />
-
             <Button
                 android:id="@+id/sendMessage"
                 style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Send"
-                android:layout_marginEnd="10dp"
+                android:layout_marginEnd="5dp"
                 android:layout_gravity="center"
                 />
         </LinearLayout>
