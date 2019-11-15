@@ -43,4 +43,5 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment:2.1.0'
     implementation 'androidx.navigation:navigation-ui:2.1.0'
     implementation 'de.hdodenhof:circleimageview:3.0.1'
+    implementation 'org.jetbrains:annotations:13.0'
 }

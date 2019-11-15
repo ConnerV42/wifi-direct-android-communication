@@ -20,10 +20,15 @@ import androidx.navigation.Navigation;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.security.KeyPair;
+import java.security.spec.ECField;
+
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private BrzRouter router;
+    private DatabaseHandler dbHelper;
+    private KeyPair keypair;
 
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
     private static final String[] REQUIRED_PERMISSIONS =
@@ -61,7 +66,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        try {
+            KeyPair p = BrzEncryption.getKeyPair();
+            this.keypair = p;
+        }catch(Exception e)
+        {
+            System.out.println("here at catch");
+        }
 
+        try {
+            BrzEncryption.listKeyStore();
+        }catch(Exception e)
+        {
+
+        }
+
+        dbHelper = new DatabaseHandler(this);
+        dbHelper.getReadableDatabase();
         this.toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
