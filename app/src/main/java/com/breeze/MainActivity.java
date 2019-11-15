@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.core.content.ContextCompat;
 
 import com.breeze.database.DatabaseHandler;
+import com.breeze.encryption.BrzEncryption;
 import com.breeze.packets.BrzChat;
 import com.breeze.packets.BrzMessage;
 import com.breeze.router.BrzRouter;
@@ -19,12 +20,15 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.security.KeyPair;
+import java.security.spec.ECField;
+
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private BrzRouter router;
     private DatabaseHandler dbHelper;
-
+    private KeyPair keypair;
 
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
     private static final String[] REQUIRED_PERMISSIONS =
@@ -61,6 +65,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        try {
+            KeyPair p = BrzEncryption.getKeyPair();
+            this.keypair = p;
+        }catch(Exception e)
+        {
+            System.out.println("here at catch");
+        }
+
+        try {
+            BrzEncryption.listKeyStore();
+        }catch(Exception e)
+        {
+
+        }
 
         dbHelper = new DatabaseHandler(this);
         dbHelper.getReadableDatabase();
