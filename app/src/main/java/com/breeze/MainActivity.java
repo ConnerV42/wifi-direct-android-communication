@@ -21,6 +21,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.lang.*;
 import java.security.spec.ECField;
 
 public class MainActivity extends AppCompatActivity {
@@ -65,19 +68,28 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //testing both public and private key retrieval
+        PrivateKey privateKey;
+        PublicKey publicKey;
+        BrzEncryption brzEnc = new BrzEncryption();
+        //debug to see what is stored within variables
         try {
-            KeyPair p = BrzEncryption.getKeyPair();
-            this.keypair = p;
-        }catch(Exception e)
+            KeyPair kp = BrzEncryption.getKeyPair();
+            privateKey = brzEnc.grabPrivateKey(kp);
+            publicKey = brzEnc.grabPublicKey(kp);
+        }catch(Exception f)
         {
-            System.out.println("here at catch");
+            System.out.println("Unable to get key pair or retrieve either keys. Check.");
         }
 
+
+        //print alias from list
         try {
             BrzEncryption.listKeyStore();
-        }catch(Exception e)
+        }catch(Exception f)
         {
-
+            System.out.println("Unable to access ListKeyStore. Check.");
         }
 
         dbHelper = new DatabaseHandler(this);

@@ -5,13 +5,17 @@ import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.Enumeration;
-
+import java.util.*;
 import android.security.KeyPairGeneratorSpec;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
+import javax.crypto.Cipher;
 
-public class BrzEncryption {
+public class BrzEncryption
+{
+    PrivateKey privateKey;
+    PublicKey publicKey;
+
 
     public static KeyPair getKeyPair() throws Exception
     {
@@ -39,9 +43,8 @@ public class BrzEncryption {
         }
     }
 
-    public boolean createKey() {
-
-
+    public boolean createKey()
+    {
         return true;
     }
 
@@ -49,8 +52,33 @@ public class BrzEncryption {
     {
         KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
         ks.load(null);
+
         Enumeration<String> aliases = ks.aliases();
         System.out.println(aliases);
     }
 
+
+   public PrivateKey grabPrivateKey(KeyPair kp)
+   {
+       try {
+
+           privateKey = kp.getPrivate();
+
+       }catch(Exception e) {
+           System.out.println("Unable to generate key pair or retrieve private key. Check.");
+       }
+       return privateKey;
+   }
+
+   public PublicKey grabPublicKey(KeyPair kp)
+   {
+       try {
+
+           publicKey = kp.getPublic();
+
+       }catch(Exception e) {
+           System.out.println("Unable to generate key pair or retrieve public key. Check.");
+       }
+       return publicKey;
+   }
 }
