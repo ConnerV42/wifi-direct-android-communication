@@ -3,7 +3,6 @@ package com.breeze.graph;
 import android.util.Log;
 
 import com.breeze.packets.BrzSerializable;
-import com.breeze.packets.BrzUser;
 
 import org.json.JSONObject;
 
