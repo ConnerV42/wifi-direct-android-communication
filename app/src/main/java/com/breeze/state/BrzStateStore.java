@@ -1,8 +1,8 @@
 package com.breeze.state;
 
+import com.breeze.graph.BrzNode;
 import com.breeze.packets.BrzMessage;
 import com.breeze.packets.BrzChat;
-import com.breeze.packets.BrzUser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,58 +46,21 @@ public class BrzStateStore {
     //
     //
 
-    private BrzUser user = null;
-    private List<Consumer<BrzUser>> userListeners = new ArrayList<>();
+    private BrzNode hostNode = null;
+    private List<Consumer<BrzNode>> hostNodeListeners = new ArrayList<>();
 
-    public void getUser(Consumer<BrzUser> callback) {
-        this.userListeners.add(callback);
-        callback.accept(this.user);
+    public void getHostNode(Consumer<BrzNode> callback) {
+        this.hostNodeListeners.add(callback);
+        callback.accept(this.hostNode);
     }
 
-    public BrzUser getUser() {
-        return this.user;
+    public BrzNode getHostNode() {
+        return this.hostNode;
     }
 
-    public void setUser(BrzUser user) {
-        this.user = user;
-        for (Consumer<BrzUser> c : this.userListeners) c.accept(this.user);
-    }
-
-    //
-    //
-    //  Other users
-    //
-    //
-
-    private HashMap<String, BrzUser> users = new HashMap<>();
-    private HashMap<String, List<Consumer<BrzUser>>> usersListeners = new HashMap<>();
-    private List<Consumer<HashMap<String, BrzUser>>> allUsersListeners = new ArrayList<>();
-
-    public void getUser(String nodeId, Consumer<BrzUser> callback) {
-        List<Consumer<BrzUser>> listeners = this.usersListeners.get(nodeId);
-        if (listeners == null) {
-            listeners = new ArrayList<>();
-            this.usersListeners.put(nodeId, listeners);
-        }
-
-        listeners.add(callback);
-        callback.accept(this.users.get(nodeId));
-    }
-    public BrzUser getUser(String nodeId) {
-        return this.users.get(nodeId);
-    }
-
-    public void getAllUsers(Consumer<HashMap<String, BrzUser>> callback) {
-        allUsersListeners.add(callback);
-        callback.accept(this.users);
-    }
-
-    public void setUser(String nodeId, BrzUser user) {
-        this.users.put(nodeId, user);
-        List<Consumer<BrzUser>> listeners = this.usersListeners.get(nodeId);
-        if(listeners != null) for (Consumer<BrzUser> c : listeners) c.accept(user);
-
-        for(Consumer<HashMap<String, BrzUser>> c: this.allUsersListeners) c.accept(this.users);
+    public void setHostNode(BrzNode hostNode) {
+        this.hostNode = hostNode;
+        for (Consumer<BrzNode> c : this.hostNodeListeners) c.accept(this.hostNode);
     }
 
     //

@@ -73,7 +73,7 @@ public class MessageList extends BaseAdapter {
             msgCmp.statusBody = convertView.findViewById(R.id.statusBody);
             msgCmp.statusBody.setText(message.message);
 
-        } else if( message.from.equals(BrzRouter.getInstance().id)) {
+        } else if( message.from.equals(BrzRouter.getInstance().hostNode.id)) {
             OutgoingMessageComponent msgCmp = new OutgoingMessageComponent();
 
             convertView = messageInflater.inflate(R.layout.li_message_outgoing, null);

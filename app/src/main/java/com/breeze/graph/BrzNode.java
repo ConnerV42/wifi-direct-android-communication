@@ -7,23 +7,34 @@ import com.breeze.packets.BrzUser;
 
 import org.json.JSONObject;
 
+import java.util.UUID;
+
 public class BrzNode implements BrzSerializable {
 
     public String id = "";
     public String endpointId = "";
     public String publicKey = "";
 
-    public BrzUser user;
+    public String name = "";
+    public String alias = "";
 
-    public BrzNode(String id, String endpointId, String publicKey, BrzUser user) {
+    public BrzNode(String id, String endpointId, String publicKey, String name, String alias) {
         this.id = id;
         this.endpointId = endpointId;
         this.publicKey = publicKey;
-        this.user = user;
+        this.name = name;
+        this.alias = alias;
     }
 
     public BrzNode(String json) {
         this.fromJSON(json);
+    }
+
+    public BrzNode() {
+    }
+
+    public void generateID() {
+        this.id = UUID.randomUUID().toString();
     }
 
     @Override
@@ -32,8 +43,11 @@ public class BrzNode implements BrzSerializable {
         try {
             json.put("id", id);
             json.put("endpointId", endpointId);
-            json.put("user", new JSONObject(user.toJSON()));
             json.put("publicKey", publicKey);
+
+            json.put("name", name);
+            json.put("alias", alias);
+
         } catch (Exception e) {
             Log.i("SERIALIZATION ERROR", e.toString());
         }
@@ -48,8 +62,10 @@ public class BrzNode implements BrzSerializable {
             this.id = jObj.getString("id");
             this.endpointId = jObj.getString("endpointId");
             this.publicKey = jObj.getString("publicKey");
-            JSONObject userJSON = jObj.getJSONObject("user");
-            this.user = new BrzUser(userJSON.toString());
+
+            this.name = jObj.getString("name");
+            this.alias = jObj.getString("alias");
+
         } catch (Exception e) {
             Log.i("DESERIALIZATION ERROR", e.toString());
         }

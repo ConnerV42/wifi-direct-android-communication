@@ -31,7 +31,7 @@ public class BrzGraphHandler implements BrzRouterHandler {
 
             // Respond to graph query
             if (query.type == BrzGraphQuery.BrzGQType.REQUEST) {
-                BrzPacket resPacket = BrzPacketBuilder.graphResponse(this.graph, this.graph.getVertex(router.id), query.from);
+                BrzPacket resPacket = BrzPacketBuilder.graphResponse(this.graph, router.hostNode, query.from);
                 this.router.sendToEndpoint(resPacket, fromEndpointId);
                 Log.i("ENDPOINT", "Responed to graph query");
             }
@@ -44,10 +44,10 @@ public class BrzGraphHandler implements BrzRouterHandler {
                 BrzNode hostNode = new BrzNode(query.hostNode);
                 hostNode.endpointId = fromEndpointId;
                 graph.setVertex(hostNode);
-                graph.addEdge(this.router.id, hostNode.id);
+                graph.addEdge(this.router.hostNode.id, hostNode.id);
 
                 // Broadcast connect event
-                this.router.broadcast(BrzPacketBuilder.graphEvent(true, graph.getVertex(router.id), hostNode));
+                this.router.broadcast(BrzPacketBuilder.graphEvent(true, router.hostNode, hostNode));
 
                 // Merge their graph into ours
                 this.graph.mergeGraph(query.graph);
@@ -60,7 +60,7 @@ public class BrzGraphHandler implements BrzRouterHandler {
             BrzGraphEvent ge = packet.graphEvent();
 
             // Don't accept events involving yourself
-            if (ge.node1.id.equals(router.id) || ge.node2.id.equals(router.id)) return;
+            if (ge.node1.id.equals(router.hostNode.id) || ge.node2.id.equals(router.hostNode.id)) return;
 
             // If it's a new connection
             if (ge.type == BrzGraphEvent.BrzGEType.CONNECT) {

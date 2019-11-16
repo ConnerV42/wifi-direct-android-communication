@@ -1,11 +1,9 @@
 package com.breeze.views.UserSelection;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
@@ -17,9 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.breeze.R;
 import com.breeze.graph.BrzGraph;
 import com.breeze.graph.BrzNode;
-import com.breeze.packets.BrzChat;
-import com.breeze.packets.BrzUser;
-import com.breeze.state.BrzStateStore;
+import com.breeze.storage.BrzStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,16 +33,16 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
             this.v = v;
         }
 
-        public void bind(BrzUser user, int position) {
+        public void bind(BrzNode node, int position) {
 
             TextView user_name = v.findViewById(R.id.user_name);
-            user_name.setText(user.name);
+            user_name.setText(node.name);
 
             TextView user_alias = v.findViewById(R.id.user_alias);
-            user_alias.setText(user.alias);
+            user_alias.setText(node.alias);
 
             ImageView user_image = v.findViewById(R.id.user_image);
-            user_image.setImageBitmap(user.getProfileImage());
+            user_image.setImageBitmap(BrzStorage.getInstance().getProfileImage(node.id));
 
             this.position = position;
         }
@@ -88,7 +84,7 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
 
     @Override
     public void onBindViewHolder(UserItemHolder holder, int position) {
-        holder.bind(filteredNodes.get(position).user, position);
+        holder.bind(filteredNodes.get(position), position);
     }
 
     @Override
@@ -107,7 +103,7 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
                 } else {
                     List<BrzNode> filteredList = new ArrayList<>();
                     for (BrzNode brzNode : allNodes) {
-                        if (brzNode.user.alias.toLowerCase().contains(searchStr) || brzNode.user.name.toLowerCase().contains(searchStr))
+                        if (brzNode.alias.toLowerCase().contains(searchStr) || brzNode.name.toLowerCase().contains(searchStr))
                             filteredList.add(brzNode);
                     }
 

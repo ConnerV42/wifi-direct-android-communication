@@ -128,17 +128,24 @@ public class BrzGraph implements BrzSerializable, Iterable<BrzNode> {
             // Merge only new information into our node
             if (myVersion != null) {
                 if (
-                        (myVersion.endpointId == null || myVersion.endpointId.equals("")) &&
-                                (n.endpointId != null && !n.endpointId.equals(""))
+                        (myVersion.endpointId == null || myVersion.endpointId.isEmpty()) &&
+                                (n.endpointId != null && !n.endpointId.isEmpty())
                 ) myVersion.endpointId = n.endpointId;
 
                 if (
-                        (myVersion.publicKey == null || myVersion.publicKey.equals("")) &&
-                                (n.publicKey != null && !n.publicKey.equals(""))
+                        (myVersion.publicKey == null || myVersion.publicKey.isEmpty()) &&
+                                (n.publicKey != null && !n.publicKey.isEmpty())
                 ) myVersion.publicKey = n.publicKey;
 
-                if (myVersion.user == null && n.user != null)
-                    myVersion.user = n.user;
+                if (
+                        (myVersion.name == null || myVersion.name.isEmpty()) &&
+                                (n.name != null && !n.name.isEmpty())
+                ) myVersion.name = n.name;
+
+                if (
+                        (myVersion.alias == null || myVersion.alias.isEmpty()) &&
+                                (n.alias != null && !n.alias.isEmpty())
+                ) myVersion.alias = n.alias;
 
             } else {
                 this.addVertex(n);

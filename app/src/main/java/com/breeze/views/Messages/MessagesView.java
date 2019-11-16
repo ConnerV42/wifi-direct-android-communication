@@ -89,7 +89,7 @@ public class MessagesView extends Fragment {
             // Reset message box
             messageBox.setText("");
 
-            BrzPacket packet = BrzPacketBuilder.message(router.id, chat.id, messageBoxText);
+            BrzPacket packet = BrzPacketBuilder.message(router.hostNode.id, chat.id, messageBoxText);
             router.send(packet);
 
             BrzStateStore.getStore().addMessage(packet.to, packet.message());

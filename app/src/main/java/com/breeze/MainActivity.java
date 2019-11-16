@@ -7,9 +7,12 @@ import android.os.Bundle;
 
 import androidx.core.content.ContextCompat;
 
+import com.breeze.database.DatabaseHandler;
+import com.breeze.encryption.BrzEncryption;
 import com.breeze.router.BrzRouter;
 
 import com.breeze.state.BrzStateStore;
+import com.breeze.storage.BrzStorage;
 import com.google.android.gms.nearby.Nearby;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private BrzRouter router;
+
     private DatabaseHandler dbHelper;
     private KeyPair keypair;
 
@@ -66,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
         try {
             KeyPair p = BrzEncryption.getKeyPair();
             this.keypair = p;
@@ -83,6 +89,14 @@ public class MainActivity extends AppCompatActivity {
 
         dbHelper = new DatabaseHandler(this);
         dbHelper.getReadableDatabase();
+
+        //-------------------------------------------------------------------------//
+
+        // Initialize storage api
+        BrzStorage.getInstance(getApplicationContext());
+
+        //-------------------------------------------------------------------------//
+
         this.toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 

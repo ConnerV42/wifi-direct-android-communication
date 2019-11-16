@@ -11,8 +11,8 @@ import android.widget.TextView;
 
 import com.breeze.R;
 import com.breeze.packets.BrzChat;
-import com.breeze.packets.BrzUser;
 import com.breeze.state.BrzStateStore;
+import com.breeze.storage.BrzStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,9 +70,8 @@ public class ChatList extends BaseAdapter {
         chatCmp.chatName = convertView.findViewById(R.id.chat_name);
         chatCmp.chatName.setText(chat.name);
 
-        BrzUser chatU = BrzStateStore.getStore().getUser(chat.id);
         chatCmp.chatImage = convertView.findViewById(R.id.chat_image);
-        chatCmp.chatImage.setImageBitmap(chatU.getProfileImage());
+        chatCmp.chatImage.setImageBitmap(BrzStorage.getInstance().getProfileImage(chat.id));
 
         return convertView;
     }

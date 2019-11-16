@@ -26,7 +26,7 @@ public class BrzMessageHandler implements BrzRouterHandler {
             throw new RuntimeException("This handler does not handle packets of type " + packet.type);
 
         // If we got a message that is for us
-        if (packet.to.equals(this.router.id)) {
+        if (packet.to.equals(this.router.hostNode.id)) {
             BrzMessage message = packet.message();
             BrzStateStore.getStore().addMessage(message.from, message);
         }

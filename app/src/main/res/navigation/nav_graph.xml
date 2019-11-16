@@ -28,7 +28,7 @@
         tools:layout="@layout/fragment_chat" />
     <activity
         android:id="@+id/profileActivity"
-        android:name="com.breeze.ProfileActivity"
+        android:name="com.breeze.views.ProfileActivity"
         android:label="activity_profile"
         tools:layout="@layout/activity_profile" />
     <activity
