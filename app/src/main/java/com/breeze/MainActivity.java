@@ -17,22 +17,34 @@ import com.google.android.gms.nearby.Nearby;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.lang.*;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateException;
 import java.security.spec.ECField;
+import java.util.Enumeration;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private BrzRouter router;
     private DatabaseHandler dbHelper;
-    private KeyPair keypair;
-
+    private PublicKey publicKey;
+    private byte[] publicKeyEncoded;
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
     private static final String[] REQUIRED_PERMISSIONS =
             new String[] {
@@ -68,28 +80,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //testing both public and private key retrieval
-        PrivateKey privateKey;
-        PublicKey publicKey;
         BrzEncryption brzEnc = new BrzEncryption();
-        //debug to see what is stored within variables
+//        try {
+//            this.signWithPrivateKey(null);
+//        }catch(Exception e)
+//        {
+//            Log.i("uhhh","for u tom");
+//        }
         try {
             KeyPair kp = BrzEncryption.getKeyPair();
-            privateKey = brzEnc.grabPrivateKey(kp);
-            publicKey = brzEnc.grabPublicKey(kp);
+            this.publicKey = brzEnc.grabPublicKey(kp);
+            this.publicKeyEncoded = this.publicKey.getEncoded();
         }catch(Exception f)
         {
             System.out.println("Unable to get key pair or retrieve either keys. Check.");
-        }
-
-
-        //print alias from list
-        try {
-            BrzEncryption.listKeyStore();
-        }catch(Exception f)
-        {
-            System.out.println("Unable to access ListKeyStore. Check.");
         }
 
         dbHelper = new DatabaseHandler(this);

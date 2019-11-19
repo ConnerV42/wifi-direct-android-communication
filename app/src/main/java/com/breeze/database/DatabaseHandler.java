@@ -39,7 +39,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             "'body' TEXT NOT NULL, " +
             "'datetime' TEXT NOT NULL, " +
             "'signature' TEXT DEFAULT NULL, " +
-            "FOREIGN KEY ('from') REFERENCES Profiles('id'))";
+            "FOREIGN KEY ('sender') REFERENCES Profiles('id'))";
     private static final String INIT_PREFS_TABLE = "CREATE TABLE IF NOT EXISTS Preferences " +
             "('id' INTEGER PRIMARY KEY, " +
             "'name' TEXT UNIQUE NOT NULL, " +
