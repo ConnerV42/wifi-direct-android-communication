@@ -22,18 +22,32 @@ public class BrzPacketBuilder {
         return ackPacket;
     }
 
-    public static BrzPacket message(String id, String msgTo, String msgBody) {
+    public static BrzPacket message(String id, String msgTo, String msgBody, String chatId, Boolean isStatus) {
         BrzMessage body = new BrzMessage();
 
         body.from = id;
-        body.message = msgBody;
-        body.userName = "Zach";
+        body.body = msgBody;
+        body.chatId = chatId;
+
+        body.isStatus = isStatus;
         body.datestamp = System.currentTimeMillis();
 
         BrzPacket packet = new BrzPacket(body);
         packet.to = msgTo;
 
         return packet;
+    }
+    public static BrzMessage makeMessage(String fromId, String msgBody, String chatId, Boolean isStatus) {
+        BrzMessage body = new BrzMessage();
+
+        body.from = fromId;
+        body.body = msgBody;
+        body.chatId = chatId;
+
+        body.isStatus = isStatus;
+        body.datestamp = System.currentTimeMillis();
+
+        return body;
     }
 
     public static BrzPacket graphQuery(String to, String id) {

@@ -6,34 +6,50 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.breeze.R;
 import com.breeze.datatypes.BrzMessage;
+import com.breeze.datatypes.BrzNode;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
+import com.breeze.storage.BrzStorage;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MessageList extends BaseAdapter {
+public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder> {
 
-    private class MessageComponent {
-        TextView messageBody;
+    public static class MessageHolder extends RecyclerView.ViewHolder {
+        View v;
+        int position = 0;
+
+        public MessageHolder(View v) {
+            super(v);
+            this.v = v;
+        }
+
+        public void bind(BrzMessage msg, int position) {
+
+            TextView body = this.v.findViewById(R.id.messageBody);
+            body.setText(msg.body);
+
+            this.position = position;
+        }
     }
 
-    private class OutgoingMessageComponent {
-        TextView messageBody;
-    }
-
-    private class StatusComponent {
-        TextView statusBody;
-    }
+    private final int TYPE_STATUS = 0;
+    private final int TYPE_OUTGOING = 1;
+    private final int TYPE_INCOMMING = 2;
 
     private List<BrzMessage> messages = new ArrayList<>();
     private Context ctx;
 
-    public MessageList(Context ctx, String chatId) {
+    MessageList(Context ctx, String chatId) {
         this.ctx = ctx;
 
         BrzStateStore.getStore().getMessages(chatId, messages -> {
@@ -45,57 +61,41 @@ public class MessageList extends BaseAdapter {
     }
 
     @Override
-    public int getCount() {
-        return messages.size();
+    public int getItemViewType(int position) {
+        BrzMessage m = this.messages.get(position);
+        if(m == null) return super.getItemViewType(position);
+
+        if(m.isStatus) return TYPE_STATUS;
+        else if(m.from.equals(BrzStateStore.getStore().getHostNode().id)) return TYPE_OUTGOING;
+        return TYPE_INCOMMING;
+    }
+
+    @NonNull
+    @Override
+    public MessageHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
+        // Get inflater
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+
+        // Inflate a new message component
+        View messageView = null;
+
+        if(viewType == TYPE_STATUS) messageView = inflater.inflate(R.layout.li_message_status, parent, false);
+        else if(viewType == TYPE_OUTGOING) messageView = inflater.inflate(R.layout.li_message_outgoing, parent, false);
+        else messageView = inflater.inflate(R.layout.li_message, parent, false);
+
+        // Make our holder
+        return new MessageHolder(messageView);
     }
 
     @Override
-    public Object getItem(int i) {
-        return messages.get(i);
+    public void onBindViewHolder(@NonNull MessageHolder holder, int position) {
+        holder.bind(this.messages.get(position), position);
     }
 
     @Override
-    public long getItemId(int i) {
-        return i;
-    }
-
-    @Override
-    public View getView(int i, View convertView, ViewGroup viewGroup) {
-        BrzMessage message = messages.get(i);
-        LayoutInflater messageInflater = (LayoutInflater) ctx.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-
-        if(message.isStatus){
-            StatusComponent msgCmp = new StatusComponent();
-
-            convertView = messageInflater.inflate(R.layout.li_message_status, null);
-            convertView.setTag(msgCmp);
-
-            msgCmp.statusBody = convertView.findViewById(R.id.statusBody);
-            msgCmp.statusBody.setText(message.message);
-
-        } else if( message.from.equals(BrzRouter.getInstance().hostNode.id)) {
-            OutgoingMessageComponent msgCmp = new OutgoingMessageComponent();
-
-            convertView = messageInflater.inflate(R.layout.li_message_outgoing, null);
-            convertView.setTag(msgCmp);
-
-            msgCmp.messageBody = convertView.findViewById(R.id.messageBody);
-            msgCmp.messageBody.setText(message.message);
-        } else {
-            MessageComponent msgCmp = new MessageComponent();
-
-            convertView = messageInflater.inflate(R.layout.li_message, null);
-            convertView.setTag(msgCmp);
-
-            msgCmp.messageBody = convertView.findViewById(R.id.messageBody);
-            msgCmp.messageBody.setText(message.message);
-
-            //msgCmp.messageName = convertView.findViewById(R.id.messageName);
-            //msgCmp.messageName.setText(message.userName);
-        }
-
-
-        return convertView;
+    public int getItemCount() {
+        return this.messages.size();
     }
 }
 

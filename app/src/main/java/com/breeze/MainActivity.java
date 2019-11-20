@@ -2,17 +2,22 @@ package com.breeze;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
+import com.breeze.application.BreezeAPI;
 import com.breeze.database.DatabaseHandler;
 import com.breeze.encryption.BrzEncryption;
 import com.breeze.router.BrzRouter;
 
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
+import com.breeze.views.ProfileActivity;
 import com.google.android.gms.nearby.Nearby;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,12 +34,9 @@ import java.security.spec.ECField;
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
-    private BrzRouter router;
-
-    private DatabaseHandler dbHelper;
-    private KeyPair keypair;
 
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
+    private static final int REQUEST_CODE_PROFILE = 2;
     private static final String[] REQUIRED_PERMISSIONS =
             new String[]{
                     Manifest.permission.BLUETOOTH,
@@ -57,45 +59,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        router.start();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-//        router.stop();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
-        try {
-            KeyPair p = BrzEncryption.getKeyPair();
-            this.keypair = p;
-        }catch(Exception e)
-        {
-            System.out.println("here at catch");
-        }
-
-        try {
-            BrzEncryption.listKeyStore();
-        }catch(Exception e)
-        {
-
-        }
-
-        dbHelper = new DatabaseHandler(this);
-        dbHelper.getReadableDatabase();
-
-        //-------------------------------------------------------------------------//
-
-        // Initialize storage api
-        BrzStorage.initialize(getApplicationContext());
-
-        //-------------------------------------------------------------------------//
 
         this.toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -104,13 +78,35 @@ public class MainActivity extends AppCompatActivity {
         store.setTitle("Breeze");
         store.getTitle(title -> this.toolbar.setTitle(title));
 
-        //        this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), "BREEZE_MESSENGER");
+        // Start the breeze background service
+        this.startApplicationService();
 
+        // See if we have a stored user profile id
+        // if not we build a new profile!
+        SharedPreferences sp = getSharedPreferences("Breeze", Context.MODE_PRIVATE);
+        String hostNodeId = sp.getString(App.PREF_HOST_NODE_ID, null);
 
-
-        NavController nav = Navigation.findNavController(this, R.id.nav_host_fragment);
-        nav.navigate(R.id.profileActivity);
+        if(hostNodeId == null) {
+            Intent profileIntent = new Intent(this, ProfileActivity.class);
+            startActivityForResult(profileIntent, REQUEST_CODE_PROFILE);
+        }
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // We've got a profile!
+        if(requestCode == REQUEST_CODE_PROFILE) {}
+    }
+
+
+    private void startApplicationService() {
+        Intent brzService = new Intent(this, BreezeAPI.class);
+        startService(brzService);
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

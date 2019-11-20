@@ -2,12 +2,14 @@ package com.breeze.database;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.breeze.datatypes.BrzNode;
 import com.breeze.dbmodels.DBBrzContact;
 import com.breeze.dbmodels.DBBrzMessage;
 import com.breeze.dbmodels.DBBrzPreference;
@@ -42,6 +44,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL(INIT_PREFS_TABLE);
         Log.i("DatabaseInfo", "Table Creations succeeded for Contacts, Messages, Preferences");
     }
+
     @Override
     public void onUpgrade(@NonNull SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS Nodes");
@@ -56,8 +59,45 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL(DROP_PREFS_TABLE);
         this.onCreate(db);
     }
-    public void addContact(@NonNull DBBrzContact DBBrzContact)
-    {
+
+    public void setNode(@NonNull BrzNode node) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String[] args = {node.id, node.endpointId, node.publicKey, node.name, node.alias};
+        db.execSQL("INSERT OR REPLACE INTO " + NODE_TABLE + " VALUES (?,?,?,?,?)", args);
+        db.close();
+    }
+    public BrzNode getNode(@NonNull String nodeId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] args = {nodeId};
+
+        Cursor c = db.rawQuery("SELECT * FROM " + NODE_TABLE + " WHERE id = ?;", args);
+
+        if (c == null) {
+            db.close();
+            return null;
+        } else if (c.getCount() < 1) {
+            c.close();
+            db.close();
+            return null;
+        }
+
+
+        BrzNode n = new BrzNode();
+        c.moveToFirst();
+
+        n.id = c.getString(c.getColumnIndex("id"));
+        n.endpointId = c.getString(c.getColumnIndex("endpointId"));
+        n.publicKey = c.getString(c.getColumnIndex("publicKey"));
+        n.name = c.getString(c.getColumnIndex("name"));
+        n.alias = c.getString(c.getColumnIndex("alias"));
+
+        c.close();
+        db.close();
+        return n;
+    }
+
+
+    public void addContact(@NonNull DBBrzContact DBBrzContact) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues vals = new ContentValues();
         vals.put("id", DBBrzContact.getId());
@@ -70,8 +110,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.insert(CONTACTS_TABLE_NAME, null, vals);
         db.close();
     }
-    public void addMessage(@NonNull DBBrzMessage message)
-    {
+
+    public void addMessage(@NonNull DBBrzMessage message) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues vals = new ContentValues();
         vals.put("id", message.getId());
@@ -81,8 +121,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.insert(MESSAGES_TABLE_NAME, null, vals);
         db.close();
     }
-    public void addPreference(@NonNull DBBrzPreference preference)
-    {
+
+    public void addPreference(@NonNull DBBrzPreference preference) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues vals = new ContentValues();
         vals.put("id", preference.getId());
@@ -91,37 +131,36 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.insert(PREFERENCES_TABLE_NAME, null, vals);
         db.close();
     }
-    public void deleteOneContact(@NonNull DBBrzContact contact)
-    {
+
+    public void deleteOneContact(@NonNull DBBrzContact contact) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(CONTACTS_TABLE_NAME, "id = ?", new String[]{ String.valueOf(contact.getId())});
-        db.close();
-    }
-    public void deleteOneMessage(@NonNull DBBrzMessage message)
-    {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(MESSAGES_TABLE_NAME, "id = ?", new String[]{ String.valueOf(message.getId())});
-        db.close();
-    }
-    public void deleteOnePreference(@NonNull DBBrzPreference preference)
-    {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(PREFERENCES_TABLE_NAME, "id = ?", new String[]{ String.valueOf(preference.getId())});
+        db.delete(CONTACTS_TABLE_NAME, "id = ?", new String[]{String.valueOf(contact.getId())});
         db.close();
     }
 
-    public int updateContact(DBBrzContact contact)
-    {
+    public void deleteOneMessage(@NonNull DBBrzMessage message) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(MESSAGES_TABLE_NAME, "id = ?", new String[]{String.valueOf(message.getId())});
+        db.close();
+    }
+
+    public void deleteOnePreference(@NonNull DBBrzPreference preference) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(PREFERENCES_TABLE_NAME, "id = ?", new String[]{String.valueOf(preference.getId())});
+        db.close();
+    }
+
+    public int updateContact(DBBrzContact contact) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         return -1;
     }
-    public int updateMessage(DBBrzMessage message)
-    {
+
+    public int updateMessage(DBBrzMessage message) {
         return -1;
     }
-    public int updatePreference(DBBrzPreference preference)
-    {
+
+    public int updatePreference(DBBrzPreference preference) {
         return -1;
     }
 }

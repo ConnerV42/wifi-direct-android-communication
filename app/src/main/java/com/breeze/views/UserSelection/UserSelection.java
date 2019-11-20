@@ -44,7 +44,7 @@ public class UserSelection extends AppCompatActivity {
 
         // When the user selects a node, add a chat for it
         adapter.setItemSelectedListener(node -> {
-            BrzStateStore.getStore().addChat(new BrzChat(node.id, node.name));
+            BrzStateStore.getStore().addChat(new BrzChat(node.id, node.name, node.id));
             finish();
         });
 

@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.breeze.R;
+import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
@@ -53,7 +54,7 @@ public class ProfileActivity extends AppCompatActivity {
             this.node.alias = "@" + profAlias.getText().toString();
 
             // Set our new node and navigate away!
-            BrzStateStore.getStore().setHostNode(this.node);
+            BreezeAPI.getInstance().setHostNode(this.node);
             finish();
         });
     }
@@ -86,5 +87,10 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         getSupportActionBar().setTitle("Setup Profile");
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Don't allow going back
     }
 }

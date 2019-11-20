@@ -23,7 +23,7 @@ public class BrzMessageHandler implements BrzRouterHandler {
         // If we got a message that is for us
         if (packet.to.equals(this.router.hostNode.id)) {
             BrzMessage message = packet.message();
-            BrzStateStore.getStore().addMessage(message.from, message);
+            BrzStateStore.getStore().addMessage(message);
         }
 
         // forward packets that aren't for us onwards

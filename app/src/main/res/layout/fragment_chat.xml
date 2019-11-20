@@ -1,58 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".views.Messages.MessagesView"
     android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:divider="?android:dividerHorizontal"
+    android:orientation="vertical"
     android:showDividers="middle"
-    >
+    tools:context=".views.Messages.MessagesView">
 
-        <ListView
-            android:id="@+id/messageList"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:paddingLeft="4dp"
-            android:paddingRight="4dp"
-            android:dividerHeight="0dp"
-            android:divider="@null"
-            />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/messageList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/editText"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:autofillHints="false"
+            android:background="@android:color/transparent"
+            android:ems="10"
+            android:hint="New Message"
+            android:inputType="textMultiLine"
+            android:maxLines="6"
+            android:minHeight="50dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp" />
 
-            <EditText
-                android:id="@+id/editText"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:minHeight="50dp"
-                android:ems="10"
-                android:background="@android:color/transparent"
-                android:hint="New Message"
-                android:autofillHints="false"
-                android:inputType="textMultiLine"
-                android:maxLines="6"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:layout_gravity="center"
-                />
-
-            <Button
-                android:id="@+id/sendMessage"
-                style="@style/Widget.AppCompat.Button.Colored"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Send"
-                android:layout_marginEnd="10dp"
-                android:layout_gravity="center"
-                />
-        </LinearLayout>
+        <Button
+            android:id="@+id/sendMessage"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginEnd="10dp"
+            android:text="Send" />
+    </LinearLayout>
 </LinearLayout>
