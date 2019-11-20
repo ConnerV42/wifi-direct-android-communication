@@ -10,6 +10,8 @@ import com.breeze.database.DatabaseHandler;
 import com.breeze.encryption.BrzEncryption;
 import com.breeze.packets.BrzChat;
 import com.breeze.packets.BrzMessage;
+import com.breeze.packets.BrzPacket;
+import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;
 
 import com.breeze.state.BrzStateStore;
@@ -37,6 +39,8 @@ import java.security.cert.CertificateException;
 import java.security.spec.ECField;
 import java.util.Enumeration;
 import java.util.List;
+
+import static com.breeze.packets.BrzPacketBuilder.*;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -86,12 +90,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BrzEncryption brzEnc = new BrzEncryption();
-//        try {
-//            this.signWithPrivateKey(null);
-//        }catch(Exception e)
-//        {
-//            Log.i("uhhh","for u tom");
-//        }
         try {
             KeyPair kp = BrzEncryption.getKeyPair();
             this.publicKey = brzEnc.grabPublicKey(kp);
@@ -100,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
         {
             System.out.println("Unable to get key pair or retrieve either keys. Check.");
         }
-
         dbHelper = new DatabaseHandler(this);
         dbHelper.getReadableDatabase();
         this.toolbar = findViewById(R.id.toolbar);
@@ -108,6 +105,10 @@ public class MainActivity extends AppCompatActivity {
 
         //this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), getPackageName());
         this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), "BREEZE_MESSENGER");
+
+        BrzPacket keepackit = Handshake(this.router.getGraph(), "yeet1", new String(this.publicKey.getEncoded()), "yeet1");
+
+        this.router.send(keepackit);
 
         BrzStateStore store = BrzStateStore.getStore();
         store.setTitle("Breeze");

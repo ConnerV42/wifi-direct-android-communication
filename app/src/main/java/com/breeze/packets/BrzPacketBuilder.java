@@ -58,7 +58,7 @@ public class BrzPacketBuilder {
         body.datestamp = System.currentTimeMillis();
         body.from = id;
 
-        BrzPacket packet = new BrzPacket();
+        BrzPacket packet = new BrzPacket(body);
         packet.to = to;
         return packet;
 

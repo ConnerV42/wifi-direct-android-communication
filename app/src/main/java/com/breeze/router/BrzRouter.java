@@ -89,7 +89,9 @@ public class BrzRouter {
         //    this.send(packet);
         //}
     }
-
+    public BrzGraph getGraph() {
+        return graph;
+    }
     public void send(BrzPacket packet) {
         Payload p = Payload.fromBytes(packet.toJSON().getBytes());
         BrzNode toNode = this.graph.getVertex(packet.to);
@@ -174,6 +176,16 @@ public class BrzRouter {
             else if(waitingForGraph && !query.graph.equals("")) {
                 waitingForGraph = false;
                 this.graph.fromJSON(query.graph);
+            }
+        }
+        if(packet.type == BrzPacket.BrzPacketType.HANDSHAKE_PACKET) {
+            if(packet.to.equals(this.id)) {
+                BrzMessage message = packet.message();
+                String msg = message.message;
+
+            } else {
+                // forward the packet to next node
+                List<String> shortestPath = graph.bfs(this.id, packet.to);
             }
         }
     }
