@@ -80,4 +80,6 @@ public class BrzEncryption
         byte[] signature = s.sign();
         return signature;
     }
+
+
 }

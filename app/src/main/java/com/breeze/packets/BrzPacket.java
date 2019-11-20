@@ -18,6 +18,7 @@ public class BrzPacket implements BrzSerializable {
         ACK,
         GRAPH_QUERY,
         GRAPH_EVENT,
+        HANDSHAKE_PACKET,
     }
 
     public String id = UUID.randomUUID().toString();

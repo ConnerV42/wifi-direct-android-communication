@@ -3,6 +3,8 @@ package com.breeze.packets;
 import com.breeze.graph.BrzGraph;
 import com.breeze.packets.graph.BrzGraphQuery;
 
+import java.security.PublicKey;
+
 public class BrzPacketBuilder {
 
     public static BrzPacket message(String id, String msgBody) {
@@ -45,5 +47,21 @@ public class BrzPacketBuilder {
         BrzPacket packet = new BrzPacket(body);
         packet.to = to;
         return packet;
+    }
+
+    public static BrzPacket Handshake(BrzGraph graph, String to, String pubKey, String id)
+    {
+        BrzMessage body = new BrzMessage();
+
+        body.message =pubKey;
+        body.userName = "Zach";
+        body.datestamp = System.currentTimeMillis();
+        body.from = id;
+
+        BrzPacket packet = new BrzPacket();
+        packet.to = to;
+        return packet;
+
+
     }
 }

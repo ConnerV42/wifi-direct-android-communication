@@ -43,6 +43,11 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private BrzRouter router;
     private DatabaseHandler dbHelper;
+
+    public PublicKey getPublicKey() {
+        return publicKey;
+    }
+
     private PublicKey publicKey;
     private byte[] publicKeyEncoded;
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
