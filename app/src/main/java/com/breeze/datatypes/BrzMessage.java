@@ -1,14 +1,16 @@
-package com.breeze.packets;
+package com.breeze.datatypes;
 
 import android.util.Log;
+
+import com.breeze.packets.BrzSerializable;
 
 import org.json.JSONObject;
 
 public class BrzMessage implements BrzSerializable {
 
-    public String message = "";
     public String from = "";
-    public String userName = "";
+    public String body = "";
+    public String chatId = "";
 
     public boolean isStatus = false;
     public Long datestamp = (long) 0;
@@ -17,12 +19,12 @@ public class BrzMessage implements BrzSerializable {
     public BrzMessage(String json) {
       this.fromJSON(json);
     }
-    public BrzMessage(String message, boolean isStatus) {
-      this.message = message;
+    public BrzMessage(String body, boolean isStatus) {
+      this.body = body;
       this.isStatus = isStatus;
     }
-    public BrzMessage(String message, String from) {
-      this.message = message;
+    public BrzMessage(String body, String from) {
+      this.body = body;
       this.from = from;
       this.isStatus = false;
     }
@@ -32,12 +34,13 @@ public class BrzMessage implements BrzSerializable {
         JSONObject json = new JSONObject();
 
         try {
-            json.put("message", this.message);
             json.put("from", this.from);
-            json.put("userName", this.userName);
+            json.put("body", this.body);
+            json.put("chatId", this.chatId);
+            json.put("isStatus", this.isStatus);
             json.put("datestamp", this.datestamp);
         } catch (Exception e) {
-            Log.i("SERIALIZATION ERROR", e.toString());
+            Log.e("SERIALIZATION ERROR", "BrzMessage", e);
         }
 
         return json.toString();
@@ -48,13 +51,14 @@ public class BrzMessage implements BrzSerializable {
         try {
             JSONObject jObj = new JSONObject(json);
 
-            this.message = jObj.getString("message");
             this.from = jObj.getString("from");
-            this.userName = jObj.getString("userName");
+            this.body = jObj.getString("body");
+            this.chatId = jObj.getString("chatId");
+            this.isStatus = jObj.getBoolean("isStatus");
             this.datestamp = jObj.getLong("datestamp");
 
         } catch (Exception e) {
-            Log.i("DESERIALIZATION ERROR", e.toString());
+            Log.e("DESERIALIZATION ERROR", "BrzMessage", e);
         }
     }
 }

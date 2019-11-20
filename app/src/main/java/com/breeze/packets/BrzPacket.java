@@ -3,6 +3,7 @@ package com.breeze.packets;
 import android.util.Base64;
 import android.util.Log;
 
+import com.breeze.datatypes.BrzMessage;
 import com.breeze.packets.graph.BrzGraphEvent;
 import com.breeze.packets.graph.BrzGraphQuery;
 

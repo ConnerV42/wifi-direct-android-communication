@@ -3,7 +3,7 @@ package com.breeze.router.handlers;
 import android.util.Log;
 
 import com.breeze.graph.BrzGraph;
-import com.breeze.graph.BrzNode;
+import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.packets.graph.BrzGraphEvent;

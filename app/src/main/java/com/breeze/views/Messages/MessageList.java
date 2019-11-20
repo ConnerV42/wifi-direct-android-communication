@@ -9,7 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.breeze.R;
-import com.breeze.packets.BrzMessage;
+import com.breeze.datatypes.BrzMessage;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
 

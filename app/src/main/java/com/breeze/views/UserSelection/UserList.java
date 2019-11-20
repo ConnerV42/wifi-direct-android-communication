@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.breeze.R;
 import com.breeze.graph.BrzGraph;
-import com.breeze.graph.BrzNode;
+import com.breeze.datatypes.BrzNode;
 import com.breeze.storage.BrzStorage;
 
 import java.util.ArrayList;

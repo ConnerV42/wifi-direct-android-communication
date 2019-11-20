@@ -1,7 +1,8 @@
 package com.breeze.packets;
 
+import com.breeze.datatypes.BrzMessage;
 import com.breeze.graph.BrzGraph;
-import com.breeze.graph.BrzNode;
+import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.graph.BrzGraphEvent;
 import com.breeze.packets.graph.BrzGraphQuery;
 

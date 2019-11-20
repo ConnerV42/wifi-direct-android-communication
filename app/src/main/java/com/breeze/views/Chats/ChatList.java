@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.breeze.R;
-import com.breeze.packets.BrzChat;
+import com.breeze.datatypes.BrzChat;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
 

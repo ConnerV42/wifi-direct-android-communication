@@ -1,17 +1,19 @@
 package com.breeze.router;
 
+import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.breeze.graph.BrzGraph;
-import com.breeze.graph.BrzNode;
+import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.handlers.BrzGraphHandler;
 import com.breeze.router.handlers.BrzMessageHandler;
 import com.breeze.router.handlers.BrzRouterHandler;
 import com.breeze.state.BrzStateStore;
+import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
 import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
@@ -36,10 +38,12 @@ public class BrzRouter {
     // Single instance
 
     private static BrzRouter instance;
-    public static BrzRouter getInstance(ConnectionsClient cc, String pkgName) {
-        if (instance == null) instance = new BrzRouter(cc, pkgName);
+
+    public static BrzRouter initialize(Context ctx, String pkgName) {
+        if (instance == null) instance = new BrzRouter(Nearby.getConnectionsClient(ctx), pkgName);
         return instance;
     }
+
     public static BrzRouter getInstance() {
         return instance;
     }
@@ -69,17 +73,6 @@ public class BrzRouter {
         // Initalize handlers
         this.handlers.add(new BrzGraphHandler(this));
         this.handlers.add(new BrzMessageHandler(this));
-
-        // Grab the host node
-        BrzStateStore.getStore().getHostNode(hn -> {
-            if (hn == null) return;
-            hostNode = hn;
-            this.graph.addVertex(hn);
-
-            Log.i("ENDPOINT", "Host node set to " +  hn.toJSON());
-
-            this.start();
-        });
     }
 
     //
@@ -132,7 +125,6 @@ public class BrzRouter {
     }
 
 
-
     //
     //
     //      Lifecycle
@@ -140,6 +132,14 @@ public class BrzRouter {
     //
 
 
+    public void start(BrzNode hostNode) {
+        if(hostNode == null) return;
+
+        this.hostNode = hostNode;
+        this.graph.setVertex(hostNode);
+
+        this.start();
+    }
 
     public void start() {
         if (running || this.hostNode == null) return;
@@ -200,13 +200,11 @@ public class BrzRouter {
     }
 
 
-
     //
     //
     //      Connections client callbacks
     //
     //
-
 
 
     // Callback for receiving payloads

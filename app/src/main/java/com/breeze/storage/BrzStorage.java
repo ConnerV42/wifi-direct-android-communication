@@ -12,28 +12,28 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class BrzStorage {
+    private ContextWrapper cw;
+
+    private BrzStorage(Context c) {
+        this.cw = new ContextWrapper(c);
+    }
+
     // Singleton stuff
     private static BrzStorage instance = null;
-
-    public static BrzStorage getInstance(Context c) {
-        if (instance == null) instance = new BrzStorage(c);
-        return instance;
-    }
 
     public static BrzStorage getInstance() {
         return instance;
     }
 
-
-    private Context context;
-
-    private BrzStorage(Context c) {
-        this.context = c;
+    public static BrzStorage initialize(Context c) {
+        if(instance == null) instance = new BrzStorage(c);
+        return instance;
     }
 
     // Profile image handling
 
     private final String PROFILE_IMAGE_DIR = "profile_images";
+
     public void saveProfileImage(Bitmap bm, String fileName) {
         this.saveImage(bm, fileName, PROFILE_IMAGE_DIR);
     }
@@ -46,8 +46,6 @@ public class BrzStorage {
     // File access helpers
 
     private void saveImage(Bitmap bm, String name, String dir) {
-        ContextWrapper cw = new ContextWrapper(context);
-
         File imageDirectory = cw.getDir(dir, Context.MODE_PRIVATE);
         File imagePath = new File(imageDirectory, name);
 
@@ -67,7 +65,6 @@ public class BrzStorage {
     }
 
     private Bitmap getImage(String name, String dir) {
-        ContextWrapper cw = new ContextWrapper(context);
         File imageDirectory = cw.getDir(dir, Context.MODE_PRIVATE);
 
         try {

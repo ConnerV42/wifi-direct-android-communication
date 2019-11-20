@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         //-------------------------------------------------------------------------//
 
         // Initialize storage api
-        BrzStorage.getInstance(getApplicationContext());
+        BrzStorage.initialize(getApplicationContext());
 
         //-------------------------------------------------------------------------//
 
@@ -104,7 +104,9 @@ public class MainActivity extends AppCompatActivity {
         store.setTitle("Breeze");
         store.getTitle(title -> this.toolbar.setTitle(title));
 
-        this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), "BREEZE_MESSENGER");
+        //        this.router = BrzRouter.getInstance(Nearby.getConnectionsClient(this), "BREEZE_MESSENGER");
+
+
 
         NavController nav = Navigation.findNavController(this, R.id.nav_host_fragment);
         nav.navigate(R.id.profileActivity);

@@ -1,8 +1,8 @@
 package com.breeze.state;
 
-import com.breeze.graph.BrzNode;
-import com.breeze.packets.BrzMessage;
-import com.breeze.packets.BrzChat;
+import com.breeze.datatypes.BrzNode;
+import com.breeze.datatypes.BrzMessage;
+import com.breeze.datatypes.BrzChat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -139,15 +139,15 @@ public class BrzStateStore {
         return this.messages.get(chatId);
     }
 
-    public void addMessage(String chatId, BrzMessage msg) {
-        List<BrzMessage> messages = this.messages.get(chatId);
+    public void addMessage(BrzMessage msg) {
+        List<BrzMessage> messages = this.messages.get(msg.chatId);
         if (messages == null) {
             messages = new ArrayList<>();
-            this.messages.put(chatId, messages);
+            this.messages.put(msg.chatId, messages);
         }
         messages.add(msg);
 
-        List<Consumer<List<BrzMessage>>> cl = this.mlisteners.get(chatId);
+        List<Consumer<List<BrzMessage>>> cl = this.mlisteners.get(msg.chatId);
         if (cl != null) for (Consumer<List<BrzMessage>> c : cl) c.accept(messages);
     }
 

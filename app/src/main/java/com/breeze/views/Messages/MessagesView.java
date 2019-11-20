@@ -15,8 +15,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.breeze.R;
-import com.breeze.packets.BrzChat;
-import com.breeze.packets.BrzMessage;
+import com.breeze.datatypes.BrzChat;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;

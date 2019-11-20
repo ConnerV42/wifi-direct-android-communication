@@ -2,7 +2,7 @@ package com.breeze.packets.graph;
 
 import android.util.Log;
 
-import com.breeze.graph.BrzNode;
+import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzSerializable;
 
 import org.json.JSONObject;

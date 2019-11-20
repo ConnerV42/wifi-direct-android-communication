@@ -2,13 +2,8 @@ package com.breeze.router.handlers;
 
 import android.util.Log;
 
-import com.breeze.graph.BrzGraph;
-import com.breeze.graph.BrzNode;
-import com.breeze.packets.BrzMessage;
+import com.breeze.datatypes.BrzMessage;
 import com.breeze.packets.BrzPacket;
-import com.breeze.packets.BrzPacketBuilder;
-import com.breeze.packets.graph.BrzGraphEvent;
-import com.breeze.packets.graph.BrzGraphQuery;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
 

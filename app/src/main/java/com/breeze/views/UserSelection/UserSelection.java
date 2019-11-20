@@ -6,23 +6,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.Toolbar;
 
 import com.breeze.R;
-import com.breeze.packets.BrzChat;
+import com.breeze.datatypes.BrzChat;
 import com.breeze.state.BrzStateStore;
 
 public class UserSelection extends AppCompatActivity {

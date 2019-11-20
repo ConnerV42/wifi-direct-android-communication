@@ -15,7 +15,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.breeze.R;
-import com.breeze.graph.BrzNode;
+import com.breeze.datatypes.BrzNode;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
 
