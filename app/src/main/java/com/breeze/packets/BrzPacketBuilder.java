@@ -4,11 +4,27 @@ import com.breeze.graph.BrzGraph;
 import com.breeze.graph.BrzNode;
 import com.breeze.packets.graph.BrzGraphEvent;
 import com.breeze.packets.graph.BrzGraphQuery;
+import java.io.File;
 
 public class BrzPacketBuilder {
 
     public static BrzPacket message(String id, String msgBody) {
         return BrzPacketBuilder.message(id, msgBody);
+    }
+
+    public static BrzPacket fileName(String id, String msgTo, String filePayloadId, String fileName) {
+        BrzFileName body = new BrzFileName();
+
+        body.from = id;
+        body.filePayloadId = filePayloadId;
+        body.fileName = fileName;
+        body.userName = "Zach";
+        body.datestamp = System.currentTimeMillis();
+
+        BrzPacket packet = new BrzPacket(body);
+        packet.to = msgTo;
+
+        return packet;
     }
 
     public static BrzPacket ack(BrzPacket packet, String to) {

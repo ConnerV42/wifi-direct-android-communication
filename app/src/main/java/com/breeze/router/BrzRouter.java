@@ -1,5 +1,6 @@
 package com.breeze.router;
 
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -11,6 +12,7 @@ import com.breeze.packets.BrzChat;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.packets.BrzUser;
+import com.breeze.packets.BrzFileName;
 import com.breeze.packets.graph.BrzGraphEvent;
 import com.breeze.packets.graph.BrzGraphQuery;
 import com.breeze.state.BrzStateStore;
@@ -27,6 +29,7 @@ import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import com.google.android.gms.nearby.connection.Strategy;
 
+import java.io.File;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -54,6 +57,10 @@ public class BrzRouter {
     private Map<String, String> seenPackets = new HashMap<>();
     private Map<Long, Payload> pendingPayloads = new HashMap<>();
 
+    private Map<Long, Payload> pendingFilePayloads = new HashMap<>();
+    private Map<Long, Payload> completedFilePayloads = new HashMap<>();
+    private Map<Long, String> filePayloadFilenames = new HashMap<>();
+
     private boolean running = false;
     private String pkgName = "";
     public final String id = UUID.randomUUID().toString();
@@ -67,7 +74,7 @@ public class BrzRouter {
         this.pkgName = pkgName;
         this.graph = BrzGraph.getInstance();
 
-        Log.i("ENDOPINT", "Endpoint UUID is " + id);
+        Log.i("ENDPOINT", "Endpoint UUID is " + id);
 
         // When we log in, add our own node to the graph
         BrzStateStore.getStore().getUser(brzUser -> {
@@ -110,6 +117,20 @@ public class BrzRouter {
         for (String id : connectedEndpoints) {
             if (!id.equals(ignoreEndpoint)) connectionsClient.sendPayload(id, p);
         }
+    }
+
+    public void sendFilePayload(Payload filePayload, BrzPacket packet) { // called in MessagesView.java
+        // Send the File Payload to the next hop along it's path
+        String nextHopUUID = graph.nextHop(this.id, packet.to);
+
+        if (nextHopUUID == null) {
+            Log.i("ENDPOINT_ERR", "Failed to find path to " + packet.to);
+        }
+        BrzNode nextHopNode = this.graph.getVertex(nextHopUUID);
+        connectionsClient.sendPayload(nextHopNode.endpointId, filePayload);
+
+        // Send out BrzPacket of type FILE_NAME to be handled
+        forwardPacket(packet);
     }
 
     public void send(BrzPacket packet) {
@@ -176,7 +197,6 @@ public class BrzRouter {
                     Log.i("ENDPOINT", "Discovering failed!", e);
                 });
     }
-
 
     private Payload stringToPayload(String str) {
         return Payload.fromStream(new ByteArrayInputStream(str.getBytes()));
@@ -290,6 +310,33 @@ public class BrzRouter {
             BrzStateStore.getStore().addMessage(message.from, message);
         }
 
+        // If we got a fileName packet that is for us
+        else if (packet.type == BrzPacket.BrzPacketType.FILE_NAME) {
+            BrzFileName fileNamePkt = packet.fileName();
+            long id = Long.parseLong(fileNamePkt.filePayloadId);
+            filePayloadFilenames.put(id, fileNamePkt.fileName);
+            handleFilePayload(id);
+        }
+    }
+
+    private void handleFilePayload(long payloadId) {
+        // BYTES and FILE could be received in any order, so we call when either the BYTES or the FILE
+        // payload is completely received. The file payload is considered complete only when both have
+        // been received.
+        Payload filePayload = completedFilePayloads.get(payloadId);
+        String filename = filePayloadFilenames.get(payloadId);
+        if (filePayload != null && filename != null) {
+            completedFilePayloads.remove(payloadId);
+            filePayloadFilenames.remove(payloadId);
+
+            // Get the received file (which will be in the Downloads folder)
+            File payloadFile = filePayload.asFile().asJavaFile();
+
+            // Rename the file.
+            payloadFile.renameTo(new File(payloadFile.getParentFile(), filename));
+
+            Log.i("ENDPOINT", "Received and Saved Payload file to downloads folder");
+        }
     }
 
     // Callback for receiving payloads
@@ -297,22 +344,41 @@ public class BrzRouter {
             new PayloadCallback() {
                 @Override
                 public void onPayloadReceived(@NonNull String endpointId, Payload payload) {
-                    pendingPayloads.put(payload.getId(), payload);
+                    if (payload.getType() != Payload.Type.FILE) {
+                        pendingPayloads.put(payload.getId(), payload);
+                    }
+                    else {
+                        pendingFilePayloads.put(payload.getId(), payload);
+                    }
+
                 }
 
                 @Override
                 public void onPayloadTransferUpdate(@NonNull String endpointId, @NonNull PayloadTransferUpdate update) {
                     if (update.getStatus() == PayloadTransferUpdate.Status.SUCCESS) {
-                        Payload p = pendingPayloads.get(update.getPayloadId());
+                        Payload payload = pendingPayloads.get(update.getPayloadId());
                         pendingPayloads.remove(update.getPayloadId());
 
-                        if (p == null) return;
+                        if (payload == null) {
+                            payload = pendingFilePayloads.get(update.getPayloadId());
+                            if(payload != null) {
+                                pendingFilePayloads.remove(update.getPayloadId());
+                                completedFilePayloads.put(update.getPayloadId(), payload);
+                            } else {
+                                return;
+                            }
+                        }
 
-                        Log.i("ENDPOINT", "Got a new raw packet!");
+                        if(payload.getType() == Payload.Type.FILE) {
+                            Log.i("ENDPOINT", "Got a new file payload");
+                            handleFilePayload(update.getPayloadId());
+                        } else {
+                            Log.i("ENDPOINT", "Got a new raw packet!");
 
-                        String json = payloadToString(p);
-                        BrzPacket packet = new BrzPacket(json);
-                        handlePacket(packet, endpointId);
+                            String json = payloadToString(payload);
+                            BrzPacket packet = new BrzPacket(json);
+                            handlePacket(packet, endpointId);
+                        }
                     }
                 }
             };

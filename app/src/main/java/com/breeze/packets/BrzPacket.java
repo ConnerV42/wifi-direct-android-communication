@@ -15,6 +15,7 @@ public class BrzPacket implements BrzSerializable {
 
     public enum BrzPacketType {
         MESSAGE,
+        FILE_NAME,
         ACK,
         GRAPH_QUERY,
         GRAPH_EVENT,
@@ -35,6 +36,10 @@ public class BrzPacket implements BrzSerializable {
 
     public BrzMessage message() {
         return new BrzMessage(this.body);
+    }
+    public BrzFileName fileName() {
+        BrzFileName fileNamePkt = new BrzFileName(this.body);
+        return fileNamePkt;
     }
     public BrzGraphQuery graphQuery() {
         return new BrzGraphQuery(this.body);

@@ -187,6 +187,4 @@ public class BrzStateStore {
         List<Consumer<List<BrzMessage>>> cl = this.mlisteners.get(chatId);
         if (cl != null) for (Consumer<List<BrzMessage>> c : cl) c.accept(messages);
     }
-
-
 }
