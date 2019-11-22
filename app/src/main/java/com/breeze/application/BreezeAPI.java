@@ -121,6 +121,40 @@ public class BreezeAPI extends Service {
         this.state.addMessage(message);
     }
 
+    public void sendMessage(BrzMessage message, String to, BrzPacket.BrzPacketType type)
+    {
+        if(type == BrzPacket.BrzPacketType.HANDSHAKE_PACKET)
+        {
+            BrzPacket p = new BrzPacket(message);
+            p.to = to;
+            p.type = BrzPacket.BrzPacketType.HANDSHAKE_PACKET;
+
+            this.router.send(p);
+            this.state.addMessage(message);
+        }
+        else if(type == BrzPacket.BrzPacketType.MESSAGE)
+        {
+            BrzPacket p = new BrzPacket(message);
+            p.to = to;
+            p.type = BrzPacket.BrzPacketType.MESSAGE;
+
+            this.router.send(p);
+            this.state.addMessage(message);
+        }
+        else if(type == BrzPacket.BrzPacketType.ACK)
+        {
+            return;
+        }
+        else if(type == BrzPacket.BrzPacketType.GRAPH_EVENT)
+        {
+            return;
+        }
+        else if(type == BrzPacket.BrzPacketType.GRAPH_EVENT)
+        {
+            return;
+        }
+    }
+
     public void addChat(BrzChat chat) {
         this.state.addChat(chat);
     }
