@@ -15,7 +15,10 @@ public class BrzGraphQuery implements BrzSerializable {
 
     public BrzGQType type = BrzGQType.REQUEST;
     public String from = "";
+
+    // If it's a response
     public String graph = "";
+    public String hostNode = "";
 
     public BrzGraphQuery () {}
     public BrzGraphQuery (String json) { this.fromJSON(json); }
@@ -23,11 +26,14 @@ public class BrzGraphQuery implements BrzSerializable {
         this.type = BrzGQType.REQUEST;
         this.from = from;
     }
-    public BrzGraphQuery (Boolean isRequest, String from, String graphJSON) {
+    public BrzGraphQuery (Boolean isRequest, String from, String graphJSON, String hostNodeJSON) {
         this.type = BrzGQType.RESPONSE;
         this.from = from;
         this.graph = graphJSON;
+        this.hostNode = hostNodeJSON;
     }
+
+
 
     @Override
     public void fromJSON(String json) {
@@ -35,10 +41,21 @@ public class BrzGraphQuery implements BrzSerializable {
             JSONObject jObj = new JSONObject(json);
             this.from = jObj.getString("from");
             this.type = BrzGQType.valueOf(jObj.getString("type"));
-            this.graph = jObj.getString("graph");
-            if(this.graph == null) this.graph = "";
+
+            try {
+                this.graph = jObj.getString("graph");
+            } catch (Exception e) {
+                this.graph = "";
+            }
+
+            try {
+                this.hostNode = jObj.getString("hostNode");
+            } catch (Exception e) {
+                this.hostNode = "";
+            }
+
         } catch (Exception e) {
-            Log.i("DESERIALIZATION ERROR", e.toString());
+            Log.i("DESERIALIZATION ERROR", "err", e);
         }
     }
 
@@ -50,8 +67,9 @@ public class BrzGraphQuery implements BrzSerializable {
             jObj.put("from", this.from);
             jObj.put("type", this.type);
             if(!this.graph.equals("")) jObj.put("graph", this.graph);
+            if(!this.hostNode.equals("")) jObj.put("hostNode", this.hostNode);
         } catch (Exception e) {
-            Log.i("DESERIALIZATION ERROR", e.toString());
+            Log.i("SERIALIZATION ERROR", "err", e);
         }
 
         return jObj.toString();

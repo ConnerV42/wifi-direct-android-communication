@@ -1,20 +1,20 @@
 package com.breeze.router;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.util.Log;
 
-import androidx.appcompat.app.AppCompatDialogFragment;
+import androidx.annotation.NonNull;
 
-import com.breeze.MainActivity;
-import com.breeze.packets.BrzMessage;
 import com.breeze.graph.BrzGraph;
-import com.breeze.graph.BrzNode;
-import com.breeze.packets.BrzChat;
+import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
-import com.breeze.packets.graph.BrzGraphQuery;
+import com.breeze.router.handlers.BrzGraphHandler;
+import com.breeze.router.handlers.BrzHandshakeHandler;
+import com.breeze.router.handlers.BrzMessageHandler;
+import com.breeze.router.handlers.BrzRouterHandler;
 import com.breeze.state.BrzStateStore;
+import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
 import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
@@ -32,44 +32,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
+import java.util.function.Consumer;
 
 public class BrzRouter {
-    private static final Strategy STRATEGY = Strategy.P2P_CLUSTER;
-    private ConnectionsClient connectionsClient;
 
-    private BrzPacketBuffer buffer = new BrzPacketBuffer();
+    // Single instance
 
-    private List<String> connectedEndpoints = new ArrayList<>();
-    private Map<String, String> endpointNames = new HashMap<>();
-
-
-    private boolean running = false;
-    private String pkgName = "";
-    public final String id = UUID.randomUUID().toString();
-    private BrzGraph graph;
-
-
-
-    private MainActivity mainActivity;
-    private boolean waitingForGraph = false;
     private static BrzRouter instance;
 
-    private BrzRouter(ConnectionsClient cc, String pkgName) {
-        this.connectionsClient = cc;
-        this.pkgName = pkgName;
-        this.graph = BrzGraph.getInstance();
-
-        this.graph.addVertex(new BrzNode(id, "", "localhost", ""));
-
-        // Begin discovery!
-        this.start();
-    }
-
-    public static BrzRouter getInstance(ConnectionsClient cc, String pkgName) {
-        if(instance == null) instance = new BrzRouter(cc, pkgName);
+    public static BrzRouter initialize(Context ctx, String pkgName) {
+        if (instance == null) instance = new BrzRouter(Nearby.getConnectionsClient(ctx), pkgName);
         return instance;
     }
 
@@ -77,44 +49,105 @@ public class BrzRouter {
         return instance;
     }
 
+    //--------------------------------------------------------------------------//
+
+    private static final Strategy STRATEGY = Strategy.P2P_CLUSTER;
+    private ConnectionsClient connectionsClient;
+    private String pkgName;
+    private boolean running = false;
+
+    private BrzPayloadBuffer payloadBuffer = new BrzPayloadBuffer();
+    private List<BrzRouterHandler> handlers = new ArrayList<>();
+
+    private List<String> connectedEndpoints = new ArrayList<>();
+    private Map<String, String> endpointUUIDs = new HashMap<>();
+
+    private BrzGraph graph;
+    public BrzNode hostNode = null;
+
+
+    private BrzRouter(ConnectionsClient cc, String pkgName) {
+        this.connectionsClient = cc;
+        this.pkgName = pkgName;
+        this.graph = BrzGraph.getInstance();
+
+        // Initalize handlers
+        this.handlers.add(new BrzGraphHandler(this));
+        this.handlers.add(new BrzMessageHandler(this));
+        this.handlers.add(new BrzHandshakeHandler(this));
+    }
+
+    //
+    //
+    //      Public access packet sending handlers
+    //
+    //
+
     public void broadcast(BrzPacket packet) {
-        //BrzMessage message = packet.message();
-        //message.userName = "You";
-
-        //BrzStateStore store = BrzStateStore.getStore();
-
-        //for(String id : connectedNodes) {
-        //    packet.to = id;
-        //    store.addMessage(id, message);
-        //    this.send(packet);
-        //}
+        this.broadcast(packet, "");
     }
-    public BrzGraph getGraph() {
-        return graph;
+
+    public void broadcast(BrzPacket packet, String ignoreEndpoint) {
+        packet.to = "BROADCAST";
+        Payload p = payloadBuffer.getStreamPayload(packet.toJSON());
+
+        for (String id : connectedEndpoints) {
+            if (!id.equals(ignoreEndpoint)) connectionsClient.sendPayload(id, p);
+        }
     }
+
     public void send(BrzPacket packet) {
-        Payload p = Payload.fromBytes(packet.toJSON().getBytes());
-        BrzNode toNode = this.graph.getVertex(packet.to);
-        if(toNode != null && !toNode.endpointId.equals("")) {
-            connectionsClient.sendPayload(toNode.endpointId, p);
-
-            buffer.addPacket(packet, 5000, 5, packResend -> {
-                connectionsClient.sendPayload(toNode.endpointId, p);
-            });
-
-        }
+        forwardPacket(packet, true);
     }
-    private void sendAck(BrzPacket packet) {
-        Payload p = Payload.fromBytes(packet.toJSON().getBytes());
-        BrzNode toNode = this.graph.getVertex(packet.to);
-        if(toNode != null && !toNode.endpointId.equals("")) {
-            connectionsClient.sendPayload(toNode.endpointId, p);
-        }
+
+    public void sendToEndpoint(BrzPacket packet, String endpointId) {
+        connectionsClient.sendPayload(endpointId, payloadBuffer.getStreamPayload(packet.toJSON()));
+    }
+
+    private void forwardPacket(BrzPacket packet, Boolean addToBuffer) {
+
+        Consumer<Payload> sendPayload = payload -> {
+            String nextHopUUID = graph.nextHop(this.hostNode.id, packet.to);
+            if (nextHopUUID == null) {
+                Log.i("ENDPOINT_ERR", "Failed to find path to " + packet.to);
+                return;
+            }
+            BrzNode nextHopNode = this.graph.getVertex(nextHopUUID);
+
+            if (
+                    nextHopNode != null &&
+                            !nextHopNode.endpointId.equals("") &&
+                            this.connectedEndpoints.contains(nextHopNode.endpointId)
+            ) connectionsClient.sendPayload(nextHopNode.endpointId, payload);
+        };
+
+        Payload p = payloadBuffer.getStreamPayload(packet.toJSON());
+        if (addToBuffer) payloadBuffer.addOutgoing(p, 5000, 5, sendPayload);
+        else sendPayload.accept(p);
+    }
+
+
+    //
+    //
+    //      Lifecycle
+    //
+    //
+
+
+    public void start(BrzNode hostNode) {
+        if(hostNode == null) return;
+
+        this.hostNode = hostNode;
+        this.graph.setVertex(hostNode);
+
+        this.start();
     }
 
     public void start() {
-        if(running) return;
+        if (running || this.hostNode == null) return;
         running = true;
+
+        Log.i("ENDPOINT", "Starting advertising and discovery");
 
         startAdvertising();
         startDiscovery();
@@ -122,91 +155,85 @@ public class BrzRouter {
 
     public void stop() {
         running = false;
+        Log.i("ENDPOINT", "Stopping nearby completely");
 
         connectionsClient.stopAllEndpoints();
         connectionsClient.stopAdvertising();
         connectionsClient.stopDiscovery();
     }
 
-    public void setMainActivity(MainActivity mainActivity) {
-        this.mainActivity = mainActivity;
-    }
-
     private void startAdvertising() {
-        connectionsClient.startAdvertising(id,
+        connectionsClient.startAdvertising(this.hostNode.id,
                 pkgName, connectionLifecycleCallback,
-                new AdvertisingOptions.Builder().setStrategy(STRATEGY).build());
+                new AdvertisingOptions.Builder().setStrategy(STRATEGY).build())
+                .addOnSuccessListener(e -> {
+                    Log.i("ENDPOINT", "Advertising successfully!");
+                })
+                .addOnFailureListener(e -> {
+                    Log.i("ENDPOINT", "Advertising failed!", e);
+                });
     }
 
     private void startDiscovery() {
         connectionsClient.startDiscovery(
                 pkgName, endpointDiscoveryCallback,
-                new DiscoveryOptions.Builder().setStrategy(STRATEGY).build());
+                new DiscoveryOptions.Builder().setStrategy(STRATEGY).build())
+                .addOnSuccessListener(e -> {
+                    Log.i("ENDPOINT", "Discovering successfully!");
+                })
+                .addOnFailureListener(e -> {
+                    Log.i("ENDPOINT", "Discovering failed!", e);
+                });
     }
+
 
     private void handlePacket(BrzPacket packet, String fromEndpointId) {
+        Log.i("ENDPOINT", "Got a packet " + packet.type);
 
-        if(packet.type != BrzPacket.BrzPacketType.ACK) {
-            BrzPacket ack = BrzPacketBuilder.ack(packet, this.endpointNames.get(fromEndpointId));
-            sendAck(ack);
-        } else {
-            this.buffer.removePacket(packet.id);
+        // Continue the broadcast if the packet has not been seen before
+        if (packet.to.equals("BROADCAST") && !this.payloadBuffer.broadcastSeen(packet.id)) {
+            this.payloadBuffer.addBroadcast(packet.id);
+            broadcast(packet, fromEndpointId);
         }
 
-        if(packet.type == BrzPacket.BrzPacketType.MESSAGE) {
-            if(packet.to.equals(this.id)) {
-                BrzMessage message = packet.message();
-                BrzStateStore store = BrzStateStore.getStore();
-                store.addMessage(message.from, message);
-            } else {
-                // forward the packet to next node
-                List<String> shortestPath = graph.bfs(this.id, packet.to);
-            }
-        }
+        for (BrzRouterHandler handler : this.handlers)
+            if (handler.handles(packet.type)) handler.handle(packet, fromEndpointId);
 
-        else if(packet.type == BrzPacket.BrzPacketType.GRAPH_QUERY) {
-            BrzGraphQuery query = packet.graphQuery();
-
-            // Respond to graph query
-            if(query.type == BrzGraphQuery.BrzGQType.REQUEST) {
-                BrzPacket resPacket = BrzPacketBuilder.graphResponse(this.graph, query.from);
-                send(resPacket);
-            }
-            // Update graph
-            else if(waitingForGraph && !query.graph.equals("")) {
-                waitingForGraph = false;
-                this.graph.fromJSON(query.graph);
-            }
-        }
-        if(packet.type == BrzPacket.BrzPacketType.HANDSHAKE_PACKET) {
-            if(packet.to.equals(this.id)) {
-                BrzMessage message = packet.message();
-                String msg = message.message;
-
-            } else {
-                // forward the packet to next node
-                List<String> shortestPath = graph.bfs(this.id, packet.to);
-            }
-        }
     }
+
+
+    //
+    //
+    //      Connections client callbacks
+    //
+    //
+
 
     // Callback for receiving payloads
     private final PayloadCallback payloadCallback =
             new PayloadCallback() {
                 @Override
-                public void onPayloadReceived(String endpointId, Payload payload) {
-                    byte[] payloadBody = payload.asBytes();
-                    if(payloadBody == null) return;
-
-                    String json = new String(payloadBody, UTF_8);
-                    BrzPacket packet = new BrzPacket(json);
-
-                    handlePacket(packet, endpointId);
+                public void onPayloadReceived(@NonNull String endpointId, Payload payload) {
+                    payloadBuffer.addIncoming(payload);
                 }
 
                 @Override
-                public void onPayloadTransferUpdate(String endpointId, PayloadTransferUpdate update) {
-                    if(update.getStatus() == PayloadTransferUpdate.Status.SUCCESS) {
+                public void onPayloadTransferUpdate(@NonNull String endpointId, @NonNull PayloadTransferUpdate update) {
+                    if (update.getStatus() != PayloadTransferUpdate.Status.SUCCESS) return;
+                    Long payloadId = update.getPayloadId();
+
+                    // Incomming packet was a success!
+                    if (payloadBuffer.isIncomming(payloadId)) {
+                        Log.i("ENDPOINT", "Recieved a payload successfully");
+
+                        Payload p = payloadBuffer.popIncoming(payloadId);
+                        BrzPacket packet = new BrzPacket(payloadBuffer.getStreamString(p));
+                        handlePacket(packet, endpointId);
+                    }
+
+                    // Outgoing packet was a success!
+                    else {
+                        payloadBuffer.removeOutgoing(payloadId);
                     }
                 }
             };
@@ -215,13 +242,14 @@ public class BrzRouter {
     private final EndpointDiscoveryCallback endpointDiscoveryCallback =
             new EndpointDiscoveryCallback() {
                 @Override
-                public void onEndpointFound(String endpointId, DiscoveredEndpointInfo info) {
-                    if(info.getServiceId().equals(pkgName))
-                        connectionsClient.requestConnection(id, endpointId, connectionLifecycleCallback);
+                public void onEndpointFound(@NonNull String endpointId, DiscoveredEndpointInfo info) {
+                    Log.i("ENDPOINT", "Endpoint found");
+                    if (info.getServiceId().equals(pkgName))
+                        connectionsClient.requestConnection(hostNode.id, endpointId, connectionLifecycleCallback);
                 }
 
                 @Override
-                public void onEndpointLost(String endpointId) {
+                public void onEndpointLost(@NonNull String endpointId) {
                 }
             };
 
@@ -229,60 +257,43 @@ public class BrzRouter {
     private final ConnectionLifecycleCallback connectionLifecycleCallback =
             new ConnectionLifecycleCallback() {
                 @Override
-                public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
-                    builder.setTitle("Confirm Connection");
-                    builder.setMessage("Connect to following device?");
+                public void onConnectionInitiated(@NonNull String endpointId, ConnectionInfo connectionInfo) {
+                    Log.i("ENDPOINT", "Endpoint initiated connection");
 
-                    final String endpoint = endpointId;
-                    final ConnectionInfo ci = connectionInfo;
-
-
-                    builder.setPositiveButton("Connect", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            endpointNames.put(endpoint, ci.getEndpointName());
-                            connectionsClient.acceptConnection(endpoint, payloadCallback);
-                        }
-                    });
-                    builder.setNegativeButton("Reject", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    });
-                    builder.create();
+                    endpointUUIDs.put(endpointId, connectionInfo.getEndpointName());
+                    connectionsClient.acceptConnection(endpointId, payloadCallback);
                 }
 
                 @Override
-                public void onConnectionResult(String endpointId, ConnectionResolution result) {
+                public void onConnectionResult(@NonNull String endpointId, ConnectionResolution result) {
                     if (result.getStatus().isSuccess()) {
-                        String endpointName = endpointNames.get(endpointId);
-                        graph.addVertex(new BrzNode(endpointName, endpointId, "other_host", ""));
-                        graph.addEdge(id, endpointName);
+                        Log.i("ENDPOINT", "Endpoint connected");
 
-                        if(connectedEndpoints.size() == 0) {
-                            waitingForGraph = true;
-                            BrzPacket reqPacket = BrzPacketBuilder.graphQuery(endpointName, id);
-                            send(reqPacket);
-                        }
                         connectedEndpoints.add(endpointId);
+                        String endpointUUID = endpointUUIDs.get(endpointId);
 
-                        BrzStateStore store = BrzStateStore.getStore();
-                        store.addChat(new BrzChat(endpointName, endpointName));
+                        // Send graph to newly connected node
+                        BrzPacket graphPacket = BrzPacketBuilder.graphResponse(graph, hostNode, endpointUUID);
+                        connectionsClient.sendPayload(endpointId, payloadBuffer.getStreamPayload(graphPacket.toJSON()));
                     }
                 }
 
                 @Override
-                public void onDisconnected(String endpointId) {
+                public void onDisconnected(@NonNull String endpointId) {
+                    Log.i("ENDPOINT", "Endpoint disconnected!");
+
+                    // Remove edge from our graph
                     connectedEndpoints.remove(endpointId);
+                    String endpointUUID = endpointUUIDs.get(endpointId);
+                    graph.removeEdge(hostNode.id, endpointUUID);
 
-                    String endpointName = endpointNames.get(endpointId);
-                    graph.removeEdge(id, endpointName);
-                    graph.removeVertex(endpointName);
+                    BrzStateStore.getStore().removeChat(endpointUUID);
 
-                    BrzStateStore store = BrzStateStore.getStore();
-                    store.removeChat(endpointName);
+                    // Broadcast disconnect event
+                    BrzNode node1 = hostNode;
+                    BrzNode node2 = graph.getVertex(endpointUUIDs.get(endpointId));
+                    if (node1 != null && node2 != null)
+                        broadcast(BrzPacketBuilder.graphEvent(false, node1, node2));
                 }
             };
 }

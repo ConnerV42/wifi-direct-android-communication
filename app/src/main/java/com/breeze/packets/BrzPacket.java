@@ -3,6 +3,7 @@ package com.breeze.packets;
 import android.util.Base64;
 import android.util.Log;
 
+import com.breeze.datatypes.BrzMessage;
 import com.breeze.packets.graph.BrzGraphEvent;
 import com.breeze.packets.graph.BrzGraphQuery;
 
@@ -26,9 +27,7 @@ public class BrzPacket implements BrzSerializable {
     public BrzPacketType type = BrzPacketType.MESSAGE;
     private String body = "";
 
-    public BrzPacket() {
-
-    }
+    public BrzPacket() {}
     public BrzPacket(BrzSerializable body) {
         this.body = body.toJSON();
     }

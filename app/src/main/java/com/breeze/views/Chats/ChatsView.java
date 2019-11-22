@@ -1,6 +1,7 @@
 package com.breeze.views.Chats;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -16,6 +17,8 @@ import android.widget.ListView;
 
 import com.breeze.R;
 import com.breeze.state.BrzStateStore;
+import com.breeze.views.UserSelection.UserSelection;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import static androidx.navigation.Navigation.findNavController;
 
@@ -61,9 +64,6 @@ public class ChatsView extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        BrzStateStore store = BrzStateStore.getStore();
-        store.setTitle("Breeze");
-
         final ChatList chatList = new ChatList(getActivity());
         ListView msgView = (ListView) view.findViewById(R.id.contactList);
         msgView.setAdapter(chatList);
@@ -76,6 +76,18 @@ public class ChatsView extends Fragment {
                 nav.navigate(R.id.chatView, args);
             }
         });
+
+        FloatingActionButton fab = view.findViewById(R.id.chat_view_fab);
+        fab.setOnClickListener(e -> {
+            Intent i = new Intent(this.getContext(), UserSelection.class);
+            this.startActivity(i);
+        });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        BrzStateStore.getStore().setTitle("Breeze");
     }
 
     @Override

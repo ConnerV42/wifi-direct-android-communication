@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <EditText
+        android:id="@+id/user_selection_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="User Search"
+        android:background="@android:color/transparent"
+        android:textColor="#000"
+        android:textColorHint="#888"
+        />
+
+</LinearLayout>

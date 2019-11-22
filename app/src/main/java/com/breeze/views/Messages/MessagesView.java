@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,8 +16,9 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.breeze.R;
-import com.breeze.packets.BrzChat;
-import com.breeze.packets.BrzMessage;
+import com.breeze.application.BreezeAPI;
+import com.breeze.datatypes.BrzChat;
+import com.breeze.datatypes.BrzMessage;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;
@@ -76,28 +78,20 @@ public class MessagesView extends Fragment {
 
         final BrzRouter router = BrzRouter.getInstance();
 
-        BrzStateStore.getStore().setTitle(this.chat.name);
-
         MessageList msgList = new MessageList(getActivity(), this.chat.id);
-        ListView msgView = (ListView) getView().findViewById(R.id.messageList);
+        RecyclerView msgView = getView().findViewById(R.id.messageList);
         msgView.setAdapter(msgList);
 
         Button sendMessage = getView().findViewById(R.id.sendMessage);
-        sendMessage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) { // send message
+        sendMessage.setOnClickListener(view1 -> { // send message
 
-                EditText messageBox = getView().findViewById(R.id.editText);
-                String messageBoxText = messageBox.getText().toString();
+            EditText messageBox = getView().findViewById(R.id.editText);
+            String messageBoxText = messageBox.getText().toString();
 
-                // Reset message box
-                messageBox.setText("");
+            // Reset message box
+            messageBox.setText("");
 
-                BrzPacket packet = BrzPacketBuilder.message(router.id, chat.id, messageBoxText);
-                router.send(packet);
-
-                BrzStateStore.getStore().addMessage(packet.to, packet.message());
-            }
+            BreezeAPI.getInstance().sendMessage(BrzPacketBuilder.makeMessage(router.hostNode.id, messageBoxText, chat.id, false), chat.id);
         });
     }
 
@@ -109,5 +103,11 @@ public class MessagesView extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        BrzStateStore.getStore().setTitle(this.chat.name);
     }
 }

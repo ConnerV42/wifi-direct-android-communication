@@ -2,7 +2,7 @@ package com.breeze.packets.graph;
 
 import android.util.Log;
 
-import com.breeze.graph.BrzNode;
+import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzSerializable;
 
 import org.json.JSONObject;
@@ -10,9 +10,9 @@ import org.json.JSONObject;
 public class BrzGraphEvent implements BrzSerializable {
     public enum BrzGEType { CONNECT, DISCONNECT }
 
-    BrzGEType type = BrzGEType.CONNECT;
-    BrzNode node1;
-    BrzNode node2;
+    public BrzGEType type = BrzGEType.CONNECT;
+    public BrzNode node1;
+    public BrzNode node2;
 
     public BrzGraphEvent() { }
     public BrzGraphEvent(String json) {
@@ -37,7 +37,7 @@ public class BrzGraphEvent implements BrzSerializable {
 
             this.type = BrzGEType.valueOf(jObj.getString("type"));
         } catch (Exception e) {
-            Log.i("DESERIALIZATION ERROR", e.toString());
+            Log.i("DESERIALIZATION ERROR", "err", e);
         }
     }
 
@@ -50,7 +50,7 @@ public class BrzGraphEvent implements BrzSerializable {
             jObj.put("node1", new JSONObject(this.node1.toJSON()));
             jObj.put("node2", new JSONObject(this.node2.toJSON()));
         } catch (Exception e) {
-            Log.i("DESERIALIZATION ERROR", e.toString());
+            Log.e("SERIALIZATION ERROR", "err", e);
         }
 
         return jObj.toString();

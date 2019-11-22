@@ -10,7 +10,7 @@
 
     <de.hdodenhof.circleimageview.CircleImageView
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/chat_image"
+        android:id="@+id/user_image"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginEnd="20dp"
@@ -18,22 +18,27 @@
         app:civ_border_width="2dp"
         app:civ_border_color="#000"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
         <TextView
-            android:id="@+id/chat_name"
+            android:id="@+id/user_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="start"
             android:text="name"
             android:textColor="#000000"
-            android:textSize="9pt"
-            android:layout_gravity="center_vertical"
-            />
+            android:textSize="9pt" />
 
-        <!--<TextView
+        <TextView
             android:id="@+id/user_alias"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:text="\@alias"
-            android:textColor="#555" />-->
+            android:textColor="#555" />
+    </LinearLayout>
 
 </LinearLayout>
