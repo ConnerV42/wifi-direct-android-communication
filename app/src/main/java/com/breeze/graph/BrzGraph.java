@@ -72,6 +72,7 @@ public class BrzGraph implements BrzSerializable, Iterable<BrzNode> {
     public String nextHop(String currentUUID, String destinationUUID) {
         List<String> path = this.bfs(currentUUID, destinationUUID);
         if (path == null) return null;
+        if(path.size() < 2) return destinationUUID;
         return path.get(1);
     }
 

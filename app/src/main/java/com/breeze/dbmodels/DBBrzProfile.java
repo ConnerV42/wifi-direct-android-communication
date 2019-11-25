@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.breeze.packets.BrzSerializable;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
@@ -14,7 +13,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 
-public class DBBrzContact implements BrzSerializable
+public class DBBrzProfile implements BrzSerializable
 {
 
     private int id;
@@ -26,13 +25,7 @@ public class DBBrzContact implements BrzSerializable
     private boolean friend;
     private boolean blocked;
 
-
-    public DBBrzContact()
-    {
-
-    }
-
-    public DBBrzContact(int id, String name, String alias, String signature) {
+    public DBBrzProfile(int id, String name, String alias, String signature) {
         this.id = id;
         this.name = name;
         this.alias = alias;
@@ -98,10 +91,9 @@ public class DBBrzContact implements BrzSerializable
         this.blocked = blocked;
     }
 
-    @NotNull
     @Override
     public String toString() {
-        return "DBBrzContact{" +
+        return "DBBrzProfile{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", alias='" + alias + '\'' +

@@ -6,8 +6,8 @@ import com.breeze.graph.BrzGraph;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
-import com.breeze.packets.graph.BrzGraphEvent;
-import com.breeze.packets.graph.BrzGraphQuery;
+import com.breeze.packets.GraphEvents.BrzGraphEvent;
+import com.breeze.packets.GraphEvents.BrzGraphQuery;
 import com.breeze.router.BrzRouter;
 
 public class BrzGraphHandler implements BrzRouterHandler {

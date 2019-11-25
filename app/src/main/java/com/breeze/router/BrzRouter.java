@@ -10,6 +10,7 @@ import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.handlers.BrzGraphHandler;
+import com.breeze.router.handlers.BrzHandshakeHandler;
 import com.breeze.router.handlers.BrzMessageHandler;
 import com.breeze.router.handlers.BrzRouterHandler;
 import com.breeze.state.BrzStateStore;
@@ -73,6 +74,7 @@ public class BrzRouter {
         // Initalize handlers
         this.handlers.add(new BrzGraphHandler(this));
         this.handlers.add(new BrzMessageHandler(this));
+        this.handlers.add(new BrzHandshakeHandler(this));
     }
 
     //

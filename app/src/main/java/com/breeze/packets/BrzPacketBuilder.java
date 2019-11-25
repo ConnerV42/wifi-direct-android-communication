@@ -3,8 +3,8 @@ package com.breeze.packets;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.graph.BrzGraph;
 import com.breeze.datatypes.BrzNode;
-import com.breeze.packets.graph.BrzGraphEvent;
-import com.breeze.packets.graph.BrzGraphQuery;
+import com.breeze.packets.GraphEvents.BrzGraphEvent;
+import com.breeze.packets.GraphEvents.BrzGraphQuery;
 
 public class BrzPacketBuilder {
 
@@ -74,5 +74,21 @@ public class BrzPacketBuilder {
         packet.to = "BROADCAST";
 
         return packet;
+    }
+
+    public static BrzPacket Handshake(BrzGraph graph, String to, String pubKey, String id)
+    {
+        BrzMessage body = new BrzMessage();
+
+        body.body =pubKey;
+        body.chatId = "Zach";
+        body.datestamp = System.currentTimeMillis();
+        body.from = id;
+
+        BrzPacket packet = new BrzPacket(body);
+        packet.to = to;
+        return packet;
+
+
     }
 }

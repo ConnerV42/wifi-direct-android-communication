@@ -18,6 +18,7 @@ import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.breeze.R;
+import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.state.BrzStateStore;
 
@@ -44,7 +45,8 @@ public class UserSelection extends AppCompatActivity {
 
         // When the user selects a node, add a chat for it
         adapter.setItemSelectedListener(node -> {
-            BrzStateStore.getStore().addChat(new BrzChat(node.id, node.name, node.id));
+            BrzChat newChat = new BrzChat(node.name, node.id);
+            BreezeAPI.getInstance().sendChatHandshakes(newChat);
             finish();
         });
 
@@ -58,19 +60,11 @@ public class UserSelection extends AppCompatActivity {
         ActionBar ab = getSupportActionBar();
         if (ab == null) return;
 
+        // Set up the activity as not "backoutable"
         ab.setDisplayHomeAsUpEnabled(true);
         ab.setDisplayShowTitleEnabled(false);
         ab.setDisplayShowCustomEnabled(true);
-
-        // Do some themeing
-        ab.setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
-        ab.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#ffffff")));
-
-        Window w = getWindow();
-        w.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        w.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        w.setStatusBarColor(Color.parseColor("#ffffff"));
-
+        ab.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
 
         // Add our search field
         ab.setCustomView(R.layout.search_view);
@@ -78,6 +72,10 @@ public class UserSelection extends AppCompatActivity {
 
         // When the user types a search query, filter the list
         EditText search = actionBarView.findViewById(R.id.user_selection_search);
+        search.requestFocus();
+        search.setTextColor(Color.parseColor("#ffffff"));
+        search.setHintTextColor(Color.parseColor("#dddddd"));
+
         search.addTextChangedListener(new TextWatcher() {
 
             @Override

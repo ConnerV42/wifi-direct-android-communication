@@ -4,8 +4,10 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.breeze.datatypes.BrzMessage;
-import com.breeze.packets.graph.BrzGraphEvent;
-import com.breeze.packets.graph.BrzGraphQuery;
+import com.breeze.packets.ChatEvents.BrzChatHandshake;
+import com.breeze.packets.ChatEvents.BrzChatResponse;
+import com.breeze.packets.GraphEvents.BrzGraphEvent;
+import com.breeze.packets.GraphEvents.BrzGraphQuery;
 
 import org.json.JSONObject;
 
@@ -19,6 +21,8 @@ public class BrzPacket implements BrzSerializable {
         ACK,
         GRAPH_QUERY,
         GRAPH_EVENT,
+        CHAT_HANDSHAKE,
+        CHAT_RESPONSE
     }
 
     public String id = UUID.randomUUID().toString();
@@ -37,12 +41,12 @@ public class BrzPacket implements BrzSerializable {
     public BrzMessage message() {
         return new BrzMessage(this.body);
     }
-    public BrzGraphQuery graphQuery() {
-        return new BrzGraphQuery(this.body);
-    }
-    public BrzGraphEvent graphEvent() {
-        return new BrzGraphEvent(this.body);
-    }
+
+    public BrzGraphQuery graphQuery() { return new BrzGraphQuery(this.body); }
+    public BrzGraphEvent graphEvent() { return new BrzGraphEvent(this.body); }
+
+    public BrzChatHandshake chatHandshake() { return new BrzChatHandshake(this.body); }
+    public BrzChatResponse chatResponse() { return new BrzChatResponse(this.body); }
 
     @Override
     public String toJSON() {

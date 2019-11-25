@@ -5,13 +5,19 @@ import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.Enumeration;
-
+import java.util.*;
 import android.security.KeyPairGeneratorSpec;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
+import android.util.Log;
 
-public class BrzEncryption {
+import javax.crypto.Cipher;
+
+public class BrzEncryption
+{
+    PrivateKey privateKey;
+    PublicKey publicKey;
+
 
     public static KeyPair getKeyPair() throws Exception
     {
@@ -20,7 +26,6 @@ public class BrzEncryption {
                     KeyProperties.KEY_ALGORITHM_RSA,
                     "AndroidKeyStore"
             );
-
             KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
             ks.load(null);
             KeyGenParameterSpec.Builder builder =
@@ -35,22 +40,46 @@ public class BrzEncryption {
             return keyPairGenerator.generateKeyPair();
         } catch (NoSuchAlgorithmException | CertificateException | IOException |
                 InvalidAlgorithmParameterException | KeyStoreException | NoSuchProviderException e ) {
-            return null;
+            Log.i("KeyPair", "Key Pair unable to be generated");
         }
+        throw new KeyStoreException("Key Pair unable to be generated");
     }
 
-    public boolean createKey() {
-
-
-        return true;
-    }
-
-    public static void listKeyStore() throws Exception
-    {
+    public static Enumeration<String>  listKeyStore() throws Exception {
         KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
         ks.load(null);
-        Enumeration<String> aliases = ks.aliases();
-        System.out.println(aliases);
+        return ks.aliases();
     }
+   public PublicKey grabPublicKey(KeyPair kp)
+   {
+       try {
+
+           publicKey = kp.getPublic();
+
+       }catch(Exception e) {
+           System.out.println("Unable to generate key pair or retrieve public key. Check.");
+       }
+       return publicKey;
+   }
+
+    public static byte[] signWithPrivateKey(byte[] data) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, InvalidKeyException, SignatureException, UnrecoverableEntryException {
+        /*
+         * Use a PrivateKey in the KeyStore to create a signature over
+         * some data.
+         */
+        KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+        ks.load(null);
+        KeyStore.Entry entry = ks.getEntry("MY_KEY", null);
+        if (!(entry instanceof KeyStore.PrivateKeyEntry)) {
+            Log.w("TAG", "Not an instance of a PrivateKeyEntry");
+            Void o = null;
+        }
+        Signature s = Signature.getInstance("SHA256withECDSA");
+        s.initSign(((KeyStore.PrivateKeyEntry) entry).getPrivateKey());
+        s.update(data);
+        byte[] signature = s.sign();
+        return signature;
+    }
+
 
 }

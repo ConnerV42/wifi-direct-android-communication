@@ -9,10 +9,15 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzNode;
-import com.breeze.dbmodels.DBBrzContact;
 import com.breeze.dbmodels.DBBrzMessage;
 import com.breeze.dbmodels.DBBrzPreference;
+
+import org.json.JSONArray;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
@@ -20,6 +25,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
 
     private static final String NODE_TABLE = "Nodes";
+    private static final String CHAT_TABLE = "Chats";
 
     private static final String CONTACTS_TABLE_NAME = "Contacts";
     private static final String MESSAGES_TABLE_NAME = "DBBrzMessage";
@@ -33,8 +39,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-        final String nodeTableSQL = "CREATE TABLE IF NOT EXISTS Nodes ('id' TEXT PRIMARY KEY, 'endpointId' TEXT, 'publicKey' TEXT NOT NULL, 'name' TEXT NOT NULL, 'alias' TEXT NOT NULL)";
+        final String nodeTableSQL = "CREATE TABLE IF NOT EXISTS " + NODE_TABLE + " ('id' TEXT PRIMARY KEY, 'endpointId' TEXT, 'publicKey' TEXT NOT NULL, 'name' TEXT NOT NULL, 'alias' TEXT NOT NULL)";
         db.execSQL(nodeTableSQL);
+
+        final String chatTableSQL = "CREATE TABLE IF NOT EXISTS " + CHAT_TABLE + " ('id' TEXT PRIMARY KEY, 'name' TEXT NOT NULL, 'nodes' TEXT NOT NULL, 'isGroup' INTEGER NOT NULL)";
+        db.execSQL(chatTableSQL);
+
 
         final String INIT_CONTACT_TABLE = "CREATE TABLE IF NOT EXISTS Contacts ('id' INTEGER PRIMARY KEY, 'name' TEXT NOT NULL, 'alias' TEXT NOT NULL, 'signature' TEXT NOT NULL, 'lasttalkedto' DATE NOT NULL, 'blocked' BOOLEAN NOT NULL, 'friend' BOOLEAN NOT NULL)";
         db.execSQL(INIT_CONTACT_TABLE);
@@ -47,7 +57,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(@NonNull SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS Nodes");
+        db.execSQL("DROP TABLE IF EXISTS " + NODE_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + CHAT_TABLE);
 
         //migration process if we want to upgrade in future.
         //For now, it'll drop all tables and redo onCreate
@@ -63,9 +74,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void setNode(@NonNull BrzNode node) {
         SQLiteDatabase db = this.getWritableDatabase();
         String[] args = {node.id, node.endpointId, node.publicKey, node.name, node.alias};
-        db.execSQL("INSERT OR REPLACE INTO " + NODE_TABLE + " VALUES (?,?,?,?,?)", args);
+        try {
+            db.execSQL("INSERT OR REPLACE INTO " + NODE_TABLE + " VALUES (?,?,?,?,?)", args);
+        } catch (Exception e) {
+            Log.i("Bad SQL Error", "Error with SQL Syntax");
+        }
         db.close();
     }
+
     public BrzNode getNode(@NonNull String nodeId) {
         SQLiteDatabase db = this.getReadableDatabase();
         String[] args = {nodeId};
@@ -97,19 +113,114 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
 
-    public void addContact(@NonNull DBBrzContact DBBrzContact) {
+    public void setChat(@NonNull BrzChat chat) {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues vals = new ContentValues();
-        vals.put("id", DBBrzContact.getId());
-        vals.put("name", DBBrzContact.getName());
-        vals.put("alias", DBBrzContact.getAlias());
-        vals.put("signature", DBBrzContact.getSignature());
-        vals.put("lasttalkedto", DBBrzContact.getLastTalkedTo());
-        vals.put("friend", DBBrzContact.isFriend());
-        vals.put("blocked", DBBrzContact.isBlocked());
-        db.insert(CONTACTS_TABLE_NAME, null, vals);
+        Object[] args = {chat.id, chat.name, new JSONArray(chat.nodes).toString(), chat.isGroup ? 1 : 0};
+        try {
+            db.execSQL("INSERT OR REPLACE INTO " + CHAT_TABLE + " VALUES (?,?,?,?)", args);
+        } catch (Exception e) {
+            Log.i("Bad SQL Error", "Error with SQL Syntax");
+        }
         db.close();
     }
+
+    public void deleteChat(@NonNull String chatId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Object[] args = {chatId};
+        try {
+            db.execSQL("DELETE FROM " + CHAT_TABLE + " WHERE id = ?", args);
+        } catch (Exception e) {
+            Log.i("Bad SQL Error", "Error with SQL Syntax");
+        }
+        db.close();
+    }
+
+    public List<BrzChat> getAllChats() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] args = {};
+        Cursor c = db.rawQuery("SELECT * FROM " + CHAT_TABLE, args);
+
+        if (c == null) {
+            db.close();
+            return null;
+        } else if (c.getCount() < 1) {
+            c.close();
+            db.close();
+            return null;
+        }
+
+        c.moveToFirst();
+
+        List<BrzChat> chats = new ArrayList<>();
+
+        for(int i = 0; i < c.getCount(); i++) {
+            BrzChat n = new BrzChat();
+
+            n.id = c.getString(c.getColumnIndex("id"));
+            n.name = c.getString(c.getColumnIndex("name"));
+
+            String nodes = c.getString(c.getColumnIndex("nodes"));
+            n.nodesFromJson(nodes);
+
+            int isGroup = c.getInt(c.getColumnIndex("isGroup"));
+            n.isGroup = isGroup == 1;
+
+            chats.add(n);
+
+            c.moveToNext();
+        }
+
+        c.close();
+        db.close();
+        return chats;
+    }
+
+    public BrzChat getChat(@NonNull String chatId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] args = { chatId };
+
+        Cursor c = db.rawQuery("SELECT * FROM " + CHAT_TABLE + " WHERE id = ?;", args);
+
+        if (c == null) {
+            db.close();
+            return null;
+        } else if (c.getCount() < 1) {
+            c.close();
+            db.close();
+            return null;
+        }
+
+        BrzChat n = new BrzChat();
+        c.moveToFirst();
+
+        n.id = c.getString(c.getColumnIndex("id"));
+        n.name = c.getString(c.getColumnIndex("name"));
+
+        String nodes = c.getString(c.getColumnIndex("nodes"));
+        n.nodesFromJson(nodes);
+
+        int isGroup = c.getInt(c.getColumnIndex("isGroup"));
+        n.isGroup = isGroup == 1;
+
+        c.close();
+        db.close();
+        return n;
+    }
+
+
+//    public void addContact(@NonNull DBBrzContact DBBrzContact) {
+//        SQLiteDatabase db = this.getWritableDatabase();
+//        ContentValues vals = new ContentValues();
+//        vals.put("id", DBBrzContact.getId());
+//        vals.put("name", DBBrzContact.getName());
+//        vals.put("alias", DBBrzContact.getAlias());
+//        vals.put("signature", DBBrzContact.getSignature());
+//        vals.put("lasttalkedto", DBBrzContact.getLastTalkedTo());
+//        vals.put("friend", DBBrzContact.isFriend());
+//        vals.put("blocked", DBBrzContact.isBlocked());
+//        db.insert(CONTACTS_TABLE_NAME, null, vals);
+//        db.close();
+//    }
 
     public void addMessage(@NonNull DBBrzMessage message) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -132,11 +243,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
     }
 
-    public void deleteOneContact(@NonNull DBBrzContact contact) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(CONTACTS_TABLE_NAME, "id = ?", new String[]{String.valueOf(contact.getId())});
-        db.close();
-    }
+//    public void deleteOneContact(@NonNull DBBrzContact contact) {
+//        SQLiteDatabase db = this.getWritableDatabase();
+//        db.delete(CONTACTS_TABLE_NAME, "id = ?", new String[]{String.valueOf(contact.getId())});
+//        db.close();
+//    }
 
     public void deleteOneMessage(@NonNull DBBrzMessage message) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -150,11 +261,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
     }
 
-    public int updateContact(DBBrzContact contact) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        return -1;
-    }
+//    public int updateContact(DBBrzContact contact) {
+//        SQLiteDatabase db = this.getWritableDatabase();
+//        ContentValues cv = new ContentValues();
+//        return -1;
+//    }
 
     public int updateMessage(DBBrzMessage message) {
         return -1;
