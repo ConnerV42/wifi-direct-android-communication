@@ -142,13 +142,8 @@ public class MessagesView extends Fragment {
                 String filePayloadId = "" + filePayload.getId();
                 String fileName = imageUri.getLastPathSegment();
 
-                // Create packet to hold outgoing File's Payload Id and File Name
                 final BrzRouter router = BrzRouter.getInstance();
-
                 BrzPacket packet = BrzPacketBuilder.fileName(router.id, chat.id, filePayloadId, fileName);
-                packet.type = BrzPacket.BrzPacketType.FILE_NAME;
-
-                // Send File Payload and BrzPacket to router
                 BrzRouter.getInstance().sendFilePayload(filePayload, packet);
             } catch (Exception e) {
                 Log.e("FILE_ACCESS", "Failure ", e);

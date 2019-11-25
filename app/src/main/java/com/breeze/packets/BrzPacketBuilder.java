@@ -12,17 +12,19 @@ public class BrzPacketBuilder {
         return BrzPacketBuilder.message(id, msgBody);
     }
 
-    public static BrzPacket fileName(String id, String msgTo, String filePayloadId, String fileName) {
-        BrzFileName body = new BrzFileName();
+    public static BrzPacket fileName(String fromUUID, String toUUID, String filePayloadId, String fileName) {
+        BrzFileInfo body = new BrzFileInfo();
 
-        body.from = id;
+        body.from = fromUUID;
+        body.destinationUUID = toUUID;
         body.filePayloadId = filePayloadId;
         body.fileName = fileName;
         body.userName = "Zach";
         body.datestamp = System.currentTimeMillis();
 
         BrzPacket packet = new BrzPacket(body);
-        packet.to = msgTo;
+        packet.type = BrzPacket.BrzPacketType.FILE_INFO;
+        packet.to = "";
 
         return packet;
     }

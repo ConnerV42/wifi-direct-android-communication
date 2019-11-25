@@ -4,23 +4,19 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
-public class BrzFileName implements BrzSerializable {
+public class BrzFileInfo implements BrzSerializable {
 
-    public String fileName = "";
     public String filePayloadId = "";
+    public String fileName = "";
     public String from = "";
+    public String destinationUUID = "";
     public String userName = "";
 
     public Long datestamp = (long) 0;
 
-    public BrzFileName() {}
-    public BrzFileName(String json) {
+    public BrzFileInfo() {}
+    public BrzFileInfo(String json) {
         this.fromJSON(json);
-    }
-    public BrzFileName(String filePayloadId, String fileName, String from) {
-        this.filePayloadId = this.filePayloadId;
-        this.fileName = fileName;
-        this.from = from;
     }
 
     @Override
@@ -31,6 +27,7 @@ public class BrzFileName implements BrzSerializable {
             json.put("filePayloadId", this.filePayloadId);
             json.put("fileName", this.fileName);
             json.put("from", this.from);
+            json.put("destinationUUID", this.destinationUUID);
             json.put("userName", this.userName);
             json.put("datestamp", this.datestamp);
         } catch (Exception e) {
