@@ -1,4 +1,4 @@
-package com.breeze.packets.graph;
+package com.breeze.packets.GraphEvents;
 
 import android.util.Log;
 

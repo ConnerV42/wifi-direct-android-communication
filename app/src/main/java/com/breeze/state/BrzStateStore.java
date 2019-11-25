@@ -106,6 +106,17 @@ public class BrzStateStore {
         if (cl != null) for (Consumer<BrzChat> c : cl) c.accept(chat);
     }
 
+    public void addAllChats(List<BrzChat> chats) {
+        for (BrzChat chat : chats) {
+            this.chats.put(chat.id, chat);
+            List<Consumer<BrzChat>> cl = this.chatListeners.get(chat.id);
+            if (cl != null) for (Consumer<BrzChat> c : cl) c.accept(chat);
+        }
+
+        List<BrzChat> allChats = new ArrayList<>(this.chats.values());
+        for (Consumer<List<BrzChat>> c : this.chatListListeners) c.accept(allChats);
+    }
+
     public void removeChat(String chatId) {
         this.chats.remove(chatId);
 

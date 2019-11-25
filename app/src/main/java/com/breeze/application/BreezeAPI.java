@@ -22,6 +22,8 @@ import com.breeze.datatypes.BrzNode;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.packets.BrzPacket;
+import com.breeze.packets.ChatEvents.BrzChatHandshake;
+import com.breeze.packets.ChatEvents.BrzChatResponse;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
@@ -31,6 +33,7 @@ public class BreezeAPI extends Service {
     // Singleton
 
     private static BreezeAPI instance = new BreezeAPI();
+
     public static BreezeAPI getInstance() {
         return instance;
     }
@@ -58,9 +61,16 @@ public class BreezeAPI extends Service {
         // Get stored hostNode info
         SharedPreferences sp = getSharedPreferences("Breeze", Context.MODE_PRIVATE);
         String hostNodeId = sp.getString(App.PREF_HOST_NODE_ID, null);
-        if(hostNodeId != null) {
+        if (hostNodeId != null) {
             BrzNode hostNode = this.db.getNode(hostNodeId);
             this.setHostNode(hostNode);
+        }
+
+        // Get stored chats
+        try {
+            this.state.addAllChats(this.db.getAllChats());
+        } catch(RuntimeException e) {
+            Log.e("BREEZE_API", "Trying to load chats", e);
         }
 
         // Upgrade to foreground process
@@ -75,7 +85,6 @@ public class BreezeAPI extends Service {
                 .build();
 
         startForeground(1, notification);
-
     }
 
     @Override
@@ -96,7 +105,11 @@ public class BreezeAPI extends Service {
         super.onDestroy();
     }
 
-    // Application interface
+    //
+    //
+    //      Host Node
+    //
+    //
 
     public void setHostNode(BrzNode hostNode) {
 
@@ -112,52 +125,85 @@ public class BreezeAPI extends Service {
         this.db.setNode(hostNode);
     }
 
+    //
+    //
+    //      Chat handshakes
+    //
+    //
+
+    public void sendChatHandshakes(BrzChat chat) {
+
+        // TODO: Generate encryption keys at some point
+
+        BrzChatHandshake handshake = new BrzChatHandshake(this.router.hostNode.id, chat, "", "");
+        BrzPacket p = new BrzPacket(handshake);
+        p.type = BrzPacket.BrzPacketType.CHAT_HANDSHAKE;
+
+        for (String nodeId : chat.nodes) {
+            p.to = nodeId;
+            this.router.send(p);
+        }
+
+        // TODO: Add some kind of "Chat Pending acceptance" thingy
+
+        this.state.addChat(chat);
+        this.db.setChat(chat);
+    }
+
+    public void incomingHandshake(BrzChatHandshake handshake) {
+        // TODO: Add some kind of "Chat Pending acceptance" thingy
+
+        this.state.addChat(handshake.chat);
+        this.db.setChat(handshake.chat);
+    }
+
+    public void acceptHandshake(BrzChatHandshake handshake) {
+        BrzChatResponse response = new BrzChatResponse(this.router.hostNode.id, handshake.chat.id, true);
+
+        BrzPacket p = new BrzPacket(handshake);
+        p.type = BrzPacket.BrzPacketType.CHAT_RESPONSE;
+        p.to = handshake.from;
+
+        this.router.send(p);
+
+        // TODO: Remove the "Chat Pending acceptance" thingy
+
+    }
+
+    public void rejectHandshake(BrzChatHandshake handshake) {
+        BrzChatResponse response = new BrzChatResponse(this.router.hostNode.id, handshake.chat.id, false);
+
+        BrzPacket p = new BrzPacket(handshake);
+        p.type = BrzPacket.BrzPacketType.CHAT_RESPONSE;
+        p.to = handshake.from;
+
+        this.router.send(p);
+
+        this.state.removeChat(handshake.chat.id);
+        this.db.deleteChat(handshake.chat.id);
+    }
+
+    //
+    //
+    //      Messaging
+    //
+    //
+
+    public void addChat(BrzChat chat) {
+        this.state.addChat(chat);
+    }
     public void sendMessage(BrzMessage message, String to) {
         BrzPacket p = new BrzPacket(message);
         p.to = to;
         p.type = BrzPacket.BrzPacketType.MESSAGE;
 
         this.router.send(p);
-        this.state.addMessage(message);
+
+        this.addMessage(message);
+
+        // TODO: Save this change to the database
     }
 
-    public void sendMessage(BrzMessage message, String to, BrzPacket.BrzPacketType type)
-    {
-        if(type == BrzPacket.BrzPacketType.HANDSHAKE_PACKET)
-        {
-            BrzPacket p = new BrzPacket(message);
-            p.to = to;
-            p.type = BrzPacket.BrzPacketType.HANDSHAKE_PACKET;
-
-            this.router.send(p);
-            this.state.addMessage(message);
-        }
-        else if(type == BrzPacket.BrzPacketType.MESSAGE)
-        {
-            BrzPacket p = new BrzPacket(message);
-            p.to = to;
-            p.type = BrzPacket.BrzPacketType.MESSAGE;
-
-            this.router.send(p);
-            this.state.addMessage(message);
-        }
-        else if(type == BrzPacket.BrzPacketType.ACK)
-        {
-            return;
-        }
-        else if(type == BrzPacket.BrzPacketType.GRAPH_EVENT)
-        {
-            return;
-        }
-        else if(type == BrzPacket.BrzPacketType.GRAPH_EVENT)
-        {
-            return;
-        }
-    }
-
-    public void addChat(BrzChat chat) {
-        this.state.addChat(chat);
-    }
     public void addMessage(BrzMessage message) {
         this.state.addMessage(message);
     }

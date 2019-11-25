@@ -1,8 +1,7 @@
-package com.breeze.packets.graph;
+package com.breeze.packets.GraphEvents;
 
 import android.util.Log;
 
-import com.breeze.graph.BrzGraph;
 import com.breeze.packets.BrzSerializable;
 import org.json.JSONObject;
 
