@@ -14,9 +14,41 @@ public class BrzHandshakeHandler implements BrzRouterHandler {
         //TODO If its a new user id and new public, add them, send an ack that tells them they're added
         //TODO If other issues, like public keys not matching, etc TODO figure out later
     }
-
     @Override
     public boolean handles(BrzPacket.BrzPacketType type) {
         return type == BrzPacket.BrzPacketType.HANDSHAKE_PACKET;
     }
+    private boolean isNodeInStore(BrzPacket packet, String endpointId)
+    {
+        return false;
+    }
+    private boolean isNodeInDatabase(BrzPacket packet, String endpointId)
+    {
+        return false;
+    }
+    private boolean compareKeys(BrzPacket packet, String endpointId)
+    {
+        return false;
+    }
+    private void addNewUser(BrzPacket packet, String endpointId)
+    {
+
+    }
+    private void addNewBrzChat(BrzPacket packet, String endpointId)
+    {
+
+    }
+    private void sendAddedAcknowledgement(BrzPacket packet, String endpointId)
+    {
+
+    }
+    private void sendKeyMismatchAcknowledgement(BrzPacket packet, String endpointId)
+    {
+
+    }
+    private void sendInitializeChatAcknowledgement(BrzPacket packet, String endpointId)
+    {
+
+    }
+
 }

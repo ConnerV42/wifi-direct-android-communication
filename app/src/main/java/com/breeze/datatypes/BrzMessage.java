@@ -12,7 +12,7 @@ public class BrzMessage implements BrzSerializable {
     public String from = "";
     public String body = "";
     public String chatId = "";
-
+    public boolean read = false;
     public boolean isStatus = false;
     public Long datestamp = (long) 0;
 

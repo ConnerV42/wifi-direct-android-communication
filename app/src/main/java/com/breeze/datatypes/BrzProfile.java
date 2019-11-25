@@ -1,4 +1,4 @@
-package com.breeze.dbmodels;
+package com.breeze.datatypes;
 
 import android.util.Log;
 
@@ -13,33 +13,36 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 
-public class DBBrzProfile implements BrzSerializable
+public class BrzProfile implements BrzSerializable
 {
 
-    private int id;
+    private String id;
+    private int nodeId;
     private String name;
     private String alias;
     private String signature;
-
-    private String lastTalkedTo;
     private boolean friend;
     private boolean blocked;
+    private String profilePicture;
 
-    public DBBrzProfile(int id, String name, String alias, String signature) {
+    public BrzProfile(String id, String name, String alias, String signature) {
         this.id = id;
         this.name = name;
         this.alias = alias;
         this.signature = signature;
-        TimeZone tz = TimeZone.getTimeZone("UTC");
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'", Locale.US); // Quoted "Z" to indicate UTC, no timezone offset
-        df.setTimeZone(tz);
-        String isoDate = df.format(new Date());
         this.friend = false;
         this.blocked = false;
-        this.lastTalkedTo = isoDate;
     }
 
-    public int getId() {
+    public BrzProfile(){
+
+    }
+
+    public void setId(String id){
+        this.id = id;
+    }
+
+    public String getId() {
         return id;
     }
 
@@ -67,14 +70,6 @@ public class DBBrzProfile implements BrzSerializable
         this.signature = signature;
     }
 
-    public String getLastTalkedTo() {
-        return lastTalkedTo;
-    }
-
-    public void setLastTalkedTo(String lastTalkedTo) {
-        this.lastTalkedTo = lastTalkedTo;
-    }
-
     public boolean isFriend() {
         return friend;
     }
@@ -90,6 +85,14 @@ public class DBBrzProfile implements BrzSerializable
     public void setBlocked(boolean blocked) {
         this.blocked = blocked;
     }
+
+    public int getNodeId() { return nodeId; }
+
+    public void setNodeId(int nodeId) { this.nodeId = nodeId; }
+
+    public String getProfilePicture() { return profilePicture; }
+
+    public void setProfilePicture(String profilePicture) { this.profilePicture = profilePicture; }
 
     @Override
     public String toString() {
@@ -120,7 +123,7 @@ public class DBBrzProfile implements BrzSerializable
         try {
 
             JSONObject jObj = new JSONObject(json);
-            this.id = Integer.parseInt(jObj.getString("id"));
+            this.id = jObj.getString("id");
             this.name = jObj.getString("name");
             this.alias = jObj.getString("alias");
             this.signature = jObj.getString("signature");
