@@ -15,11 +15,7 @@ import javax.crypto.Cipher;
 
 public class BrzEncryption
 {
-    PrivateKey privateKey;
-    PublicKey publicKey;
-
-
-    public static KeyPair getKeyPair() throws Exception
+    public static KeyPair generateAndSaveKeyPair() throws Exception
     {
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
@@ -50,8 +46,9 @@ public class BrzEncryption
         ks.load(null);
         return ks.aliases();
     }
-   public PublicKey grabPublicKey(KeyPair kp)
+   public static PublicKey grabPublicKey(KeyPair kp)
    {
+       PublicKey publicKey = null;
        try {
 
            publicKey = kp.getPublic();
@@ -81,5 +78,26 @@ public class BrzEncryption
         return signature;
     }
 
+    public static KeyPair generateChatKeyPair(String chatId)  throws Exception {
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
+                    KeyProperties.KEY_ALGORITHM_RSA,
+                    "AndroidKeyStore"
+            );
+            KeyGenParameterSpec.Builder builder =
+                    new KeyGenParameterSpec.Builder(
+                            chatId,
+                            KeyProperties.PURPOSE_DECRYPT).
+                            setKeySize(1024).
+                            setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_OAEP).
+                            setDigests(KeyProperties.DIGEST_SHA256);
 
+            keyPairGenerator.initialize(builder.build());
+            return keyPairGenerator.generateKeyPair();
+        } catch (NoSuchAlgorithmException |
+                InvalidAlgorithmParameterException | NoSuchProviderException e ) {
+            Log.i("KeyPair", "Key Pair unable to be generated");
+        }
+        throw new KeyStoreException("Key Pair unable to be generated");
+    }
 }

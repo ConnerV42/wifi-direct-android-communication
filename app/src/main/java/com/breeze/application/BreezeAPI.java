@@ -21,12 +21,17 @@ import com.breeze.database.DatabaseHandler;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
+import com.breeze.encryption.BrzEncryption;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.ChatEvents.BrzChatHandshake;
 import com.breeze.packets.ChatEvents.BrzChatResponse;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
+
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 public class BreezeAPI extends Service {
 
@@ -44,6 +49,8 @@ public class BreezeAPI extends Service {
     public BrzStorage storage = null;
     public BrzStateStore state = null;
     public DatabaseHandler db = null;
+    public PublicKey publicKey = null;
+    private PrivateKey privateKey = null;
 
     @Override
     public void onCreate() {
@@ -85,6 +92,20 @@ public class BreezeAPI extends Service {
                 .build();
 
         startForeground(1, notification);
+        KeyPair keyPairForThisNode = null;
+        try{
+            keyPairForThisNode = BrzEncryption.generateAndSaveKeyPair();
+        }catch (Exception e){
+            Log.i("kp error", "Cannot generate key pair for this device");
+        }
+        if(keyPairForThisNode != null){
+            this.publicKey = keyPairForThisNode.getPublic();
+            this.privateKey = keyPairForThisNode.getPrivate();
+        }
+        else{
+            Log.i("bad keypair", "This device has no valid keypair in the store");
+        }
+
     }
 
     @Override
@@ -134,8 +155,19 @@ public class BreezeAPI extends Service {
     public void sendChatHandshakes(BrzChat chat) {
 
         // TODO: Generate encryption keys at some point
+        KeyPair chatKeyPair = null;
 
-        BrzChatHandshake handshake = new BrzChatHandshake(this.router.hostNode.id, chat, "", "");
+
+        try {
+            chatKeyPair = BrzEncryption.generateChatKeyPair(chat.id);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String chatPublicKey = chatKeyPair.getPublic().toString();
+        String chatPrivateKey = chatKeyPair.getPrivate().toString();
+
+        BrzChatHandshake handshake = new BrzChatHandshake(this.router.hostNode.id, chat, chatPublicKey, chatPrivateKey);
         BrzPacket p = new BrzPacket(handshake);
         p.type = BrzPacket.BrzPacketType.CHAT_HANDSHAKE;
 
@@ -145,9 +177,10 @@ public class BreezeAPI extends Service {
         }
 
         // TODO: Add some kind of "Chat Pending acceptance" thingy
-
-        this.state.addChat(chat);
-        this.db.setChat(chat);
+        // Chat pending acceptance is implicit here: chat will only be added when
+        // a "Chat init" packet of some sort is received back here from the other device
+//        this.state.addChat(chat);
+//        this.db.setChat(chat);
     }
 
     public void incomingHandshake(BrzChatHandshake handshake) {
@@ -207,4 +240,5 @@ public class BreezeAPI extends Service {
     public void addMessage(BrzMessage message) {
         this.state.addMessage(message);
     }
+
 }

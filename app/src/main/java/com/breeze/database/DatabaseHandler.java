@@ -12,9 +12,6 @@ import androidx.annotation.NonNull;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzNode;
-import com.breeze.dbmodels.DBBrzMessage;
-import com.breeze.dbmodels.DBBrzPreference;
-
 import org.json.JSONArray;
 
 import java.text.ParseException;
@@ -41,7 +38,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String INIT_BRZCHAT_TABLE = "CREATE TABLE IF NOT EXISTS BrzChat ('id' TEXT PRIMARY KEY, " +
             "'name' TEXT NOT NULL, " +
             "'publicKey' TEXT NOT NULL," +
-            "'privateKeyReference' TEXT NOT NULL," +
+            "'privateKeyTag' TEXT NOT NULL," +
             "'isGroup' BOOLEAN NOT NULL, " +
             "'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP, " +
             "'updatedAt' DATETIME)";
@@ -54,11 +51,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             "'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP, " +
             "'updatedAt' DATETIME, " +
             "'read' BOOLEAN NOT NULL DEFAULT 0," +
-            "FOREIGN KEY (chatId) REFERENCES BrzChat (id))";
+            "FOREIGN KEY ('chatId') REFERENCES BrzChat(id)," +
+            "FOREIGN KEY ('from') REFERENCES BrzNode(id))";
 
     private static final String INIT_BRZNODE_TABLE = "CREATE TABLE IF NOT EXISTS BrzNode ('id' TEXT PRIMARY KEY, " +
-            "'endpointId' TEXT NOT NULL, " +
-            "'publicKey' TEXT NOT NULL," +
+            "'endpointId' TEXT NOT NULL UNIQUE, " +
+            "'publicKey' TEXT NOT NULL UNIQUE," +
             "'name' TEXT NOT NULL, " +
             "'alias' TEXT NOT NULL," +
             "'metadataReference' TEXT NOT NULL)";
