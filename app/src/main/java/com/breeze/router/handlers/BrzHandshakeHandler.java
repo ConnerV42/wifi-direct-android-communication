@@ -18,9 +18,12 @@ public class BrzHandshakeHandler implements BrzRouterHandler {
 
         if(packet.type == BrzPacket.BrzPacketType.CHAT_HANDSHAKE) {
             BreezeAPI.getInstance().incomingHandshake(packet.chatHandshake());
-        } else {
+        } else if(packet.type == BrzPacket.BrzPacketType.CHAT_RESPONSE) {
+            BreezeAPI.getInstance().incomingChatResponse(packet.chatResponse());
+        } else{
             // TODO: Do something when the user either accepts or rejects the chat
         }
+
     }
 
     @Override

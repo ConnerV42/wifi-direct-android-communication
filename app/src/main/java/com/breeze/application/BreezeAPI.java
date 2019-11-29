@@ -183,6 +183,15 @@ public class BreezeAPI extends Service {
 //        this.db.setChat(chat);
     }
 
+    public void incomingChatResponse(BrzChatResponse response) {
+
+        /*
+        TODO: Handle when the handshake was sent out, other device received and agreed, and sent back
+        response implying 'all good to add'
+         */
+        return;
+    }
+
     public void incomingHandshake(BrzChatHandshake handshake) {
         // TODO: Add some kind of "Chat Pending acceptance" thingy
 
