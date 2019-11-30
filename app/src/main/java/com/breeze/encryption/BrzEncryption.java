@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAKeyGenParameterSpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import android.security.KeyPairGeneratorSpec;
 import android.security.keystore.KeyGenParameterSpec;
@@ -13,6 +16,7 @@ import android.security.keystore.KeyProperties;
 import android.util.Base64;
 import android.util.Log;
 
+import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 
 import javax.crypto.Cipher;
@@ -22,7 +26,92 @@ import javax.crypto.NoSuchPaddingException;
 public final class BrzEncryption
 {
     public static final String DEFAULT_DEVICE_KEYPAIR_NAME = "MY_BREEZE_KEY";
+    public static final String DEFAULT_ENCRYPTION_PADDING = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1;
+    public static final String DEFAULT_CIPHER_INSTANCE_SETTING = "RSA/ECB/PKCS1Padding";
 
+    /**
+     * @param chatToEncrypt the chat we're setting the public and private keys of
+     * @return a BrzChat with a public and private key for security
+     */
+    public static BrzChat encryptBrzChat(BrzChat chatToEncrypt){
+        return null;
+    }
+
+    /**
+     * @param key the public key to be converted to a string
+     * @return a string representation of the public key
+     */
+    public static String getPublicKeyAsString(PublicKey key)
+    {
+        try{
+            KeyFactory factory = KeyFactory.getInstance("RSA");
+            X509EncodedKeySpec spec = factory.getKeySpec(key, X509EncodedKeySpec.class);
+            return Base64.encodeToString(spec.getEncoded(), Base64.DEFAULT);
+        } catch(NoSuchAlgorithmException | InvalidKeySpecException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     *
+     * @param key the private key to be used to create a string
+     * @return A string representation of the private key
+     */
+    public static String getPrivateKeyAsString(PrivateKey key)
+    {
+        try {
+            KeyFactory fact = KeyFactory.getInstance("RSA");
+            PKCS8EncodedKeySpec spec = fact.getKeySpec(key,
+                    PKCS8EncodedKeySpec.class);
+            return Base64.encodeToString(spec.getEncoded(), Base64.DEFAULT);
+        } catch(NoSuchAlgorithmException | InvalidKeySpecException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    /**
+     * @param pubKeyString the string to be used to build a public key object
+     * @return A PublicKey object created from the string
+     */
+    public static PublicKey getPublicKeyFromString(String pubKeyString)
+    {
+        try{
+            byte [] data = Base64.decode(pubKeyString, Base64.DEFAULT);
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(data);
+            KeyFactory fact = KeyFactory.getInstance("RSA");
+            return fact.generatePublic(spec);
+        } catch(InvalidKeySpecException | NoSuchAlgorithmException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * @param privateKeyString the string the private key object is built from
+     * @return a private key object created from the string passed in.
+     */
+    public static PrivateKey getPrivateKeyFromString(String privateKeyString)
+    {
+        try {
+            byte[] clear = Base64.decode(privateKeyString, Base64.DEFAULT);
+            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(clear);
+            KeyFactory fact = KeyFactory.getInstance("RSA");
+            PrivateKey ret = fact.generatePrivate(spec);
+            Arrays.fill(clear, (byte) 0);
+            return ret;
+        }catch(InvalidKeySpecException | NoSuchAlgorithmException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
 
     /**
      * @param alias the alias of the keypair to check the keystore for
@@ -69,7 +158,7 @@ public final class BrzEncryption
                                 alias,
                                 KeyProperties.PURPOSE_DECRYPT).
                                 setKeySize(1024).
-                                setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_OAEP).
+                                setEncryptionPaddings(BrzEncryption.DEFAULT_ENCRYPTION_PADDING).
                                 setDigests(KeyProperties.DIGEST_SHA256);
 
                 keyPairGenerator.initialize(builder.build());
@@ -88,25 +177,6 @@ public final class BrzEncryption
         return ks.aliases();
     }
 
-    public static byte[] signWithPrivateKey(byte[] data) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, InvalidKeyException, SignatureException, UnrecoverableEntryException {
-        /*
-         * Use a PrivateKey in the KeyStore to create a signature over
-         * some data.
-         */
-        KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
-        ks.load(null);
-        KeyStore.Entry entry = ks.getEntry("MY_KEY", null);
-        if (!(entry instanceof KeyStore.PrivateKeyEntry)) {
-            Log.w("TAG", "Not an instance of a PrivateKeyEntry");
-            Void o = null;
-        }
-        Signature s = Signature.getInstance("SHA256withECDSA");
-        s.initSign(((KeyStore.PrivateKeyEntry) entry).getPrivateKey());
-        s.update(data);
-        byte[] signature = s.sign();
-        return signature;
-    }
-
     /**
      *
      * @param pubkey {PublicKey} The public key to sign the message with
@@ -122,7 +192,7 @@ public final class BrzEncryption
         }
         try
         {
-            Cipher inCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            Cipher inCipher = Cipher.getInstance(BrzEncryption.DEFAULT_CIPHER_INSTANCE_SETTING);
             inCipher.init(Cipher.ENCRYPT_MODE, pubkey);
 
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -150,7 +220,7 @@ public final class BrzEncryption
             throw new IllegalArgumentException("Bad public key or message to encrypt");
         }
         try {
-            Cipher inCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            Cipher inCipher = Cipher.getInstance(BrzEncryption.DEFAULT_CIPHER_INSTANCE_SETTING);
             inCipher.init(Cipher.DECRYPT_MODE, privateKey);
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
             CipherOutputStream cipherOutputStream = new CipherOutputStream(outStream, inCipher);
@@ -217,6 +287,49 @@ public final class BrzEncryption
                 e.printStackTrace();
                 return null;
             } catch (UnrecoverableEntryException e) {
+                e.printStackTrace();
+                return null;
+            } catch (KeyStoreException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+    }
+
+    /**
+     *
+     * @param alias the alias of the keypair containing the public key in the keystore
+     * @return the public key object from the store
+     */
+
+    public static PublicKey getPublicKeyFromKeyStore(String alias)
+    {
+        if (alias == null || alias.isEmpty()) {
+            throw new IllegalArgumentException("Bad public key alias");
+        }
+        KeyStore ks = null;
+        try {
+            ks = KeyStore.getInstance("AndroidKeyStore");
+        } catch (KeyStoreException kse) {
+            kse.printStackTrace();
+            return null;
+        }
+        if (ks == null) {
+            throw new RuntimeException("Bad keystore object, cannot decrypt BrzMessage");
+        } else {
+            try {
+                if (!ks.containsAlias(alias)) {
+                    throw new RuntimeException("Bad keystore alias, cannot find private key with alias: " + alias);
+                }
+                ks.load(null);
+                return ks.getCertificate(alias).getPublicKey();
+            } catch (CertificateException e) {
+                e.printStackTrace();
+                return null;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
                 return null;
             } catch (KeyStoreException e) {
