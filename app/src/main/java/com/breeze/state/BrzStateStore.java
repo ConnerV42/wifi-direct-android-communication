@@ -1,12 +1,16 @@
 package com.breeze.state;
 
+import android.util.Log;
+
 import com.breeze.datatypes.BrzNode;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzChat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class BrzStateStore {
@@ -151,6 +155,8 @@ public class BrzStateStore {
     }
 
     public void addMessage(BrzMessage msg) {
+        Log.i("STATE", msg.toJSON());
+
         List<BrzMessage> messages = this.messages.get(msg.chatId);
         if (messages == null) {
             messages = new ArrayList<>();
@@ -160,6 +166,26 @@ public class BrzStateStore {
 
         List<Consumer<List<BrzMessage>>> cl = this.mlisteners.get(msg.chatId);
         if (cl != null) for (Consumer<List<BrzMessage>> c : cl) c.accept(messages);
+    }
+
+    public void addAllMessages(List<BrzMessage> newMessages) {
+        Set<String> chatIdsToUpdate = new HashSet<>();
+        for(BrzMessage msg : newMessages) {
+            List<BrzMessage> messages = this.messages.get(msg.chatId);
+            if (messages == null) {
+                messages = new ArrayList<>();
+                this.messages.put(msg.chatId, messages);
+            }
+            messages.add(msg);
+            chatIdsToUpdate.add(msg.chatId);
+        }
+
+        for(String chatId : chatIdsToUpdate) {
+            List<BrzMessage> messages = this.messages.get(chatId);
+            List<Consumer<List<BrzMessage>>> cl = this.mlisteners.get(chatId);
+            if (cl != null) for (Consumer<List<BrzMessage>> c : cl) c.accept(messages);
+        }
+
     }
 
 

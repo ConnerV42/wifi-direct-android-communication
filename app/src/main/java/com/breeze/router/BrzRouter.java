@@ -144,8 +144,7 @@ public class BrzRouter {
     }
 
     public void start() {
-        if (running || this.hostNode == null) return;
-        running = true;
+        if (this.hostNode == null) return;
 
         Log.i("ENDPOINT", "Starting advertising and discovery");
 
@@ -154,12 +153,12 @@ public class BrzRouter {
     }
 
     public void stop() {
-        running = false;
         Log.i("ENDPOINT", "Stopping nearby completely");
 
         connectionsClient.stopAllEndpoints();
         connectionsClient.stopAdvertising();
-        connectionsClient.stopDiscovery();
+
+        this.stopDiscovery();
     }
 
     private void startAdvertising() {
@@ -174,16 +173,24 @@ public class BrzRouter {
                 });
     }
 
-    private void startDiscovery() {
+    public Boolean isDiscovering = false;
+    public void startDiscovery() {
         connectionsClient.startDiscovery(
                 pkgName, endpointDiscoveryCallback,
                 new DiscoveryOptions.Builder().setStrategy(STRATEGY).build())
                 .addOnSuccessListener(e -> {
                     Log.i("ENDPOINT", "Discovering successfully!");
+                    isDiscovering = true;
                 })
                 .addOnFailureListener(e -> {
                     Log.i("ENDPOINT", "Discovering failed!", e);
                 });
+    }
+
+    public void stopDiscovery() {
+        connectionsClient.stopDiscovery();
+        isDiscovering = false;
+        Log.i("ENDPOINT", "Stopped discovering successfully!");
     }
 
 

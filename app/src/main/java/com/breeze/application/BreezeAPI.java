@@ -21,6 +21,7 @@ import com.breeze.database.DatabaseHandler;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
+import com.breeze.graph.BrzGraph;
 import com.breeze.encryption.BrzEncryption;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.ChatEvents.BrzChatHandshake;
@@ -28,6 +29,9 @@ import com.breeze.packets.ChatEvents.BrzChatResponse;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
+import com.breeze.views.ProfileActivity;
+
+import java.util.List;
 
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -52,6 +56,8 @@ public class BreezeAPI extends Service {
     public PublicKey publicKey = null;
     private PrivateKey privateKey = null;
 
+    public BrzNode hostNode = null;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -67,16 +73,46 @@ public class BreezeAPI extends Service {
 
         // Get stored hostNode info
         SharedPreferences sp = getSharedPreferences("Breeze", Context.MODE_PRIVATE);
-        String hostNodeId = sp.getString(App.PREF_HOST_NODE_ID, null);
-        if (hostNodeId != null) {
-            BrzNode hostNode = this.db.getNode(hostNodeId);
+        String hostNodeId = sp.getString(App.PREF_HOST_NODE_ID, "");
+        BrzNode hostNode = this.db.getNode(hostNodeId);
+        if (hostNode != null) {
             this.setHostNode(hostNode);
+        } else {
+            // Get a new profile since one isn't set
+            Intent profileIntent = new Intent(this, ProfileActivity.class);
+            profileIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(profileIntent);
         }
 
         // Get stored chats
+        List<BrzChat> chats = null;
         try {
-            this.state.addAllChats(this.db.getAllChats());
-        } catch(RuntimeException e) {
+            chats = this.db.getAllChats();
+            if (chats != null) {
+                Log.i("STATE", "Found " + chats.size() + " chats in the database");
+                this.state.addAllChats(chats);
+            } else {
+                Log.i("STATE", "No stored chats found!");
+            }
+
+        } catch (RuntimeException e) {
+            Log.e("BREEZE_API", "Trying to load chats", e);
+        }
+
+        // Get stored messages
+        try {
+            if (chats != null) {
+                for (BrzChat c : chats) {
+                    List<BrzMessage> messages = this.db.getChatMessages(c.id);
+                    if (messages != null) {
+                        Log.i("STATE", "Found " + messages.size() + " messages in chat " + c.id);
+                        this.state.addAllMessages(messages);
+                    } else {
+                        Log.i("STATE", "Failed to find messages in chat " + c.id);
+                    }
+                }
+            }
+        } catch (RuntimeException e) {
             Log.e("BREEZE_API", "Trying to load chats", e);
         }
 
@@ -92,19 +128,22 @@ public class BreezeAPI extends Service {
                 .build();
 
         startForeground(1, notification);
-        KeyPair keyPairForThisNode = null;
-        try{
-            keyPairForThisNode = BrzEncryption.generateAndSaveKeyPair();
-        }catch (Exception e){
-            Log.i("kp error", "Cannot generate key pair for this device");
-        }
-        if(keyPairForThisNode != null){
-            this.publicKey = keyPairForThisNode.getPublic();
-            this.privateKey = keyPairForThisNode.getPrivate();
-        }
-        else{
-            Log.i("bad keypair", "This device has no valid keypair in the store");
-        }
+
+
+        // TODO: create a keypair for the current hostNode
+//        KeyPair keyPairForThisNode = null;
+//        try{
+//            keyPairForThisNode = BrzEncryption.generateAndSaveKeyPair();
+//        }catch (Exception e){
+//            Log.i("kp error", "Cannot generate key pair for this device");
+//        }
+//        if(keyPairForThisNode != null){
+//            this.publicKey = keyPairForThisNode.getPublic();
+//            this.privateKey = keyPairForThisNode.getPrivate();
+//        }
+//        else{
+//            Log.i("bad keypair", "This device has no valid keypair in the store");
+//        }
 
     }
 
@@ -133,6 +172,9 @@ public class BreezeAPI extends Service {
     //
 
     public void setHostNode(BrzNode hostNode) {
+        if (hostNode == null) return;
+
+        this.hostNode = hostNode;
 
         // Set our id in preferences
         SharedPreferences sp = getSharedPreferences("Breeze", Context.MODE_PRIVATE);
@@ -158,14 +200,17 @@ public class BreezeAPI extends Service {
         KeyPair chatKeyPair = null;
 
 
-        try {
-            chatKeyPair = BrzEncryption.generateChatKeyPair(chat.id);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            chatKeyPair = BrzEncryption.generateChatKeyPair(chat.id);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        String chatPublicKey = chatKeyPair.getPublic().toString();
+//        String chatPrivateKey = chatKeyPair.getPrivate().toString();
 
-        String chatPublicKey = chatKeyPair.getPublic().toString();
-        String chatPrivateKey = chatKeyPair.getPrivate().toString();
+        String chatPublicKey = "";
+        String chatPrivateKey = "";
 
         BrzChatHandshake handshake = new BrzChatHandshake(this.router.hostNode.id, chat, chatPublicKey, chatPrivateKey);
         BrzPacket p = new BrzPacket(handshake);
@@ -178,9 +223,10 @@ public class BreezeAPI extends Service {
 
         // TODO: Add some kind of "Chat Pending acceptance" thingy
         // Chat pending acceptance is implicit here: chat will only be added when
-        // a "Chat init" packet of some sort is received back here from the other device
-//        this.state.addChat(chat);
-//        this.db.setChat(chat);
+        // a "Chat init" packet of some sort is received back here from the other device0
+
+        this.state.addChat(chat);
+        this.db.setChat(chat);
     }
 
     public void incomingChatResponse(BrzChatResponse response) {
@@ -195,12 +241,21 @@ public class BreezeAPI extends Service {
     public void incomingHandshake(BrzChatHandshake handshake) {
         // TODO: Add some kind of "Chat Pending acceptance" thingy
 
+        BrzChat chat = handshake.chat;
+        if (!chat.isGroup) {
+            BrzNode n = BrzGraph.getInstance().getVertex(handshake.from);
+            chat.name = n.name;
+        }
+
+        Log.i("BREEZEAPI", "Got a handshake " + chat.nodes);
+
+
         this.state.addChat(handshake.chat);
         this.db.setChat(handshake.chat);
     }
 
     public void acceptHandshake(BrzChatHandshake handshake) {
-        BrzChatResponse response = new BrzChatResponse(this.router.hostNode.id, handshake.chat.id, true);
+        BrzChatResponse response = new BrzChatResponse(this.hostNode.id, handshake.chat.id, true);
 
         BrzPacket p = new BrzPacket(handshake);
         p.type = BrzPacket.BrzPacketType.CHAT_RESPONSE;
@@ -213,7 +268,7 @@ public class BreezeAPI extends Service {
     }
 
     public void rejectHandshake(BrzChatHandshake handshake) {
-        BrzChatResponse response = new BrzChatResponse(this.router.hostNode.id, handshake.chat.id, false);
+        BrzChatResponse response = new BrzChatResponse(this.hostNode.id, handshake.chat.id, false);
 
         BrzPacket p = new BrzPacket(handshake);
         p.type = BrzPacket.BrzPacketType.CHAT_RESPONSE;
@@ -234,12 +289,17 @@ public class BreezeAPI extends Service {
     public void addChat(BrzChat chat) {
         this.state.addChat(chat);
     }
-    public void sendMessage(BrzMessage message, String to) {
+
+    public void sendMessage(BrzMessage message, String chatId) {
         BrzPacket p = new BrzPacket(message);
-        p.to = to;
         p.type = BrzPacket.BrzPacketType.MESSAGE;
 
-        this.router.send(p);
+        // Send message to each recipient
+        BrzChat chat = this.state.getChat(chatId);
+        for (String nodeId : chat.nodes) {
+            p.to = nodeId;
+            this.router.send(p);
+        }
 
         this.addMessage(message);
 
@@ -248,6 +308,7 @@ public class BreezeAPI extends Service {
 
     public void addMessage(BrzMessage message) {
         this.state.addMessage(message);
+        this.db.addMessage(message);
     }
 
 }

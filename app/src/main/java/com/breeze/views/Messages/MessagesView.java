@@ -6,8 +6,10 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,6 +83,12 @@ public class MessagesView extends Fragment {
         MessageList msgList = new MessageList(getActivity(), this.chat.id);
         RecyclerView msgView = getView().findViewById(R.id.messageList);
         msgView.setAdapter(msgList);
+
+        LinearLayoutManager msgLayout = new LinearLayoutManager(getActivity());
+        msgLayout.setStackFromEnd(true);
+        msgView.setLayoutManager(msgLayout);
+
+        Log.i("STATE", "Bound message list to " + this.chat.id);
 
         Button sendMessage = getView().findViewById(R.id.sendMessage);
         sendMessage.setOnClickListener(view1 -> { // send message

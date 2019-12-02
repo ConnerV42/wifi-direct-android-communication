@@ -15,9 +15,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:divider="@null"
-        android:dividerHeight="0dp"
-        android:paddingLeft="4dp"
-        android:paddingRight="4dp" />
+        android:dividerHeight="0dp" />
 
 
     <LinearLayout

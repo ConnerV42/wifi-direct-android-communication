@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
@@ -80,16 +81,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Start the breeze background service
         this.startApplicationService();
-
-        // See if we have a stored user profile id
-        // if not we build a new profile!
-        SharedPreferences sp = getSharedPreferences("Breeze", Context.MODE_PRIVATE);
-        String hostNodeId = sp.getString(App.PREF_HOST_NODE_ID, null);
-
-        if(hostNodeId == null) {
-            Intent profileIntent = new Intent(this, ProfileActivity.class);
-            startActivityForResult(profileIntent, REQUEST_CODE_PROFILE);
-        }
     }
 
     @Override
@@ -97,7 +88,8 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         // We've got a profile!
-        if(requestCode == REQUEST_CODE_PROFILE) {}
+        if (requestCode == REQUEST_CODE_PROFILE) {
+        }
     }
 
 
@@ -105,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
         Intent brzService = new Intent(this, BreezeAPI.class);
         startService(brzService);
     }
-
 
 
     @Override
@@ -117,6 +108,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
+        // TODO: Remove temporary discovery toggle
+        BrzRouter router = BreezeAPI.getInstance().router;
+        if (router.isDiscovering) router.stopDiscovery();
+        else router.stopDiscovery();
+
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
@@ -138,6 +135,23 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_CODE_REQUIRED_PERMISSIONS) {
+            // Permission was granted
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                BreezeAPI api = BreezeAPI.getInstance();
+                if (api != null && api.router != null) api.router.start();
+            }
+
+            // Permission denied
+            else {
+
+            }
+        }
+
     }
 
 }

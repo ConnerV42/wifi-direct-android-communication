@@ -37,11 +37,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     private static final String INIT_BRZCHAT_TABLE = "CREATE TABLE IF NOT EXISTS BrzChat ('id' TEXT PRIMARY KEY, " +
             "'name' TEXT NOT NULL, " +
-            "'publicKey' TEXT NOT NULL," +
-            "'privateKeyTag' TEXT NOT NULL," +
-            "'isGroup' BOOLEAN NOT NULL, " +
-            "'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP, " +
-            "'updatedAt' DATETIME)";
+            "'nodes' TEXT NOT NULL, " +
+            "'isGroup' BOOLEAN NOT NULL " +
+//            "'publicKey' TEXT NOT NULL," +
+//            "'privateKeyTag' TEXT NOT NULL," +
+//            "'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP, " +
+//            "'updatedAt' DATETIME" +
+            ")";
 
     private static final String INIT_BRZMESSAGE_TABLE = "CREATE TABLE IF NOT EXISTS BrzMessage ('id' INTEGER PRIMARY KEY AUTOINCREMENT, " +
             "'from' TEXT NOT NULL, " +
@@ -58,11 +60,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             "'endpointId' TEXT NOT NULL UNIQUE, " +
             "'publicKey' TEXT NOT NULL UNIQUE," +
             "'name' TEXT NOT NULL, " +
-            "'alias' TEXT NOT NULL," +
-            "'metadataReference' TEXT NOT NULL)";
+            "'alias' TEXT NOT NULL)";
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+//        this.onUpgrade(getWritableDatabase(), 0, 0);
+        this.onCreate(getWritableDatabase());
     }
 
     @Override
@@ -77,7 +80,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void onUpgrade(@NonNull SQLiteDatabase db, int oldVersion, int newVersion) {
         for(String tableName : DatabaseHandler.tableNames)
         {
-            db.execSQL("DROP TABLE IF EXISTS" + tableName);
+            db.execSQL("DROP TABLE IF EXISTS " + tableName);
         }
         this.onCreate(db);
     }
@@ -221,7 +224,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void addMessage(@NonNull BrzMessage message) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues vals = new ContentValues();
-        vals.put("from", message.from);
+        vals.put("[from]", message.from);
+
         vals.put("body", message.body);
         vals.put("isStatus", message.isStatus);
         vals.put("chatId", message.chatId);
@@ -334,9 +338,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return list;
     }
 
-    public List<BrzMessage> getChatMessages(@NonNull int chatId){
+    public List<BrzMessage> getChatMessages(@NonNull String chatId){
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + BRZMESSAGE_TABLE_NAME + " WHERE 'chatId' = ?;", new String[]{String.valueOf(chatId)});
+        String[] args = {chatId};
+        Cursor c = db.rawQuery("SELECT * FROM " + BRZMESSAGE_TABLE_NAME + " WHERE [chatId] = ? ORDER BY createdAt asc;", args);
         if (c == null) {
             db.close();
             return null;

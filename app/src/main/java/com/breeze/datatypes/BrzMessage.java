@@ -30,21 +30,21 @@ public class BrzMessage implements BrzSerializable {
       this.isStatus = false;
     }
 
-    public String signMessageWithPrivateKey() throws Exception {
-        byte[] arr = this.body.getBytes();
-        byte[] ret = null;
-        try {
-            ret = BrzEncryption.signWithPrivateKey(arr);
-        }catch(Exception e)
-        {
-            Log.i("private key signing error","blah");
-        }
-        if(ret == null)
-        {
-            throw new Exception("Bad signature from private key signing");
-        }
-        return new String(ret);
-    }
+//    public String signMessageWithPrivateKey() throws Exception {
+//        byte[] arr = this.body.getBytes();
+//        byte[] ret = null;
+//        try {
+//            ret = BrzEncryption.signWithPrivateKey(arr);
+//        }catch(Exception e)
+//        {
+//            Log.i("private key signing error","blah");
+//        }
+//        if(ret == null)
+//        {
+//            throw new Exception("Bad signature from private key signing");
+//        }
+//        return new String(ret);
+//    }
 
     @Override
     public String toJSON() {
