@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAKeyGenParameterSpec;
@@ -34,7 +35,53 @@ public final class BrzEncryption
      * @return a BrzChat with a public and private key for security
      */
     public static BrzChat encryptBrzChat(BrzChat chatToEncrypt){
-        return null;
+        String id = chatToEncrypt.id;
+        try {
+            KeyPair kp = BrzEncryption.generateAndSaveKeyPair(id);
+            PublicKey chatPub = kp.getPublic();
+            PrivateKey chatPriv = kp.getPrivate();
+            chatToEncrypt.setPublicKey(BrzEncryption.getPublicKeyAsString(chatPub));
+            chatToEncrypt.setPrivateKey(BrzEncryption.getPrivateKeyAsString(chatPriv));
+            return chatToEncrypt;
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public static boolean addBrzChatKeys(BrzChat encryptedChat){
+        return false;
+    }
+    public static boolean addChatKeysToKeyStore(PublicKey pubKey, PrivateKey privKey, String alias){
+        KeyStore ks = null;
+        try {
+            ks = KeyStore.getInstance("AndroidKeyStore");
+        } catch (KeyStoreException kse) {
+            kse.printStackTrace();
+            return false;
+        }
+        if (ks == null) {
+            throw new RuntimeException("Bad keystore object, cannot decrypt BrzMessage");
+        } else {
+            try {
+                ks.load(null);
+                ks.setKeyEntry(alias, pubKey, null, null);
+                ks.setKeyEntry(alias, privKey, null, null);
+            } catch (CertificateException e) {
+                e.printStackTrace();
+                return false;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+                return false;
+            } catch (KeyStoreException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        return false;
     }
 
     /**
