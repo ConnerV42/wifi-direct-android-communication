@@ -70,7 +70,22 @@ public class BreezeAPI extends Service {
         this.storage = BrzStorage.initialize(this);
         this.state = BrzStateStore.getStore();
         this.db = new DatabaseHandler(this);
-
+        try {
+            if(!BrzEncryption.storeContainsKey("MY_KEY"))
+            {
+                KeyPair kp = BrzEncryption.generateAndSaveKeyPair("MY_KEY");
+                this.publicKey = kp.getPublic();
+                this.privateKey = kp.getPrivate();
+            }
+            else
+            {
+                this.publicKey = BrzEncryption.getPublicKeyFromKeyStore("MY_KEY");
+                this.privateKey = BrzEncryption.getPrivateKeyFromStore("MY_KEY");
+            }
+        }catch(Exception e)
+        {
+            Log.i("key error", "cannot gen and save keys");
+        }
         // Get stored hostNode info
         SharedPreferences sp = getSharedPreferences("Breeze", Context.MODE_PRIVATE);
         String hostNodeId = sp.getString(App.PREF_HOST_NODE_ID, "");

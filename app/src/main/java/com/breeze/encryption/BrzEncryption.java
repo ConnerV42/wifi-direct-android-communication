@@ -312,10 +312,10 @@ public final class BrzEncryption
             throw new RuntimeException("Bad keystore object, cannot decrypt BrzMessage");
         } else {
             try {
+                ks.load(null, null);
                 if (!ks.containsAlias(privateKeyAlias)) {
                     throw new RuntimeException("Bad keystore alias, cannot find private key with alias: " + privateKeyAlias);
                 }
-                ks.load(null);
                 KeyStore.Entry entry = ks.getEntry(privateKeyAlias, null);
                 if (!(entry instanceof KeyStore.PrivateKeyEntry)) {
                     Log.w("Bad privateKeyEntry", "Not an instance of a PrivateKeyEntry");
@@ -365,10 +365,10 @@ public final class BrzEncryption
             throw new RuntimeException("Bad keystore object, cannot decrypt BrzMessage");
         } else {
             try {
+                ks.load(null, null);
                 if (!ks.containsAlias(alias)) {
                     throw new RuntimeException("Bad keystore alias, cannot find private key with alias: " + alias);
                 }
-                ks.load(null);
                 return ks.getCertificate(alias).getPublicKey();
             } catch (CertificateException e) {
                 e.printStackTrace();
