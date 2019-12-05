@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
@@ -20,8 +21,10 @@ import android.util.Log;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 public final class BrzEncryption
@@ -29,6 +32,45 @@ public final class BrzEncryption
     public static final String DEFAULT_DEVICE_KEYPAIR_NAME = "MY_BREEZE_KEY";
     public static final String DEFAULT_ENCRYPTION_PADDING = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1;
     public static final String DEFAULT_CIPHER_INSTANCE_SETTING = "RSA/ECB/PKCS1Padding";
+
+
+    public static boolean deleteKeyPairByAlias(String alias){
+        if(alias == null || alias.isEmpty())
+        {
+            throw new IllegalArgumentException("Ca't go to keystore with an empty alias bro");
+        }
+        try{
+            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+            ks.load(null,null);
+            ks.deleteEntry(alias);
+            return true;
+        }catch(Exception e)
+        {
+            return false;
+        }
+    }
+
+    public static KeyPair getKeyPairByAlias(String alias)
+    {
+        if(alias == null || alias.isEmpty())
+        {
+            throw new IllegalArgumentException("Ca't go to keystore with an empty alias bro");
+        }
+        try{
+            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+            ks.load(null,null);
+            Key key = ks.getKey(alias, null);
+            if (key instanceof PrivateKey) {
+                Certificate cert = ks.getCertificate(alias);
+                return new KeyPair(cert.getPublicKey(), (PrivateKey) key);
+            } else {
+                return null;
+            }
+        }catch(Exception e)
+        {
+            return null;
+        }
+    }
 
     /**
      * @param chatToEncrypt the chat we're setting the public and private keys of
@@ -204,7 +246,7 @@ public final class BrzEncryption
                         new KeyGenParameterSpec.Builder(
                                 alias,
                                 KeyProperties.PURPOSE_DECRYPT).
-                                setKeySize(1024).
+                                setKeySize(2048).
                                 setEncryptionPaddings(BrzEncryption.DEFAULT_ENCRYPTION_PADDING).
                                 setDigests(KeyProperties.DIGEST_SHA256);
 
@@ -241,12 +283,14 @@ public final class BrzEncryption
         {
             Cipher inCipher = Cipher.getInstance(BrzEncryption.DEFAULT_CIPHER_INSTANCE_SETTING);
             inCipher.init(Cipher.ENCRYPT_MODE, pubkey);
+            byte[] vals = inCipher.doFinal(message.body.getBytes());
 
-            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-            CipherOutputStream cipherOutputStream = new CipherOutputStream(outStream, inCipher);
-            cipherOutputStream.write(android.util.Base64.decode(message.body, Base64.DEFAULT));
-            cipherOutputStream.close();
-            byte [] vals = outStream.toByteArray();
+
+//            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+//            CipherOutputStream cipherOutputStream = new CipherOutputStream(outStream, inCipher);
+//            cipherOutputStream.write(android.util.Base64.encode(message.body.getBytes(), Base64.DEFAULT));
+//            cipherOutputStream.close();
+
             message.body = android.util.Base64.encodeToString(vals, Base64.DEFAULT);
             return message;
         }catch(Exception e)
@@ -269,20 +313,26 @@ public final class BrzEncryption
         try {
             Cipher inCipher = Cipher.getInstance(BrzEncryption.DEFAULT_CIPHER_INSTANCE_SETTING);
             inCipher.init(Cipher.DECRYPT_MODE, privateKey);
-            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-            CipherOutputStream cipherOutputStream = new CipherOutputStream(outStream, inCipher);
-            cipherOutputStream.write(android.util.Base64.decode(message.body, Base64.DEFAULT));
-            cipherOutputStream.close();
-            byte[] vals = outStream.toByteArray();
-            message.body = android.util.Base64.encodeToString(vals, Base64.DEFAULT);
+//            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+//            CipherOutputStream cipherOutputStream = new CipherOutputStream(outStream, inCipher);
+//            cipherOutputStream.write(android.util.Base64.decode(message.body, Base64.DEFAULT));
+//            cipherOutputStream.close();
+//            byte[] vals = outStream.toByteArray();
+
+            byte [] vals = new byte[0];
+            try {
+                vals = inCipher.doFinal(Base64.decode(message.body, Base64.DEFAULT));
+            } catch (BadPaddingException e) {
+                e.printStackTrace();
+            } catch (IllegalBlockSizeException e) {
+                e.printStackTrace();
+            }
+            message.body = new String(vals);
             return message;
         } catch (NoSuchPaddingException e) {
             e.printStackTrace();
             return null;
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
-        } catch (IOException e) {
             e.printStackTrace();
             return null;
         } catch (InvalidKeyException e) {

@@ -31,6 +31,7 @@ import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
 import com.breeze.views.ProfileActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import java.security.KeyPair;
@@ -70,22 +71,6 @@ public class BreezeAPI extends Service {
         this.storage = BrzStorage.initialize(this);
         this.state = BrzStateStore.getStore();
         this.db = new DatabaseHandler(this);
-        try {
-            if(!BrzEncryption.storeContainsKey("MY_KEY"))
-            {
-                KeyPair kp = BrzEncryption.generateAndSaveKeyPair("MY_KEY");
-                this.publicKey = kp.getPublic();
-                this.privateKey = kp.getPrivate();
-            }
-            else
-            {
-                this.publicKey = BrzEncryption.getPublicKeyFromKeyStore("MY_KEY");
-                this.privateKey = BrzEncryption.getPrivateKeyFromStore("MY_KEY");
-            }
-        }catch(Exception e)
-        {
-            Log.i("key error", "cannot gen and save keys");
-        }
         // Get stored hostNode info
         SharedPreferences sp = getSharedPreferences("Breeze", Context.MODE_PRIVATE);
         String hostNodeId = sp.getString(App.PREF_HOST_NODE_ID, "");
@@ -145,20 +130,30 @@ public class BreezeAPI extends Service {
         startForeground(1, notification);
 
 
-        // TODO: create a keypair for the current hostNode
-//        KeyPair keyPairForThisNode = null;
-//        try{
-//            keyPairForThisNode = BrzEncryption.generateAndSaveKeyPair();
-//        }catch (Exception e){
-//            Log.i("kp error", "Cannot generate key pair for this device");
-//        }
-//        if(keyPairForThisNode != null){
-//            this.publicKey = keyPairForThisNode.getPublic();
-//            this.privateKey = keyPairForThisNode.getPrivate();
-//        }
-//        else{
-//            Log.i("bad keypair", "This device has no valid keypair in the store");
-//        }
+        // TODO: create a keypair for the current hostNode.. Done
+        try {
+            if(!BrzEncryption.storeContainsKey("MY_KEY"))
+            {
+                KeyPair kp = BrzEncryption.generateAndSaveKeyPair("MY_KEY");
+                this.publicKey = kp.getPublic();
+                this.privateKey = kp.getPrivate();
+            }
+            else
+            {
+                this.publicKey = BrzEncryption.getPublicKeyFromKeyStore("MY_KEY");
+                this.privateKey = BrzEncryption.getPrivateKeyFromStore("MY_KEY");
+            }
+        }catch(Exception e)
+        {
+            Log.i("key error", "cannot gen and save keys");
+        }
+
+//        BrzMessage brz = new BrzMessage();
+//        brz.body = "hello world";
+//        brz.chatId = "testChat";
+//        brz.from = "testNode";
+//        brz.isStatus = false;
+//        _sendMessage_test(brz, "testChat");
 
     }
 
@@ -306,11 +301,13 @@ public class BreezeAPI extends Service {
     }
 
     public void sendMessage(BrzMessage message, String chatId) {
+        _sendMessage_test(message, chatId);
         BrzPacket p = new BrzPacket(message);
         p.type = BrzPacket.BrzPacketType.MESSAGE;
 
         // Send message to each recipient
         BrzChat chat = this.state.getChat(chatId);
+
         for (String nodeId : chat.nodes) {
             p.to = nodeId;
             this.router.send(p);
@@ -319,6 +316,101 @@ public class BreezeAPI extends Service {
         this.addMessage(message);
 
         // TODO: Save this change to the database
+    }
+
+    public void _sendMessage_test(BrzMessage message, String chatId) {
+        if(message == null || message.body == null || message.body.isEmpty()){
+            throw new IllegalArgumentException("You can't encrypt an empty message bro");
+        }
+        if(chatId == null || chatId.isEmpty()){
+            throw new IllegalArgumentException("You can't encrypt a message without a chat's public key bro");
+        }
+        KeyPair testKp_Node = null;
+        KeyPair testKp_Chat = null;
+//        BrzEncryption.deleteKeyPairByAlias("testNode");
+//        BrzEncryption.deleteKeyPairByAlias("testChat");
+        try{
+            if(BrzEncryption.storeContainsKey("testNode")) {
+                testKp_Node = BrzEncryption.getKeyPairByAlias("testNode");
+            }
+            else {
+                testKp_Node = BrzEncryption.generateAndSaveKeyPair("testNode");
+            }
+            if(BrzEncryption.storeContainsKey("testChat")){
+                testKp_Chat = BrzEncryption.getKeyPairByAlias("testChat");
+            }
+            else {
+                testKp_Chat = BrzEncryption.generateAndSaveKeyPair("testChat");
+            }
+        } catch(Exception e)
+        {
+            Log.i("Keygen error", "cannot gen keypair");
+            return;
+        }
+        if(testKp_Chat == null || testKp_Node == null)
+        {
+            Log.i("Keygen error", "cannot gen keypair");
+            return;
+        }
+
+        BrzNode testNode = new BrzNode();
+        testNode.alias = "testNode";
+        testNode.endpointId = "testNode";
+        testNode.id = "testNode";
+        testNode.publicKey = BrzEncryption.getPublicKeyAsString(testKp_Node.getPublic());
+
+        BrzChat chat = new BrzChat();
+        chat.id = "testChat";
+        chat.isGroup = false;
+        chat.name = "testChat";
+        ArrayList<String> arr = new ArrayList<>();
+        arr.add("testNode");
+        chat.nodes = arr;
+        chat.setPrivateKey(BrzEncryption.getPrivateKeyAsString(testKp_Chat.getPrivate()));
+        chat.setPublicKey(BrzEncryption.getPublicKeyAsString(testKp_Chat.getPublic()));
+
+
+        //TODO Double asymmetric encryption for chats isn't going to work.
+        // Symmetric encryption for the chats is the only thing that will work
+        // The length of the message gets too long after the initial encryption
+        // So the second encryption for the chat won't work... however, after some
+        // Stack overflow research, I found out that symmetric makes more sense in this context, plus
+        // we talked about it in presentation on 120419
+        message = BrzEncryption.encryptMessageBody(testKp_Node.getPublic(), message);
+//        message = BrzEncryption.encryptMessageBody(testKp_Chat.getPublic(), message);
+
+        String temp = message.body;
+
+         message = BrzEncryption.decryptMessageBody(testKp_Chat.getPrivate(), message);
+//        message = BrzEncryption.decryptMessageBody(testKp_Node.getPrivate(), message);
+
+        String decrypted = message.body;
+
+//        for(String nodeId : chat.nodes){
+//            PublicKey nodePubKey = BrzEncryption.getPublicKeyFromString(this.db.getNode(nodeId).publicKey);
+//            message = BrzEncryption.encryptMessageBody(nodePubKey, message);
+//            BrzPacket p = new BrzPacket(message);
+//
+//            p.to = nodeId;
+//            this.router.send(p);
+//        }this.addMessage(message);
+    }
+
+    public void _decryptMessage_test(BrzMessage message, String chatId) {
+        if(message == null || message.body == null || message.body.isEmpty()){
+            throw new IllegalArgumentException("You can't decrypt an empty message bro");
+        }
+        if(chatId == null || chatId.isEmpty()){
+            throw new IllegalArgumentException("You can't decrypt a message without a chat's public key bro");
+        }
+
+        BrzChat chat = this.state.getChat(chatId);
+        String str_chatPrivKey = chat.getPublicKey();
+        PrivateKey key = BrzEncryption.getPrivateKeyFromString(str_chatPrivKey);
+
+        message = BrzEncryption.decryptMessageBody(key, message);
+
+
     }
 
     public void addMessage(BrzMessage message) {
