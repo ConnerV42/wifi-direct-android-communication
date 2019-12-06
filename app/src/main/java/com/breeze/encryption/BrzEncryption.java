@@ -17,7 +17,7 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
 import android.util.Log;
-
+import javax.crypto.*;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 
@@ -79,7 +79,7 @@ public final class BrzEncryption
     public static BrzChat encryptBrzChat(BrzChat chatToEncrypt){
         String id = chatToEncrypt.id;
         try {
-            KeyPair kp = BrzEncryption.generateAndSaveKeyPair(id);
+            KeyPair kp = BrzEncryption.generateAndSaveAsymKeyPair(id);
             PublicKey chatPub = kp.getPublic();
             PrivateKey chatPriv = kp.getPrivate();
             chatToEncrypt.setPublicKey(BrzEncryption.getPublicKeyAsString(chatPub));
@@ -223,7 +223,7 @@ public final class BrzEncryption
         }
     }
 
-    public static KeyPair generateAndSaveKeyPair(String alias) throws Exception
+    public static KeyPair generateAndSaveAsymKeyPair(String alias) throws Exception
     {
 
         if(alias == null || alias.isEmpty() || alias.length() > 100)
@@ -257,9 +257,44 @@ public final class BrzEncryption
                 InvalidAlgorithmParameterException | KeyStoreException | NoSuchProviderException e ) {
             Log.i("KeyPair", "This device's Key Pair unable to be generated");
         }
-        throw new KeyStoreException("This device's Key Pair unable to be generated");
+        throw new KeyStoreException("This device's Asymmetric Key Pair unable to be generated");
     }
+    public static SecretKey generateAndSaveSymKeyPair(String alias,int keysize) throws Exception
+    {
+        if(alias == null || alias.isEmpty() || alias.length() > 100)
+        {
+            throw new IllegalArgumentException("Bad alias parameter for the keystore");
+        }
+        try
+        {
+            final SecureRandom random = new SecureRandom();
+            KeyGenerator generator = KeyGenerator.getInstance("AES");
+            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+            ks.load(null);
+            if(ks.containsAlias(alias))
+            {
+                throw new RuntimeException("Cannot create new key with alias" + alias + ": it already exists");
+            }
+            else
+            {
+                KeyGenParameterSpec.Builder builder =
+                        new KeyGenParameterSpec.Builder(
+                                alias,
+                                KeyProperties.PURPOSE_DECRYPT).
+                                setKeySize(keysize).
+                                setEncryptionPaddings(BrzEncryption.DEFAULT_ENCRYPTION_PADDING).
+                                setDigests(KeyProperties.DIGEST_SHA256);
+                generator.init(keysize, random);
+                SecretKey key = generator.generateKey();
+                return key;
+            }
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
 
+    }
     public static Enumeration<String>  listKeyStore() throws Exception {
         KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
         ks.load(null);
@@ -273,7 +308,7 @@ public final class BrzEncryption
      * @return {BrzMessage} A message with its body encrypted by the given public key
      */
 
-    public static BrzMessage encryptMessageBody(PublicKey pubkey, BrzMessage message)
+    public static BrzMessage encryptAsymMessageBody(PublicKey pubkey, BrzMessage message)
     {
         if(pubkey == null ||message.body.isEmpty() || message == null)
         {
@@ -299,14 +334,32 @@ public final class BrzEncryption
             return null;
         }
     }
+    public static BrzMessage encryptSymMessageBody(SecretKey key, BrzMessage message)
+    {
+        if(key == null ||message.body.isEmpty() || message == null)
+        {
+            throw new IllegalArgumentException("Bad public key or message to encrypt");
+        }
+        try {
+            Cipher cipher = Cipher.getInstance("AES/GCM/PKCS5Padding");
+            cipher.init(cipher.ENCRYPT_MODE, key);
+            byte[] bytes = cipher.doFinal(message.body.getBytes());
+            message.body = android.util.Base64.encodeToString(bytes, Base64.DEFAULT);
+            return message;
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
 
+    }
     /**
      *
      * @param privateKey the key to decrypt the message with
      * @param message the BrzMessage with the encrypted message body
      * @return the BrzMessage object passed in, but with a decrypted body
      */
-    public static BrzMessage decryptMessageBody(PrivateKey privateKey, BrzMessage message) {
+    public static BrzMessage decryptAsymMessageBody(PrivateKey privateKey, BrzMessage message) {
         if (privateKey == null ||  message.body.isEmpty() || message == null) {
             throw new IllegalArgumentException("Bad public key or message to encrypt");
         }
@@ -340,7 +393,26 @@ public final class BrzEncryption
             return null;
         }
     }
+    public static BrzMessage decryptSymMessageBody(SecretKey key, BrzMessage message) throws Exception
+    {
+        if (key == null ||  message.body.isEmpty() || message == null)
+        {
+            throw new IllegalArgumentException("Bad public key or message to encrypt");
+        }
 
+        try {
+            Cipher cipher = Cipher.getInstance("AES/GCM/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, key);
+            byte[]decryptedBytes = cipher.doFinal(Base64.decode(message.body, Base64.DEFAULT));
+            //byte[] decryptedBytes = cipher.doFinal(bytes);
+            message.body = new String(decryptedBytes);
+            return message;
+        } catch (NoSuchPaddingException | NoSuchAlgorithmException| InvalidKeyException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
     /**
      *
      * @param privateKeyAlias The alias that the private key is referenced by in the key store
