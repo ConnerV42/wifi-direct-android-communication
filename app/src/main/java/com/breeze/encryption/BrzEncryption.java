@@ -273,7 +273,7 @@ public final class BrzEncryption
             ks.load(null);
             if(ks.containsAlias(alias))
             {
-                throw new RuntimeException("Cannot create new key with alias" + alias + ": it already exists");
+                throw new RuntimeException("Cannot create new symkey with alias" + alias + ": it already exists");
             }
             else
             {
