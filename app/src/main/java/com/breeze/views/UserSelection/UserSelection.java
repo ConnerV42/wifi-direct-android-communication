@@ -16,41 +16,107 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
+import com.breeze.datatypes.BrzNode;
+import com.breeze.graph.BrzGraph;
 import com.breeze.state.BrzStateStore;
+import com.google.android.flexbox.FlexboxLayout;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class UserSelection extends AppCompatActivity {
-
-    UserList adapter = null;
+    List<String> nodes = new LinkedList<>();
+    List<TextView> nodeViews = new LinkedList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Set up our content
         setContentView(R.layout.activity_user_selection);
 
-        RecyclerView recyclerView = findViewById(R.id.user_selection_user_list);
+        // Set the done
+        FloatingActionButton fab = findViewById(R.id.user_selection_fab);
+        fab.hide();
+        fab.setOnClickListener(e -> {
+            if (nodes.size() == 1) {
+                String nodeId = nodes.get(0);
+                BrzNode n = BrzGraph.getInstance().getVertex(nodeId);
+                BrzChat newChat = new BrzChat(n.name, nodeId);
+                BreezeAPI.getInstance().sendChatHandshakes(newChat);
+            } else if (nodes.size() != 0) {
+                BrzChat newChat = new BrzChat("New chat", nodes);
+                BreezeAPI.getInstance().sendChatHandshakes(newChat);
+            }
 
-        recyclerView.setHasFixedSize(true);
-
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-
-        this.adapter = new UserList(this);
-        recyclerView.setAdapter(adapter);
-
-        // When the user selects a node, add a chat for it
-        adapter.setItemSelectedListener(node -> {
-            BrzChat newChat = new BrzChat(node.name, node.id);
-            BreezeAPI.getInstance().sendChatHandshakes(newChat);
             finish();
         });
 
+        // Set up the list
+        RecyclerView recyclerView = findViewById(R.id.user_selection_user_list);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
 
+        UserList adapter = new UserList(this);
+        recyclerView.setAdapter(adapter);
+
+        // When the user selects a node, add it to the list
+        adapter.setItemSelectedListener(node -> {
+            int nodeI = nodes.indexOf(node.id);
+            if (nodeI == -1) {
+                LinearLayout.LayoutParams nodeLayout = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                nodeLayout.leftMargin = 10;
+                nodeLayout.bottomMargin = 10;
+
+                TextView nodeView = new TextView(this);
+                nodeView.setText(node.name);
+                nodeView.setPadding(20, 15, 20, 15);
+                nodeView.setLayoutParams(nodeLayout);
+                nodeView.setBackgroundResource(R.drawable.status_bubble);
+                nodeView.setId(nodeI);
+
+                FlexboxLayout toList = findViewById(R.id.user_selection_to_list);
+                toList.addView(nodeView);
+
+                nodes.add(node.id);
+                nodeViews.add(nodeView);
+            } else {
+                FlexboxLayout toList = findViewById(R.id.user_selection_to_list);
+                toList.removeView(nodeViews.get(nodeI));
+
+                nodes.remove(nodeI);
+                nodeViews.remove(nodeI);
+            }
+
+            if (nodes.size() == 0) {
+                fab.hide();
+            } else {
+                fab.show();
+            }
+        });
+
+        // When the user types a search query, filter the list
+        EditText search = findViewById(R.id.user_selection_search);
+        search.requestFocus();
+        search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                adapter.getFilter().filter(s);
+            }
+        });
     }
 
     @Override
@@ -62,38 +128,9 @@ public class UserSelection extends AppCompatActivity {
 
         // Set up the activity as not "backoutable"
         ab.setDisplayHomeAsUpEnabled(true);
-        ab.setDisplayShowTitleEnabled(false);
-        ab.setDisplayShowCustomEnabled(true);
         ab.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
 
-        // Add our search field
-        ab.setCustomView(R.layout.search_view);
-        View actionBarView = ab.getCustomView();
-
-        // When the user types a search query, filter the list
-        EditText search = actionBarView.findViewById(R.id.user_selection_search);
-        search.requestFocus();
-        search.setTextColor(Color.parseColor("#ffffff"));
-        search.setHintTextColor(Color.parseColor("#dddddd"));
-
-        search.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start,
-                                          int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start,
-                                      int before, int count) {
-                adapter.getFilter().filter(s);
-            }
-        });
-
+        ab.setTitle("New chat");
     }
 
     @Override

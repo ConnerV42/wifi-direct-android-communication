@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.breeze.R;
+import com.breeze.application.BreezeAPI;
 import com.breeze.graph.BrzGraph;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.storage.BrzStorage;
@@ -64,7 +65,7 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
 
         for (BrzNode node : BrzGraph.getInstance()) {
             this.allNodes.add(node);
-            this.filteredNodes.add(node);
+            this.getFilter().filter("");
         }
     }
 
@@ -107,17 +108,15 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
             @Override
             protected FilterResults performFiltering(CharSequence searchSequence) {
                 String searchStr = searchSequence.toString().toLowerCase();
-                if (searchStr.isEmpty()) {
-                    filteredNodes = allNodes;
-                } else {
-                    List<BrzNode> filteredList = new ArrayList<>();
-                    for (BrzNode brzNode : allNodes) {
-                        if (brzNode.alias.toLowerCase().contains(searchStr) || brzNode.name.toLowerCase().contains(searchStr))
-                            filteredList.add(brzNode);
-                    }
+                if (searchStr.isEmpty()) searchStr = "@";
 
-                    filteredNodes = filteredList;
+                List<BrzNode> filteredList = new ArrayList<>();
+                for (BrzNode brzNode : allNodes) {
+                    if (!brzNode.id.equals(BreezeAPI.getInstance().hostNode.id) && (brzNode.alias.toLowerCase().contains(searchStr) || brzNode.name.toLowerCase().contains(searchStr)))
+                        filteredList.add(brzNode);
                 }
+
+                filteredNodes = filteredList;
 
                 FilterResults filterResults = new FilterResults();
                 filterResults.values = filteredNodes;

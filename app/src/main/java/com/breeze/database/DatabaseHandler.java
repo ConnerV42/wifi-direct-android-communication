@@ -38,7 +38,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String INIT_BRZCHAT_TABLE = "CREATE TABLE IF NOT EXISTS BrzChat ('id' TEXT PRIMARY KEY, " +
             "'name' TEXT NOT NULL, " +
             "'nodes' TEXT NOT NULL, " +
-            "'isGroup' BOOLEAN NOT NULL " +
+            "'isGroup' BOOLEAN NOT NULL, " +
+            "'acceptedByHost' BOOLEAN NOT NULL, " +
+            "'acceptedByRecipient' BOOLEAN NOT NULL " +
 //            "'publicKey' TEXT NOT NULL," +
 //            "'privateKeyTag' TEXT NOT NULL," +
 //            "'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP, " +
@@ -129,7 +131,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public void setChat(@NonNull BrzChat chat) {
         SQLiteDatabase db = this.getWritableDatabase();
-        Object[] args = {chat.id, chat.name, new JSONArray(chat.nodes).toString(), chat.isGroup ? 1 : 0};
+        Object[] args = {chat.id, chat.name, new JSONArray(chat.nodes).toString(), chat.isGroup ? 1 : 0, chat.acceptedByHost ? 1 : 0, chat.acceptedByRecipient ? 1 : 0};
         try {
             db.execSQL("INSERT OR REPLACE INTO " + BRZCHAT_TABLE_NAME + " VALUES (?,?,?,?)", args);
         } catch (Exception e) {
@@ -179,6 +181,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             int isGroup = c.getInt(c.getColumnIndex("isGroup"));
             n.isGroup = isGroup == 1;
 
+            int acceptedByHost = c.getInt(c.getColumnIndex("acceptedByHost"));
+            n.acceptedByHost = acceptedByHost == 1;
+
+            int acceptedByRecipient = c.getInt(c.getColumnIndex("acceptedByRecipient"));
+            n.acceptedByRecipient = acceptedByRecipient == 1;
+
             chats.add(n);
 
             c.moveToNext();
@@ -215,6 +223,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         int isGroup = c.getInt(c.getColumnIndex("isGroup"));
         n.isGroup = isGroup == 1;
+
+        int acceptedByHost = c.getInt(c.getColumnIndex("acceptedByHost"));
+        n.acceptedByHost = acceptedByHost == 1;
+
+        int acceptedByRecipient = c.getInt(c.getColumnIndex("acceptedByRecipient"));
+        n.acceptedByRecipient = acceptedByRecipient == 1;
 
         c.close();
         db.close();

@@ -20,8 +20,10 @@ public class BrzChat implements BrzSerializable {
     public List<String> nodes = new ArrayList<>();
     public boolean isGroup = false;
 
-    public BrzChat() {
-    }
+    public boolean acceptedByHost = false;
+    public boolean acceptedByRecipient = false;
+
+    public BrzChat() {}
 
     public BrzChat(String json) {
         this.fromJSON(json);
@@ -32,7 +34,6 @@ public class BrzChat implements BrzSerializable {
         this.nodes.add(nodeId);
         this.isGroup = false;
     }
-
 
     public BrzChat(String name, List<String> nodes) {
         this.name = name;
@@ -82,9 +83,7 @@ public class BrzChat implements BrzSerializable {
 
             this.id = jObj.getString("id");
             this.name = jObj.getString("name");
-
             nodesFromJson(jObj.getString("nodes"));
-
             this.isGroup = jObj.getBoolean("isGroup");
         } catch (Exception e) {
             Log.e("DESERIALIZATION ERROR", "BrzChat", e);

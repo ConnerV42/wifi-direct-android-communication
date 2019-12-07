@@ -127,6 +127,21 @@ public class BreezeAPI extends Service {
 
         startForeground(1, notification);
 
+//        BrzGraph.getInstance().addVertex(new BrzNode("1", "", "", "Jake", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("2", "", "", "Paul", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("3", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("4", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("5", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("6", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("7", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("8", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("9", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("10", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("11", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("12", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("13", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("14", "", "", "Conner", "@JJ"));
+
         // TODO: create a keypair for the current hostNode
 //        KeyPair keyPairForThisNode = null;
 //        try{
@@ -192,24 +207,12 @@ public class BreezeAPI extends Service {
     //
 
     public void sendChatHandshakes(BrzChat chat) {
+        chat.acceptedByHost = true;
+        chat.acceptedByRecipient = false;
 
-        // TODO: Generate encryption keys at some point
-        KeyPair chatKeyPair = null;
+        // TODO: Generate chat encryption keys
 
-
-//        try {
-//            chatKeyPair = BrzEncryption.generateChatKeyPair(chat.id);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        String chatPublicKey = chatKeyPair.getPublic().toString();
-//        String chatPrivateKey = chatKeyPair.getPrivate().toString();
-
-        String chatPublicKey = "";
-        String chatPrivateKey = "";
-
-        BrzChatHandshake handshake = new BrzChatHandshake(this.router.hostNode.id, chat, chatPublicKey, chatPrivateKey);
+        BrzChatHandshake handshake = new BrzChatHandshake(this.router.hostNode.id, chat, "", "");
         BrzPacket p = new BrzPacket(handshake);
         p.type = BrzPacket.BrzPacketType.CHAT_HANDSHAKE;
 
@@ -218,34 +221,64 @@ public class BreezeAPI extends Service {
             this.router.send(p);
         }
 
-        // TODO: Add some kind of "Chat Pending acceptance" thingy
-        // Chat pending acceptance is implicit here: chat will only be added when
-        // a "Chat init" packet of some sort is received back here from the other device0
-
         this.state.addChat(chat);
         this.db.setChat(chat);
     }
 
     public void incomingChatResponse(BrzChatResponse response) {
+        BrzChat c = this.state.getChat(response.chatId);
+        if (c == null) return;
 
-        /*
-        TODO: Handle when the handshake was sent out, other device received and agreed, and sent back
-        response implying 'all good to add'
-         */
-        return;
+        // Chat accepted!
+        if (response.accepted) {
+            c.acceptedByRecipient = true;
+
+            BrzNode n = BrzGraph.getInstance().getVertex(response.from);
+            if (n != null) {
+                BrzMessage sm = new BrzMessage(n.name + " accepeted the chat request!");
+                sm.chatId = c.id;
+                this.state.addMessage(sm);
+                this.db.addMessage(sm);
+            }
+        }
+
+        // Rejected and the chat is a group
+        else if (c.isGroup) {
+            c.nodes.remove(response.from);
+
+            BrzNode n = BrzGraph.getInstance().getVertex(response.from);
+            if (n != null) {
+                BrzMessage sm = new BrzMessage(n.name + " rejected the chat.");
+                sm.chatId = c.id;
+                this.state.addMessage(sm);
+                this.db.addMessage(sm);
+            }
+        }
+
+        // Rejected and the chat is singular
+        else {
+            BrzNode n = BrzGraph.getInstance().getVertex(response.from);
+            if (n != null) {
+                BrzMessage sm = new BrzMessage(n.name + " rejected the chat.");
+                sm.chatId = c.id;
+                this.state.addMessage(sm);
+                this.db.addMessage(sm);
+            }
+        }
+
+        this.state.addChat(c);
+        this.db.setChat(c);
     }
 
     public void incomingHandshake(BrzChatHandshake handshake) {
-        // TODO: Add some kind of "Chat Pending acceptance" thingy
-
         BrzChat chat = handshake.chat;
         if (!chat.isGroup) {
             BrzNode n = BrzGraph.getInstance().getVertex(handshake.from);
             chat.name = n.name;
         }
 
-        Log.i("BREEZEAPI", "Got a handshake " + chat.nodes);
-
+        chat.acceptedByHost = false;
+        chat.acceptedByRecipient = false;
 
         this.state.addChat(handshake.chat);
         this.db.setChat(handshake.chat);
@@ -254,20 +287,26 @@ public class BreezeAPI extends Service {
     public void acceptHandshake(BrzChatHandshake handshake) {
         BrzChatResponse response = new BrzChatResponse(this.hostNode.id, handshake.chat.id, true);
 
-        BrzPacket p = new BrzPacket(handshake);
+        // Send the response
+        BrzPacket p = new BrzPacket(response);
         p.type = BrzPacket.BrzPacketType.CHAT_RESPONSE;
         p.to = handshake.from;
-
         this.router.send(p);
 
-        // TODO: Remove the "Chat Pending acceptance" thingy
+        // TODO: Add the keys to our keystore
 
+        // Set state to have the chat accepted
+        BrzChat c = this.state.getChat(handshake.chat.id);
+        c.acceptedByHost = true;
+        c.acceptedByRecipient = true;
+        this.state.addChat(c);
+        this.db.setChat(c);
     }
 
     public void rejectHandshake(BrzChatHandshake handshake) {
         BrzChatResponse response = new BrzChatResponse(this.hostNode.id, handshake.chat.id, false);
 
-        BrzPacket p = new BrzPacket(handshake);
+        BrzPacket p = new BrzPacket(response);
         p.type = BrzPacket.BrzPacketType.CHAT_RESPONSE;
         p.to = handshake.from;
 
@@ -283,10 +322,6 @@ public class BreezeAPI extends Service {
     //
     //
 
-    public void addChat(BrzChat chat) {
-        this.state.addChat(chat);
-    }
-
     public void sendMessage(BrzMessage message, String chatId) {
         BrzPacket p = new BrzPacket(message);
         p.type = BrzPacket.BrzPacketType.MESSAGE;
@@ -299,8 +334,6 @@ public class BreezeAPI extends Service {
         }
 
         this.addMessage(message);
-
-        // TODO: Save this change to the database
     }
 
     public void addMessage(BrzMessage message) {
