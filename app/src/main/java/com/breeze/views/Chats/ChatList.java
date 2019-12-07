@@ -71,7 +71,13 @@ public class ChatList extends BaseAdapter {
         chatCmp.chatName.setText(chat.name);
 
         chatCmp.chatImage = convertView.findViewById(R.id.chat_image);
-        chatCmp.chatImage.setImageBitmap(BrzStorage.getInstance().getProfileImage(chat.id));
+
+        if(!chat.isGroup) {
+            chatCmp.chatImage.setImageBitmap(BrzStorage.getInstance().getProfileImage(chat.otherPersonId(), ctx));
+        } else {
+            chatCmp.chatImage.setImageBitmap(BrzStorage.getInstance().getProfileImage(chat.id, ctx));
+        }
+
 
         return convertView;
     }

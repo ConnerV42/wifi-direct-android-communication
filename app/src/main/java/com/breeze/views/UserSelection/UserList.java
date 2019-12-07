@@ -1,6 +1,9 @@
 package com.breeze.views.UserSelection;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +36,7 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
             this.v = v;
         }
 
-        public void bind(BrzNode node, int position) {
+        public void bind(BrzNode node, int position, Context ctx) {
 
             TextView user_name = v.findViewById(R.id.user_name);
             user_name.setText(node.name);
@@ -42,7 +45,9 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
             user_alias.setText(node.alias);
 
             ImageView user_image = v.findViewById(R.id.user_image);
-            user_image.setImageBitmap(BrzStorage.getInstance().getProfileImage(node.id));
+            Bitmap b = BrzStorage.getInstance().getProfileImage(node.id, ctx);
+            Log.i("STATE", "For " + node.name + " image is " + (b != null));
+            user_image.setImageBitmap(b);
 
             this.position = position;
         }
@@ -52,7 +57,11 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
     private List<BrzNode> allNodes = new ArrayList<>();
     private Consumer<BrzNode> itemSelectedListener = null;
 
+    private Context ctx;
+
     public UserList(Context ctx) {
+        this.ctx = ctx;
+
         for (BrzNode node : BrzGraph.getInstance()) {
             this.allNodes.add(node);
             this.filteredNodes.add(node);
@@ -84,7 +93,7 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
 
     @Override
     public void onBindViewHolder(UserItemHolder holder, int position) {
-        holder.bind(filteredNodes.get(position), position);
+        holder.bind(filteredNodes.get(position), position, ctx);
     }
 
     @Override

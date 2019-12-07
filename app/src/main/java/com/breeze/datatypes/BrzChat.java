@@ -2,6 +2,7 @@ package com.breeze.datatypes;
 
 import android.util.Log;
 
+import com.breeze.application.BreezeAPI;
 import com.breeze.packets.BrzSerializable;
 
 import org.json.JSONArray;
@@ -47,6 +48,15 @@ public class BrzChat implements BrzSerializable {
         } catch (Exception e) {
             Log.e("DESERIALIZATION ERROR", "BrzChat", e);
         }
+    }
+
+    public String otherPersonId() {
+        if (this.isGroup)
+            throw new RuntimeException("otherPersonId does not work for group chats");
+        for (String id : this.nodes)
+            if (!id.equals(BreezeAPI.getInstance().hostNode.id)) return id;
+
+        return "";
     }
 
     @Override

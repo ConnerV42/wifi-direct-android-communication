@@ -39,6 +39,8 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
             TextView body = this.v.findViewById(R.id.messageBody);
             body.setText(msg.body);
 
+            body.setTextSize(15.0f);
+
             this.position = position;
         }
     }

@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 
 import com.breeze.R;
@@ -90,7 +91,7 @@ public class MessagesView extends Fragment {
 
         Log.i("STATE", "Bound message list to " + this.chat.id);
 
-        Button sendMessage = getView().findViewById(R.id.sendMessage);
+        ImageButton sendMessage = getView().findViewById(R.id.sendMessage);
         sendMessage.setOnClickListener(view1 -> { // send message
 
             EditText messageBox = getView().findViewById(R.id.editText);

@@ -4,6 +4,14 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
+
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
+
+import com.breeze.R;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,7 +34,7 @@ public class BrzStorage {
     }
 
     public static BrzStorage initialize(Context c) {
-        if(instance == null) instance = new BrzStorage(c);
+        if (instance == null) instance = new BrzStorage(c);
         return instance;
     }
 
@@ -38,10 +46,27 @@ public class BrzStorage {
         this.saveImage(bm, fileName, PROFILE_IMAGE_DIR);
     }
 
-    public Bitmap getProfileImage(String fileName) {
-        return this.getImage(fileName, PROFILE_IMAGE_DIR);
+    public Bitmap getProfileImage(String fileName, Context ctx) {
+        Bitmap b = getImage(fileName, PROFILE_IMAGE_DIR);
+        if (b == null)
+            b = bitmapFromVector(ctx, R.drawable.ic_person_black_24dp);
+        return b;
     }
 
+
+    private Bitmap bitmapFromVector(Context context, int drawableId) {
+        Drawable drawable = ContextCompat.getDrawable(context, drawableId);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            drawable = (DrawableCompat.wrap(drawable)).mutate();
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
+    }
 
     // File access helpers
 
@@ -54,12 +79,12 @@ public class BrzStorage {
             stream = new FileOutputStream(imagePath);
             bm.compress(Bitmap.CompressFormat.JPEG, 100, stream);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         } finally {
             try {
                 if (stream != null) stream.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                //  e.printStackTrace();
             }
         }
     }
@@ -71,7 +96,7 @@ public class BrzStorage {
             File image = new File(imageDirectory, name);
             return BitmapFactory.decodeStream(new FileInputStream(image));
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
 
         return null;

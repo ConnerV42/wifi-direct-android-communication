@@ -4,9 +4,7 @@
     android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:divider="?android:dividerHorizontal"
     android:orientation="vertical"
-    android:showDividers="middle"
     tools:context=".views.Messages.MessagesView">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -21,7 +19,12 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:background="@drawable/status_bubble"
+        android:layout_marginBottom="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        >
 
         <EditText
             android:id="@+id/editText"
@@ -39,13 +42,15 @@
             android:paddingStart="20dp"
             android:paddingEnd="20dp" />
 
-        <Button
+<!--            style="@style/Widget.AppCompat.Button.Colored"-->
+        <ImageButton
             android:id="@+id/sendMessage"
-            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginEnd="10dp"
-            android:text="Send" />
+            android:src="@drawable/ic_send_black_24dp"
+            android:background="@android:color/transparent" />
+
     </LinearLayout>
 </LinearLayout>

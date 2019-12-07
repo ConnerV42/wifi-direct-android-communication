@@ -53,8 +53,6 @@ public class BreezeAPI extends Service {
     public BrzStorage storage = null;
     public BrzStateStore state = null;
     public DatabaseHandler db = null;
-    public PublicKey publicKey = null;
-    private PrivateKey privateKey = null;
 
     public BrzNode hostNode = null;
 
@@ -128,7 +126,6 @@ public class BreezeAPI extends Service {
                 .build();
 
         startForeground(1, notification);
-
 
         // TODO: create a keypair for the current hostNode
 //        KeyPair keyPairForThisNode = null;
