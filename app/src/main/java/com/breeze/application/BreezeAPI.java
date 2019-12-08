@@ -225,6 +225,11 @@ public class BreezeAPI extends Service {
         this.db.setChat(chat);
     }
 
+    public void updateChat(BrzChat chat) {
+        this.state.addChat(chat);
+        this.db.setChat(chat);
+    }
+
     public void incomingChatResponse(BrzChatResponse response) {
         BrzChat c = this.state.getChat(response.chatId);
         if (c == null) return;

@@ -37,7 +37,7 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
             this.v = v;
         }
 
-        public void bind(BrzNode node, int position, Context ctx) {
+        public void bind(BrzNode node, int position, Context ctx, List<String> nodes) {
 
             TextView user_name = v.findViewById(R.id.user_name);
             user_name.setText(node.name);
@@ -46,8 +46,19 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
             user_alias.setText(node.alias);
 
             ImageView user_image = v.findViewById(R.id.user_image);
-            Bitmap b = BrzStorage.getInstance().getProfileImage(node.id, ctx);
-            Log.i("STATE", "For " + node.name + " image is " + (b != null));
+            Bitmap b;
+            if(nodes.contains(node.id)) {
+                user_name.setTextColor(ctx.getColor(R.color.colorAccent));
+                user_alias.setTextColor(ctx.getColor(R.color.colorAccent));
+                user_image.setColorFilter(ctx.getColor(R.color.colorAccent));
+
+                b = BrzStorage.getInstance().bitmapFromVector(ctx, R.drawable.ic_done_black_24dp);
+            } else {
+                user_name.setTextColor(ctx.getColor(android.R.color.black));
+                user_alias.setTextColor(ctx.getColor(android.R.color.black));
+                user_image.setColorFilter(ctx.getColor(android.R.color.black));
+                b = BrzStorage.getInstance().getProfileImage(node.id, ctx);
+            }
             user_image.setImageBitmap(b);
 
             this.position = position;
@@ -59,9 +70,11 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
     private Consumer<BrzNode> itemSelectedListener = null;
 
     private Context ctx;
+    private List<String> nodes;
 
-    public UserList(Context ctx) {
+    public UserList(Context ctx, List<String> nodes) {
         this.ctx = ctx;
+        this.nodes = nodes;
 
         for (BrzNode node : BrzGraph.getInstance()) {
             this.allNodes.add(node);
@@ -87,6 +100,7 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
         user_list_item.setOnClickListener(e -> {
             if (this.itemSelectedListener != null)
                 this.itemSelectedListener.accept(this.filteredNodes.get(holder.position));
+            holder.bind(filteredNodes.get(holder.position), holder.position, ctx, nodes);
         });
 
         return holder;
@@ -94,7 +108,7 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
 
     @Override
     public void onBindViewHolder(UserItemHolder holder, int position) {
-        holder.bind(filteredNodes.get(position), position, ctx);
+        holder.bind(filteredNodes.get(position), position, ctx, nodes);
     }
 
     @Override

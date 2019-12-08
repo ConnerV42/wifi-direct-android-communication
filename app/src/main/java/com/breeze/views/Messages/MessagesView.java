@@ -1,100 +1,65 @@
 package com.breeze.views.Messages;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
 
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
-import com.breeze.datatypes.BrzMessage;
-import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
+import com.breeze.views.ChatSettingsActivity;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * to handle interaction events.
- * Use the {@link MessagesView#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class MessagesView extends Fragment {
-
-    private static final String ARG_CHAT_ID = "";
+public class MessagesView extends AppCompatActivity {
     private BrzChat chat;
 
-    public MessagesView() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param chatId The li_chat id to view.
-     * @return A new instance of fragment MessagesView.
-     */
-    public static MessagesView newInstance(String chatId) {
-        MessagesView fragment = new MessagesView();
-        Bundle args = new Bundle();
-        args.putString(ARG_CHAT_ID, chatId);
-        fragment.setArguments(args);
-        return fragment;
+    public static Intent getIntent(Context ctx, String chatId) {
+        Intent i = new Intent(ctx, MessagesView.class);
+        i.putExtra("ARG_CHAT_ID", chatId);
+        return i;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            String chatId = getArguments().getString("ARG_CHAT_ID");
-            BrzStateStore.getStore().getChat(chatId, chat -> this.chat = chat);
-        }
-    }
+        setContentView(R.layout.activity_messages_view);
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_chat, container, false);
-    }
+        // Get the chat from the argument
+        Intent i = getIntent();
+        String chatId = i.getStringExtra("ARG_CHAT_ID");
+        BrzStateStore.getStore().getChat(chatId, chat -> this.chat = chat);
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        // Set up content
 
         final BrzRouter router = BrzRouter.getInstance();
 
-        MessageList msgList = new MessageList(getActivity(), this.chat.id);
-        RecyclerView msgView = getView().findViewById(R.id.messageList);
+        MessageList msgList = new MessageList(this, this.chat.id);
+        RecyclerView msgView = findViewById(R.id.messageList);
         msgView.setAdapter(msgList);
 
-        LinearLayoutManager msgLayout = new LinearLayoutManager(getActivity());
+        LinearLayoutManager msgLayout = new LinearLayoutManager(this);
         msgLayout.setStackFromEnd(true);
         msgView.setLayoutManager(msgLayout);
 
         Log.i("STATE", "Bound message list to " + this.chat.id);
 
-        ImageButton sendMessage = getView().findViewById(R.id.sendMessage);
+        ImageButton sendMessage = findViewById(R.id.sendMessage);
         sendMessage.setOnClickListener(view1 -> { // send message
 
-            EditText messageBox = getView().findViewById(R.id.editText);
+            EditText messageBox = findViewById(R.id.editText);
             String messageBoxText = messageBox.getText().toString();
 
             // Reset message box
@@ -104,19 +69,36 @@ public class MessagesView extends Fragment {
         });
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-    }
 
     @Override
     public void onStart() {
         super.onStart();
-        BrzStateStore.getStore().setTitle(this.chat.name);
+
+        ActionBar ab = getSupportActionBar();
+        if (ab == null) return;
+        ab.setTitle(this.chat.name);
+        ab.setDisplayHomeAsUpEnabled(true);
+        ab.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (this.chat.isGroup) getMenuInflater().inflate(R.menu.menu_messages_view, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+        } else if (id == R.id.action_settings) {
+            Log.i("STATE", "Settings selected");
+            startActivity(ChatSettingsActivity.getIntent(this, this.chat.id));
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -10,22 +10,15 @@
         android:label="fragment_contact_view"
         tools:layout="@layout/fragment_contact_view" >
         <action
-            android:id="@+id/action_contactView_to_chatView"
-            app:destination="@id/chatView"
-            app:enterAnim="@animator/from_left"
-            />
-        <action
             android:id="@+id/action_contactView_to_profileActivity"
             app:destination="@id/profileActivity" />
         <action
             android:id="@+id/action_contactView_to_userSelection"
             app:destination="@id/userSelection" />
+        <action
+            android:id="@+id/action_contactView_to_messagesView"
+            app:destination="@id/messagesView" />
     </fragment>
-    <fragment
-        android:id="@+id/chatView"
-        android:name="com.breeze.views.Messages.MessagesView"
-        android:label="fragment_chat"
-        tools:layout="@layout/fragment_chat" />
     <activity
         android:id="@+id/profileActivity"
         android:name="com.breeze.views.ProfileActivity"
@@ -36,4 +29,13 @@
         android:name="com.breeze.views.UserSelection.UserSelection"
         android:label="activity_user_selection"
         tools:layout="@layout/activity_user_selection" />
+    <activity
+        android:id="@+id/chatSettingsActivity"
+        android:name="com.breeze.views.ChatSettingsActivity"
+        android:label="ChatSettingsActivity" />
+    <activity
+        android:id="@+id/messagesView"
+        android:name="com.breeze.views.Messages.MessagesView"
+        android:label="fragment_chat"
+        tools:layout="@layout/activity_messages_view" />
 </navigation>

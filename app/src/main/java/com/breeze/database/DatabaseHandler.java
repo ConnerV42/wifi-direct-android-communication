@@ -133,7 +133,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         Object[] args = {chat.id, chat.name, new JSONArray(chat.nodes).toString(), chat.isGroup ? 1 : 0, chat.acceptedByHost ? 1 : 0, chat.acceptedByRecipient ? 1 : 0};
         try {
-            db.execSQL("INSERT OR REPLACE INTO " + BRZCHAT_TABLE_NAME + " VALUES (?,?,?,?)", args);
+            db.execSQL("INSERT OR REPLACE INTO " + BRZCHAT_TABLE_NAME + " VALUES (?,?,?,?,?,?)", args);
         } catch (Exception e) {
             Log.i("Bad SQL Error", "Error with SQL Syntax");
         }

@@ -149,7 +149,7 @@ public class BrzRouter {
         Log.i("ENDPOINT", "Starting advertising and discovery");
 
         startAdvertising();
-        startDiscovery();
+//        startDiscovery();
     }
 
     public void stop() {

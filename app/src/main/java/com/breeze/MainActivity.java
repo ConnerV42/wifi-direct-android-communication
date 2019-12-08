@@ -26,6 +26,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -108,20 +109,15 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
-        // TODO: Remove temporary discovery toggle
-        BrzRouter router = BreezeAPI.getInstance().router;
-        if (router.isDiscovering) router.stopDiscovery();
-        else router.stopDiscovery();
-
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Log.i("STATE", "Settings selected");
             return true;
+        } else if (id == R.id.action_toggle_discovery) {
+            BrzRouter router = BreezeAPI.getInstance().router;
+            if (router.isDiscovering) router.stopDiscovery();
+            else router.startDiscovery();
         }
 
         return super.onOptionsItemSelected(item);

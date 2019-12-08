@@ -17,6 +17,7 @@ import android.widget.ListView;
 
 import com.breeze.R;
 import com.breeze.state.BrzStateStore;
+import com.breeze.views.Messages.MessagesView;
 import com.breeze.views.UserSelection.UserSelection;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -65,16 +66,10 @@ public class ChatsView extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         final ChatList chatList = new ChatList(getActivity());
-        ListView msgView = (ListView) view.findViewById(R.id.contactList);
+        ListView msgView = view.findViewById(R.id.contactList);
         msgView.setAdapter(chatList);
-        msgView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView parentView, View childView, int position, long id) {
-                NavController nav = findNavController(getView());
-
-                Bundle args = new Bundle();
-                args.putString("ARG_CHAT_ID", chatList.getChatId(position));
-                nav.navigate(R.id.chatView, args);
-            }
+        msgView.setOnItemClickListener((parentView, childView, position, id) -> {
+            startActivity(MessagesView.getIntent(getContext(), chatList.getChatId(position)));
         });
 
         FloatingActionButton fab = view.findViewById(R.id.chat_view_fab);
@@ -96,5 +91,7 @@ public class ChatsView extends Fragment {
     }
 
     @Override
-    public void onDetach() { super.onDetach(); }
+    public void onDetach() {
+        super.onDetach();
+    }
 }

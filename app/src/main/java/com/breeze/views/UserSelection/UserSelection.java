@@ -62,7 +62,7 @@ public class UserSelection extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        UserList adapter = new UserList(this);
+        UserList adapter = new UserList(this, this.nodes);
         recyclerView.setAdapter(adapter);
 
         // When the user selects a node, add it to the list

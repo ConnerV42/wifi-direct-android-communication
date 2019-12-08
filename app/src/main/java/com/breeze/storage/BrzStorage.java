@@ -38,12 +38,20 @@ public class BrzStorage {
         return instance;
     }
 
-    // Profile image handling
+    /*
+     *
+     *      Profile image handling
+     *
+     */
 
     private final String PROFILE_IMAGE_DIR = "profile_images";
 
     public void saveProfileImage(Bitmap bm, String fileName) {
         this.saveImage(bm, fileName, PROFILE_IMAGE_DIR);
+    }
+
+    public void deleteProfileImage(String fileName) {
+        this.deleteImage(fileName, PROFILE_IMAGE_DIR);
     }
 
     public Bitmap getProfileImage(String fileName, Context ctx) {
@@ -53,22 +61,35 @@ public class BrzStorage {
         return b;
     }
 
+    /*
+     *
+     *      Chat image handling
+     *
+     */
 
-    private Bitmap bitmapFromVector(Context context, int drawableId) {
-        Drawable drawable = ContextCompat.getDrawable(context, drawableId);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            drawable = (DrawableCompat.wrap(drawable)).mutate();
-        }
+    private final String CHAT_IMAGE_DIR = "chat_images";
 
-        Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-
-        return bitmap;
+    public void saveChatImage(Bitmap bm, String fileName) {
+        this.saveImage(bm, fileName, CHAT_IMAGE_DIR);
     }
 
-    // File access helpers
+    public void deleteChatImage(String fileName) {
+        this.deleteImage(fileName, CHAT_IMAGE_DIR);
+    }
+
+    public Bitmap getChatImage(String fileName, Context ctx) {
+        Bitmap b = getImage(fileName, CHAT_IMAGE_DIR);
+        if (b == null)
+            b = bitmapFromVector(ctx, R.drawable.ic_person_black_24dp);
+        return b;
+    }
+
+
+    /*
+     *
+     *      File access helpers
+     *
+     */
 
     private void saveImage(Bitmap bm, String name, String dir) {
         File imageDirectory = cw.getDir(dir, Context.MODE_PRIVATE);
@@ -100,6 +121,21 @@ public class BrzStorage {
         }
 
         return null;
+    }
+
+    private void deleteImage(String name, String dir) {
+        File imageDirectory = cw.getDir(dir, Context.MODE_PRIVATE);
+        File imagePath = new File(imageDirectory, name);
+        imagePath.delete();
+    }
+
+    public Bitmap bitmapFromVector(Context context, int drawableId) {
+        Drawable drawable = ContextCompat.getDrawable(context, drawableId);
+        Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
     }
 
 }
