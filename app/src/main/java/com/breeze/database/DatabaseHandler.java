@@ -246,9 +246,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.insert(BRZMESSAGE_TABLE_NAME, null, vals);
         db.close();
     }
-    public void deleteMessage(@NonNull int id) {
+    public void deleteMessage(@NonNull String id) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(BRZMESSAGE_TABLE_NAME, "id = ?", new String[]{String.valueOf(id)});
+        db.delete(BRZMESSAGE_TABLE_NAME, "id = ?", new String[]{ id });
         db.close();
     }
     public BrzMessage getMessage(@NonNull int id){
@@ -280,76 +280,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         c.close();
         db.close();
         return message;
-    }
-
-    public List<BrzMessage> getInbox(@NonNull int currentUserId){
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + BRZMESSAGE_TABLE_NAME + " WHERE 'from' != ?;", new String[]{String.valueOf(currentUserId)});
-        if (c == null) {
-            db.close();
-            return null;
-        } else if (c.getCount() < 1) {
-            c.close();
-            db.close();
-            return null;
-        }
-        ArrayList<BrzMessage> list = new ArrayList<>();
-        if (c.moveToFirst()) {
-            while (!c.isAfterLast()) {
-                BrzMessage message = new BrzMessage();
-                message.from = c.getString(c.getColumnIndex("from"));
-                message.body = c.getString(c.getColumnIndex("body"));
-                message.chatId = c.getString(c.getColumnIndex("chatId"));
-                message.isStatus = c.getString(c.getColumnIndex("isStatus")).equals("1");
-                long milliseconds = 0;
-                SimpleDateFormat f = new SimpleDateFormat("dd-MMM-yyyy");
-                try {
-                    Date d = f.parse(c.getString(c.getColumnIndex("createdAt")));
-                    milliseconds = d.getTime();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                message.datestamp = milliseconds;
-                list.add(message);
-                c.moveToNext();
-            }
-        }
-        return list;
-    }
-
-    public List<BrzMessage> getSentMessages(@NonNull int currentUserId){
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + BRZMESSAGE_TABLE_NAME + " WHERE 'from' = ?;", new String[]{String.valueOf(currentUserId)});
-        if (c == null) {
-            db.close();
-            return null;
-        } else if (c.getCount() < 1) {
-            c.close();
-            db.close();
-            return null;
-        }
-        ArrayList<BrzMessage> list = new ArrayList<>();
-        if (c.moveToFirst()) {
-            while (!c.isAfterLast()) {
-                BrzMessage message = new BrzMessage();
-                message.from = c.getString(c.getColumnIndex("from"));
-                message.body = c.getString(c.getColumnIndex("body"));
-                message.chatId = c.getString(c.getColumnIndex("chatId"));
-                message.isStatus = c.getString(c.getColumnIndex("isStatus")).equals("1");
-                long milliseconds = 0;
-                SimpleDateFormat f = new SimpleDateFormat("dd-MMM-yyyy");
-                try {
-                    Date d = f.parse(c.getString(c.getColumnIndex("createdAt")));
-                    milliseconds = d.getTime();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                message.datestamp = milliseconds;
-                list.add(message);
-                c.moveToNext();
-            }
-        }
-        return list;
     }
 
     public List<BrzMessage> getChatMessages(@NonNull String chatId){
@@ -388,7 +318,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return list;
     }
 
-
-
-
+    public void deleteChatMessages(@NonNull String chatId){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(BRZMESSAGE_TABLE_NAME, "chatId = ?", new String[]{ chatId });
+        db.close();
+    }
 }

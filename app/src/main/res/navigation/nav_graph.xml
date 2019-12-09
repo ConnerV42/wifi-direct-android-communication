@@ -8,7 +8,7 @@
         android:id="@+id/contactView"
         android:name="com.breeze.views.Chats.ChatsView"
         android:label="fragment_contact_view"
-        tools:layout="@layout/fragment_contact_view" >
+        tools:layout="@layout/fragment_chats_view" >
         <action
             android:id="@+id/action_contactView_to_profileActivity"
             app:destination="@id/profileActivity" />

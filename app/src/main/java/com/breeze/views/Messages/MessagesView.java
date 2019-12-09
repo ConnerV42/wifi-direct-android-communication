@@ -46,7 +46,7 @@ public class MessagesView extends AppCompatActivity {
 
         final BrzRouter router = BrzRouter.getInstance();
 
-        MessageList msgList = new MessageList(this, this.chat.id);
+        MessageList msgList = new MessageList(this, this.chat);
         RecyclerView msgView = findViewById(R.id.messageList);
         msgView.setAdapter(msgList);
 

@@ -88,6 +88,10 @@ public class BreezeAPI extends Service {
             chats = this.db.getAllChats();
             if (chats != null) {
                 Log.i("STATE", "Found " + chats.size() + " chats in the database");
+//                for(BrzChat b : chats) {
+//                    this.db.deleteChat(b.id);
+//                    this.db.deleteChatMessages(b.id);
+//                }
                 this.state.addAllChats(chats);
             } else {
                 Log.i("STATE", "No stored chats found!");
@@ -210,6 +214,9 @@ public class BreezeAPI extends Service {
         chat.acceptedByHost = true;
         chat.acceptedByRecipient = false;
 
+        if(!chat.nodes.contains(this.hostNode.id))
+            chat.nodes.add(this.hostNode.id);
+
         // TODO: Generate chat encryption keys
 
         BrzChatHandshake handshake = new BrzChatHandshake(this.router.hostNode.id, chat, "", "");
@@ -217,6 +224,7 @@ public class BreezeAPI extends Service {
         p.type = BrzPacket.BrzPacketType.CHAT_HANDSHAKE;
 
         for (String nodeId : chat.nodes) {
+            if(nodeId.equals(hostNode.id)) continue;
             p.to = nodeId;
             this.router.send(p);
         }
@@ -334,6 +342,7 @@ public class BreezeAPI extends Service {
         // Send message to each recipient
         BrzChat chat = this.state.getChat(chatId);
         for (String nodeId : chat.nodes) {
+            if(nodeId.equals(hostNode.id)) continue;
             p.to = nodeId;
             this.router.send(p);
         }
