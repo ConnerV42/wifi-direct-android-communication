@@ -4,7 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAKeyGenParameterSpec;
@@ -19,8 +21,10 @@ import android.util.Log;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 public final class BrzEncryption
@@ -29,12 +33,97 @@ public final class BrzEncryption
     public static final String DEFAULT_ENCRYPTION_PADDING = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1;
     public static final String DEFAULT_CIPHER_INSTANCE_SETTING = "RSA/ECB/PKCS1Padding";
 
+
+    public static boolean deleteKeyPairByAlias(String alias){
+        if(alias == null || alias.isEmpty())
+        {
+            throw new IllegalArgumentException("Ca't go to keystore with an empty alias bro");
+        }
+        try{
+            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+            ks.load(null,null);
+            ks.deleteEntry(alias);
+            return true;
+        }catch(Exception e)
+        {
+            return false;
+        }
+    }
+
+    public static KeyPair getKeyPairByAlias(String alias)
+    {
+        if(alias == null || alias.isEmpty())
+        {
+            throw new IllegalArgumentException("Ca't go to keystore with an empty alias bro");
+        }
+        try{
+            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+            ks.load(null,null);
+            Key key = ks.getKey(alias, null);
+            if (key instanceof PrivateKey) {
+                Certificate cert = ks.getCertificate(alias);
+                return new KeyPair(cert.getPublicKey(), (PrivateKey) key);
+            } else {
+                return null;
+            }
+        }catch(Exception e)
+        {
+            return null;
+        }
+    }
+
     /**
      * @param chatToEncrypt the chat we're setting the public and private keys of
      * @return a BrzChat with a public and private key for security
      */
     public static BrzChat encryptBrzChat(BrzChat chatToEncrypt){
-        return null;
+        String id = chatToEncrypt.id;
+        try {
+            KeyPair kp = BrzEncryption.generateAndSaveKeyPair(id);
+            PublicKey chatPub = kp.getPublic();
+            PrivateKey chatPriv = kp.getPrivate();
+            chatToEncrypt.setPublicKey(BrzEncryption.getPublicKeyAsString(chatPub));
+            chatToEncrypt.setPrivateKey(BrzEncryption.getPrivateKeyAsString(chatPriv));
+            return chatToEncrypt;
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public static boolean addBrzChatKeys(BrzChat encryptedChat){
+        return false;
+    }
+    public static boolean addChatKeysToKeyStore(PublicKey pubKey, PrivateKey privKey, String alias){
+        KeyStore ks = null;
+        try {
+            ks = KeyStore.getInstance("AndroidKeyStore");
+        } catch (KeyStoreException kse) {
+            kse.printStackTrace();
+            return false;
+        }
+        if (ks == null) {
+            throw new RuntimeException("Bad keystore object, cannot decrypt BrzMessage");
+        } else {
+            try {
+                ks.load(null);
+                ks.setKeyEntry(alias, pubKey, null, null);
+                ks.setKeyEntry(alias, privKey, null, null);
+            } catch (CertificateException e) {
+                e.printStackTrace();
+                return false;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+                return false;
+            } catch (KeyStoreException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        return false;
     }
 
     /**
@@ -157,7 +246,7 @@ public final class BrzEncryption
                         new KeyGenParameterSpec.Builder(
                                 alias,
                                 KeyProperties.PURPOSE_DECRYPT).
-                                setKeySize(1024).
+                                setKeySize(2048).
                                 setEncryptionPaddings(BrzEncryption.DEFAULT_ENCRYPTION_PADDING).
                                 setDigests(KeyProperties.DIGEST_SHA256);
 
@@ -194,12 +283,14 @@ public final class BrzEncryption
         {
             Cipher inCipher = Cipher.getInstance(BrzEncryption.DEFAULT_CIPHER_INSTANCE_SETTING);
             inCipher.init(Cipher.ENCRYPT_MODE, pubkey);
+            byte[] vals = inCipher.doFinal(message.body.getBytes());
 
-            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-            CipherOutputStream cipherOutputStream = new CipherOutputStream(outStream, inCipher);
-            cipherOutputStream.write(android.util.Base64.decode(message.body, Base64.DEFAULT));
-            cipherOutputStream.close();
-            byte [] vals = outStream.toByteArray();
+
+//            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+//            CipherOutputStream cipherOutputStream = new CipherOutputStream(outStream, inCipher);
+//            cipherOutputStream.write(android.util.Base64.encode(message.body.getBytes(), Base64.DEFAULT));
+//            cipherOutputStream.close();
+
             message.body = android.util.Base64.encodeToString(vals, Base64.DEFAULT);
             return message;
         }catch(Exception e)
@@ -222,20 +313,26 @@ public final class BrzEncryption
         try {
             Cipher inCipher = Cipher.getInstance(BrzEncryption.DEFAULT_CIPHER_INSTANCE_SETTING);
             inCipher.init(Cipher.DECRYPT_MODE, privateKey);
-            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-            CipherOutputStream cipherOutputStream = new CipherOutputStream(outStream, inCipher);
-            cipherOutputStream.write(android.util.Base64.decode(message.body, Base64.DEFAULT));
-            cipherOutputStream.close();
-            byte[] vals = outStream.toByteArray();
-            message.body = android.util.Base64.encodeToString(vals, Base64.DEFAULT);
+//            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+//            CipherOutputStream cipherOutputStream = new CipherOutputStream(outStream, inCipher);
+//            cipherOutputStream.write(android.util.Base64.decode(message.body, Base64.DEFAULT));
+//            cipherOutputStream.close();
+//            byte[] vals = outStream.toByteArray();
+
+            byte [] vals = new byte[0];
+            try {
+                vals = inCipher.doFinal(Base64.decode(message.body, Base64.DEFAULT));
+            } catch (BadPaddingException e) {
+                e.printStackTrace();
+            } catch (IllegalBlockSizeException e) {
+                e.printStackTrace();
+            }
+            message.body = new String(vals);
             return message;
         } catch (NoSuchPaddingException e) {
             e.printStackTrace();
             return null;
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
-        } catch (IOException e) {
             e.printStackTrace();
             return null;
         } catch (InvalidKeyException e) {
@@ -265,10 +362,10 @@ public final class BrzEncryption
             throw new RuntimeException("Bad keystore object, cannot decrypt BrzMessage");
         } else {
             try {
+                ks.load(null, null);
                 if (!ks.containsAlias(privateKeyAlias)) {
                     throw new RuntimeException("Bad keystore alias, cannot find private key with alias: " + privateKeyAlias);
                 }
-                ks.load(null);
                 KeyStore.Entry entry = ks.getEntry(privateKeyAlias, null);
                 if (!(entry instanceof KeyStore.PrivateKeyEntry)) {
                     Log.w("Bad privateKeyEntry", "Not an instance of a PrivateKeyEntry");
@@ -318,10 +415,10 @@ public final class BrzEncryption
             throw new RuntimeException("Bad keystore object, cannot decrypt BrzMessage");
         } else {
             try {
+                ks.load(null, null);
                 if (!ks.containsAlias(alias)) {
                     throw new RuntimeException("Bad keystore alias, cannot find private key with alias: " + alias);
                 }
-                ks.load(null);
                 return ks.getCertificate(alias).getPublicKey();
             } catch (CertificateException e) {
                 e.printStackTrace();
