@@ -1,6 +1,9 @@
 package com.breeze.views.Messages;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +29,7 @@ import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
+import com.google.android.gms.nearby.connection.Payload;
 
 
 /**
@@ -36,6 +41,7 @@ import com.breeze.state.BrzStateStore;
  */
 public class MessagesView extends Fragment {
 
+    private static final int READ_REQUEST_CODE = 69;
     private static final String ARG_CHAT_ID = "";
     private BrzChat chat;
 
@@ -101,6 +107,39 @@ public class MessagesView extends Fragment {
 
             BreezeAPI.getInstance().sendMessage(BrzPacketBuilder.makeMessage(router.hostNode.id, messageBoxText, chat.id, false), chat.id);
         });
+
+        Button sendPhoto = getView().findViewById(R.id.sendPhoto);
+        sendPhoto.setOnClickListener(view1 -> {
+            // Bring up the option to select media to send from external storage
+            Intent intent = new Intent(Intent.ACTION_PICK,
+                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, READ_REQUEST_CODE);
+        });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            try {
+                Uri imageUri = data.getData();
+
+                // For Payload (FILE)
+                ParcelFileDescriptor parcel = this.getContext().getContentResolver().openFileDescriptor(imageUri, "r");
+                Payload filePayload = Payload.fromFile(parcel);
+                // Payload filePayloadAsStream = Payload.fromStream(parcel);
+
+                // For File Name Payload (BYTES)
+                String filePayloadId = "" + filePayload.getId();
+                String fileName = imageUri.getLastPathSegment();
+
+                final BrzRouter router = BrzRouter.getInstance();
+                BrzPacket packet = BrzPacketBuilder.fileInfoPacket(router.hostNode.id, chat.id, filePayloadId, fileName);
+                BrzRouter.getInstance().sendFilePayload(filePayload, packet);
+            } catch (Exception e) {
+                Log.e("FILE_ACCESS", "Failure ", e);
+            }
+        }
     }
 
     @Override

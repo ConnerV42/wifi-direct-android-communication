@@ -5,10 +5,12 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.breeze.datatypes.BrzFileInfo;
 import com.breeze.graph.BrzGraph;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
+import com.breeze.router.handlers.BrzFileInfoPktHandler;
 import com.breeze.router.handlers.BrzGraphHandler;
 import com.breeze.router.handlers.BrzHandshakeHandler;
 import com.breeze.router.handlers.BrzMessageHandler;
@@ -28,6 +30,7 @@ import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import com.google.android.gms.nearby.connection.Strategy;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,6 +65,10 @@ public class BrzRouter {
     private List<String> connectedEndpoints = new ArrayList<>();
     private Map<String, String> endpointUUIDs = new HashMap<>();
 
+    public Map<Long, Payload> pendingFilePayloads = new HashMap<>();
+    public Map<Long, Payload> completedFilePayloads = new HashMap<>();
+    public Map<Long, BrzPacket> fileInfoPackets = new HashMap<>();
+
     private BrzGraph graph;
     public BrzNode hostNode = null;
 
@@ -75,6 +82,7 @@ public class BrzRouter {
         this.handlers.add(new BrzGraphHandler(this));
         this.handlers.add(new BrzMessageHandler(this));
         this.handlers.add(new BrzHandshakeHandler(this));
+        this.handlers.add(new BrzFileInfoPktHandler(this));
     }
 
     //
@@ -98,6 +106,25 @@ public class BrzRouter {
 
     public void send(BrzPacket packet) {
         forwardPacket(packet, true);
+    }
+
+    public void sendFilePayload(Payload filePayload, BrzPacket packet) {
+        if(filePayload == null || packet == null) return;
+
+        BrzFileInfo fileInfoPacket = packet.fileInfoPacket();
+
+        String nextHopUUID = graph.nextHop(this.hostNode.id, fileInfoPacket.destinationUUID);
+
+        if(nextHopUUID == null) {
+            Log.i("ENDPOINT_ERROR", "Failed to find path to " + fileInfoPacket.destinationUUID);
+        }
+        BrzNode nextHopNode = this.graph.getVertex(nextHopUUID);
+
+        connectionsClient.sendPayload(nextHopNode.endpointId, filePayload);
+
+        // FileInfoPackets arrive at each hop along the way, to guide file payloads throughout network traversal
+        packet.to = nextHopUUID;
+        send(packet);
     }
 
     public void sendToEndpoint(BrzPacket packet, String endpointId) {
@@ -124,6 +151,33 @@ public class BrzRouter {
         Payload p = payloadBuffer.getStreamPayload(packet.toJSON());
         if (addToBuffer) payloadBuffer.addOutgoing(p, 5000, 5, sendPayload);
         else sendPayload.accept(p);
+    }
+
+    public void handleFilePayload(long payloadId) {
+        // BYTES and FILE could be received in any order, so we call when either the BYTES or the FILE
+        // payload is completely received. The file payload is considered complete only when both have
+        // been received.
+        Payload filePayload = completedFilePayloads.get(payloadId);
+        BrzPacket packet = fileInfoPackets.get(payloadId);
+        if (filePayload != null && packet != null) {
+            completedFilePayloads.remove(payloadId);
+            fileInfoPackets.remove(payloadId);
+
+            BrzFileInfo fileInfo = packet.fileInfoPacket();
+
+            // Send off to sendFilePayload, if this is not the destination uuid
+            if (!hostNode.id.equals(fileInfo.destinationUUID)) {
+                sendFilePayload(filePayload, packet);
+            } else {
+                // Get the received file (which will be in the Downloads folder)
+                File payloadFile = filePayload.asFile().asJavaFile();
+
+                // Rename the file.
+                payloadFile.renameTo(new File(payloadFile.getParentFile(), fileInfo.fileName));
+
+                Log.i("ENDPOINT", "Received and Saved Payload file to downloads folder");
+            }
+        }
     }
 
 
@@ -221,7 +275,12 @@ public class BrzRouter {
             new PayloadCallback() {
                 @Override
                 public void onPayloadReceived(@NonNull String endpointId, Payload payload) {
-                    payloadBuffer.addIncoming(payload);
+                    if (payload.getType() == Payload.Type.FILE) {
+                        pendingFilePayloads.put(payload.getId(), payload);
+                    }
+                    else {
+                        payloadBuffer.addIncoming(payload);
+                    }
                 }
 
                 @Override
@@ -231,11 +290,18 @@ public class BrzRouter {
 
                     // Incomming packet was a success!
                     if (payloadBuffer.isIncomming(payloadId)) {
-                        Log.i("ENDPOINT", "Recieved a payload successfully");
+                        Log.i("ENDPOINT", "Received a payload");
+                        Payload payload = payloadBuffer.popIncoming(payloadId);
 
-                        Payload p = payloadBuffer.popIncoming(payloadId);
-                        BrzPacket packet = new BrzPacket(payloadBuffer.getStreamString(p));
+                        BrzPacket packet = new BrzPacket(payloadBuffer.getStreamString(payload));
                         handlePacket(packet, endpointId);
+                    } else if (pendingFilePayloads.containsKey(payloadId)) { // If it's a File Payload
+                        Payload payload = pendingFilePayloads.get(payloadId);
+                        if(payload != null) {
+                            pendingFilePayloads.remove(payloadId);
+                            completedFilePayloads.put(payloadId, payload);
+                            handleFilePayload(payloadId);
+                        }
                     }
 
                     // Outgoing packet was a success!
