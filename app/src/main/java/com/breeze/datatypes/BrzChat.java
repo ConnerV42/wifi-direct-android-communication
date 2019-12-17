@@ -82,4 +82,11 @@ public class BrzChat implements BrzSerializable {
             Log.e("DESERIALIZATION ERROR", "BrzChat", e);
         }
     }
+    public String getKeyAlias() {
+        return keyAlias;
+    }
+
+    public void setKeyAlias(String keyAlias) {
+        this.keyAlias = keyAlias;
+    }
 }
