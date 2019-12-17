@@ -48,49 +48,7 @@ public final class BrzEncryption
         return(Pattern.compile("[$&+,:;=\\\\?@#|/'<>.^*()%!-]").matcher(alias).find());
     }
 
-    public static BrzMessage encryptSymMessageBody(SecretKey key, BrzMessage message)
-    {
-        if(key == null ||message.body.isEmpty() || message == null)
-        {
-            throw new IllegalArgumentException("Bad public key or message to encrypt");
-        }
-        try {
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-//            byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-//            IvParameterSpec ivspec = new IvParameterSpec(iv);
-            cipher.init(cipher.ENCRYPT_MODE, key);
-            byte[] bytes = cipher.doFinal(message.body.getBytes());
-            message.body = android.util.Base64.encodeToString(bytes, Base64.DEFAULT);
-            return message;
-        }catch(Exception e)
-        {
-            e.printStackTrace();
-            return null;
-        }
-
-    }
-    public static BrzMessage decryptSymMessageBody(SecretKey key, BrzMessage message) throws Exception
-    {
-        if (key == null ||  message.body.isEmpty() || message == null)
-        {
-            throw new IllegalArgumentException("Bad public key or message to encrypt");
-        }
-
-        try {
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            cipher.init(Cipher.DECRYPT_MODE, key);
-            byte[]decryptedBytes = cipher.doFinal(Base64.decode(message.body, Base64.DEFAULT));
-            //byte[] decryptedBytes = cipher.doFinal(bytes);
-            message.body = new String(decryptedBytes);
-            return message;
-        } catch (NoSuchPaddingException | NoSuchAlgorithmException| InvalidKeyException e)
-        {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public final static Pair<SecretKey, byte[]> generateAndSaveSymKey(final String alias)
+    public final static SecretKey generateAndSaveSymKey(final String alias)
     {
         if(alias == null || alias.isEmpty() || alias.length() > 50 || aliasCheck(alias))
         {
@@ -111,7 +69,7 @@ public final class BrzEncryption
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                     .build()
             );
-            return new Pair<SecretKey, byte[]>(secretKey, initialVector);
+            return secretKey;
         }catch(Exception e){
             Log.i("Keystore / Secret Key Creation error", e.getMessage());
             e.printStackTrace();
@@ -247,82 +205,6 @@ public final class BrzEncryption
     }
 
     /**
-     * @param key the public key to be converted to a string
-     * @return a string representation of the public key
-     */
-    public static String getPublicKeyAsString(PublicKey key)
-    {
-        try{
-            KeyFactory factory = KeyFactory.getInstance("RSA");
-            X509EncodedKeySpec spec = factory.getKeySpec(key, X509EncodedKeySpec.class);
-            return Base64.encodeToString(spec.getEncoded(), Base64.DEFAULT);
-        } catch(NoSuchAlgorithmException | InvalidKeySpecException e)
-        {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     *
-     * @param key the private key to be used to create a string
-     * @return A string representation of the private key
-     */
-    public static String getPrivateKeyAsString(PrivateKey key)
-    {
-        try {
-            KeyFactory fact = KeyFactory.getInstance("RSA");
-            PKCS8EncodedKeySpec spec = fact.getKeySpec(key,
-                    PKCS8EncodedKeySpec.class);
-            return Base64.encodeToString(spec.getEncoded(), Base64.DEFAULT);
-        } catch(NoSuchAlgorithmException | InvalidKeySpecException e)
-        {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-
-    /**
-     * @param pubKeyString the string to be used to build a public key object
-     * @return A PublicKey object created from the string
-     */
-    public static PublicKey getPublicKeyFromString(String pubKeyString)
-    {
-        try{
-            byte [] data = Base64.decode(pubKeyString, Base64.DEFAULT);
-            X509EncodedKeySpec spec = new X509EncodedKeySpec(data);
-            KeyFactory fact = KeyFactory.getInstance("RSA");
-            return fact.generatePublic(spec);
-        } catch(InvalidKeySpecException | NoSuchAlgorithmException e)
-        {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * @param privateKeyString the string the private key object is built from
-     * @return a private key object created from the string passed in.
-     */
-    public static PrivateKey getPrivateKeyFromString(String privateKeyString)
-    {
-        try {
-            byte[] clear = Base64.decode(privateKeyString, Base64.DEFAULT);
-            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(clear);
-            KeyFactory fact = KeyFactory.getInstance("RSA");
-            PrivateKey ret = fact.generatePrivate(spec);
-            Arrays.fill(clear, (byte) 0);
-            return ret;
-        }catch(InvalidKeySpecException | NoSuchAlgorithmException e)
-        {
-            e.printStackTrace();
-            return null;
-        }
-
-    }
-
-    /**
      * @param alias the alias of the keypair to check the keystore for
      * @return true if the keypair is in the store, false if not
      */
@@ -380,7 +262,7 @@ public final class BrzEncryption
         throw new KeyStoreException("This device's Key Pair unable to be generated");
     }
 
-    public static Enumeration<String>  listKeyStore() throws Exception {
+    public static Enumeration<String> listKeyStore() throws Exception {
         KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
         ks.load(null);
         return ks.aliases();
@@ -404,17 +286,31 @@ public final class BrzEncryption
             Cipher inCipher = Cipher.getInstance(BrzEncryption.DEFAULT_CIPHER_INSTANCE_SETTING);
             inCipher.init(Cipher.ENCRYPT_MODE, pubkey);
             byte[] vals = inCipher.doFinal(message.body.getBytes());
-
-
-//            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-//            CipherOutputStream cipherOutputStream = new CipherOutputStream(outStream, inCipher);
-//            cipherOutputStream.write(android.util.Base64.encode(message.body.getBytes(), Base64.DEFAULT));
-//            cipherOutputStream.close();
-
             message.body = android.util.Base64.encodeToString(vals, Base64.DEFAULT);
             return message;
         }catch(Exception e)
         {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String asymmetricEncrypt(String keyAlias, String message) {
+        if(!aliasCheck(keyAlias)){
+            throw new IllegalArgumentException("Bad public key or message to encrypt");
+        }
+        if(!BrzEncryption.storeContainsKey(keyAlias)){
+            throw new IllegalArgumentException("Bad key alias; store does not contain key");
+        }
+        try{
+            PublicKey pubKey = getPublicKeyFromKeyStore(keyAlias);
+            Cipher inCipher = Cipher.getInstance(BrzEncryption.DEFAULT_CIPHER_INSTANCE_SETTING);
+            inCipher.init(Cipher.ENCRYPT_MODE, pubKey);
+            byte[] vals = inCipher.doFinal(message.getBytes());
+            message = android.util.Base64.encodeToString(vals, Base64.DEFAULT);
+            return message;
+        }catch(IllegalBlockSizeException| BadPaddingException | NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException e){
+            Log.i("Asymmetric Message Encryption Error", e.getMessage());
             e.printStackTrace();
             return null;
         }

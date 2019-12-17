@@ -2,11 +2,20 @@ package com.breeze.datatypes;
 
 import android.util.Log;
 
+import com.breeze.application.BreezeAPI;
+import com.breeze.database.DatabaseHandler;
+import com.breeze.encryption.BrzEncryption;
+import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzSerializable;
+import com.breeze.router.BrzRouter;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -48,6 +57,31 @@ public class BrzChat implements BrzSerializable {
             for (int i = 0; i < nodeArr.length(); i++) this.nodes.add(nodeArr.getString(i));
         } catch (Exception e) {
             Log.e("DESERIALIZATION ERROR", "BrzChat", e);
+        }
+    }
+
+    public int sendMessageToChat(BrzMessage message){
+        if(!BrzEncryption.storeContainsKey(this.keyAlias))
+        {
+            throw new IllegalArgumentException("Cannot find key with alias :" + keyAlias + " in keystore");
+        }
+        try{
+            message.body = BrzEncryption.symmetricEncrypt(this.keyAlias, message.body);
+            BrzRouter router = BrzRouter.getInstance();
+            BreezeAPI api = BreezeAPI.getInstance();
+            int success = 0;
+            for (String nodeId : this.nodes) {
+                BrzNode node = api.db.getNode(nodeId);
+                message.body = BrzEncryption.asymmetricEncrypt(node.publicKey, message.body);
+                BrzPacket p = new BrzPacket(message);
+                p.type = BrzPacket.BrzPacketType.MESSAGE;
+                p.to = nodeId;
+                router.send(p);
+                success++;
+            }
+            return success;
+        }catch(Exception e){
+            return -1;
         }
     }
 
