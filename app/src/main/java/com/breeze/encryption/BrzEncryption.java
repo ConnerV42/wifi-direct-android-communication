@@ -12,11 +12,15 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
+import java.util.regex.Pattern;
+
 import android.security.KeyPairGeneratorSpec;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
+import android.security.keystore.KeyProtection;
 import android.util.Base64;
 import android.util.Log;
+import android.util.Pair;
 
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
@@ -25,14 +29,134 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public final class BrzEncryption
 {
     public static final String DEFAULT_DEVICE_KEYPAIR_NAME = "MY_BREEZE_KEY";
     public static final String DEFAULT_ENCRYPTION_PADDING = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1;
     public static final String DEFAULT_CIPHER_INSTANCE_SETTING = "RSA/ECB/PKCS1Padding";
+    private static final String initVector = "breezeVector";
+    //Check aliases for special characters
+    private final static boolean aliasCheck(String alias){
+        return(Pattern.compile("[$&+,:;=\\\\?@#|/'<>.^*()%!-]").matcher(alias).find());
+    }
 
+    public static BrzMessage encryptSymMessageBody(SecretKey key, BrzMessage message)
+    {
+        if(key == null ||message.body.isEmpty() || message == null)
+        {
+            throw new IllegalArgumentException("Bad public key or message to encrypt");
+        }
+        try {
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+//            byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+//            IvParameterSpec ivspec = new IvParameterSpec(iv);
+            cipher.init(cipher.ENCRYPT_MODE, key);
+            byte[] bytes = cipher.doFinal(message.body.getBytes());
+            message.body = android.util.Base64.encodeToString(bytes, Base64.DEFAULT);
+            return message;
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+    public static BrzMessage decryptSymMessageBody(SecretKey key, BrzMessage message) throws Exception
+    {
+        if (key == null ||  message.body.isEmpty() || message == null)
+        {
+            throw new IllegalArgumentException("Bad public key or message to encrypt");
+        }
+
+        try {
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, key);
+            byte[]decryptedBytes = cipher.doFinal(Base64.decode(message.body, Base64.DEFAULT));
+            //byte[] decryptedBytes = cipher.doFinal(bytes);
+            message.body = new String(decryptedBytes);
+            return message;
+        } catch (NoSuchPaddingException | NoSuchAlgorithmException| InvalidKeyException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public final static Pair<SecretKey, byte[]> generateAndSaveSymKey(final String alias)
+    {
+        if(alias == null || alias.isEmpty() || alias.length() > 50 || aliasCheck(alias))
+        {
+            Log.i("Bad Keystore SecretKey alias", "Bad alias parameter for the keystore. Cannot be null, empty, have a length over 50, or contain any special characters.");
+            throw new IllegalArgumentException("Bad alias parameter for the keystore");
+        }
+        try {
+            final KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+            ks.load(null);
+            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+            keyGen.init(256);
+            SecretKey secretKey = keyGen.generateKey();
+            byte[] initialVector = new byte[12];
+            SecureRandom secureRandom = new SecureRandom();
+            secureRandom.nextBytes(initialVector);
+            ks.setEntry(alias, new KeyStore.SecretKeyEntry(secretKey), new KeyProtection.Builder(KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                    .build()
+            );
+            return new Pair<SecretKey, byte[]>(secretKey, initialVector);
+        }catch(Exception e){
+            Log.i("Keystore / Secret Key Creation error", e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public final static String symmetricEncrypt(final String keyAlias, final String message){
+        //https://stackoverflow.com/questions/31851612/java-aes-gcm-nopadding-what-is-cipher-getiv-giving-me/31863209
+        try{
+            final KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+            ks.load(null);
+            final Cipher ce = Cipher.getInstance("AES/GCM/NoPadding");
+            final SecretKey secretKey = (SecretKey) ks.getKey(keyAlias, null);
+            ce.init(Cipher.ENCRYPT_MODE, secretKey);
+            byte [] iv = ce.getIV();
+            byte [] cipherText = ce.doFinal(message.getBytes());
+            byte [] ret = new byte[12 + message.getBytes().length + 16];
+            System.arraycopy(iv, 0, ret, 0, 12);
+            System.arraycopy(cipherText, 0 ,ret, 12, cipherText.length);
+            return Base64.encodeToString(ret, Base64.DEFAULT);
+        }catch(Exception e){
+            Log.i("Symmetric Encryption Error", "Error with encrypting message with secret key: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public final static String symmetricDecrypt(final String keyAlias, final String message){
+        //https://stackoverflow.com/questions/31851612/java-aes-gcm-nopadding-what-is-cipher-getiv-giving-me/31863209
+        try{
+            final KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+            ks.load(null);
+            final Cipher ce = Cipher.getInstance("AES/GCM/NoPadding");
+            byte [] decoded = Base64.decode(message, Base64.DEFAULT);
+            GCMParameterSpec params = new GCMParameterSpec(128, decoded, 0, 12);
+            final SecretKey secretKey = (SecretKey) ks.getKey(keyAlias, null);
+            ce.init(Cipher.DECRYPT_MODE, secretKey, params);
+            return new String(ce.doFinal(decoded, 12, decoded.length - 12), "UTF-8");
+        }catch(Exception e){
+            Log.i("Symmetric Decryption Error", "Error with encrypting message with secret key: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     public static boolean deleteKeyPairByAlias(String alias){
         if(alias == null || alias.isEmpty())
@@ -77,13 +201,9 @@ public final class BrzEncryption
      * @return a BrzChat with a public and private key for security
      */
     public static BrzChat encryptBrzChat(BrzChat chatToEncrypt){
+        //TODO
         String id = chatToEncrypt.id;
         try {
-            KeyPair kp = BrzEncryption.generateAndSaveKeyPair(id);
-            PublicKey chatPub = kp.getPublic();
-            PrivateKey chatPriv = kp.getPrivate();
-            chatToEncrypt.setPublicKey(BrzEncryption.getPublicKeyAsString(chatPub));
-            chatToEncrypt.setPrivateKey(BrzEncryption.getPrivateKeyAsString(chatPriv));
             return chatToEncrypt;
         }catch(Exception e)
         {
