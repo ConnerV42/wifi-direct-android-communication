@@ -19,9 +19,7 @@ public class BrzChat implements BrzSerializable {
     public List<String> nodes = new ArrayList<>();
     public boolean isGroup = false;
 
-    private String publicKey;
-    private String privateKey;
-
+    private String keyAlias;
 
     public BrzChat() {
     }
@@ -83,21 +81,5 @@ public class BrzChat implements BrzSerializable {
         } catch (Exception e) {
             Log.e("DESERIALIZATION ERROR", "BrzChat", e);
         }
-    }
-
-    public String getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
-
-    public String getPrivateKey() {
-        return privateKey;
-    }
-
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
     }
 }
