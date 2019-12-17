@@ -27,7 +27,6 @@ public class BrzChat implements BrzSerializable {
 
     public List<String> nodes = new ArrayList<>();
     public boolean isGroup = false;
-
     private String keyAlias;
 
     public BrzChat() {

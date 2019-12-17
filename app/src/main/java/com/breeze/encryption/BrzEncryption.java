@@ -156,52 +156,23 @@ public final class BrzEncryption
 
     /**
      * @param chatToEncrypt the chat we're setting the public and private keys of
-     * @return a BrzChat with a public and private key for security
+     * @return a BrzChat with a secret key added to the store
      */
-    public static BrzChat encryptBrzChat(BrzChat chatToEncrypt){
-        //TODO
-        String id = chatToEncrypt.id;
-        try {
-            return chatToEncrypt;
-        }catch(Exception e)
+    public static BrzChat initializeBrzChat(BrzChat chatToEncrypt){
+        if(chatToEncrypt == null
+                || chatToEncrypt.getKeyAlias() == null
+                || chatToEncrypt.getKeyAlias().length() == 0
+                || chatToEncrypt.nodes.size() == 0
+          ){
+            throw new IllegalArgumentException("BrzChat malformed. Cannot initiate encryption on a BrzChat");
+        }
+        if(storeContainsKey(chatToEncrypt.getKeyAlias()))
         {
-            e.printStackTrace();
-            return null;
+            Log.i("BrzChat Warning", "BrzChat already has a key in the keystore, reinitializing");
+            deleteKeyPairByAlias(chatToEncrypt.getKeyAlias());
         }
-    }
-    public static boolean addBrzChatKeys(BrzChat encryptedChat){
-        return false;
-    }
-    public static boolean addChatKeysToKeyStore(PublicKey pubKey, PrivateKey privKey, String alias){
-        KeyStore ks = null;
-        try {
-            ks = KeyStore.getInstance("AndroidKeyStore");
-        } catch (KeyStoreException kse) {
-            kse.printStackTrace();
-            return false;
-        }
-        if (ks == null) {
-            throw new RuntimeException("Bad keystore object, cannot decrypt BrzMessage");
-        } else {
-            try {
-                ks.load(null);
-                ks.setKeyEntry(alias, pubKey, null, null);
-                ks.setKeyEntry(alias, privKey, null, null);
-            } catch (CertificateException e) {
-                e.printStackTrace();
-                return false;
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-                return false;
-            } catch (KeyStoreException e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-        return false;
+        generateAndSaveSymKey(chatToEncrypt.getKeyAlias());
+        return chatToEncrypt;
     }
 
     /**
