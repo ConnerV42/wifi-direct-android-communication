@@ -5,6 +5,7 @@ import android.util.Log;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.packets.BrzPacket;
+import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
 
@@ -23,7 +24,12 @@ public class BrzMessageHandler implements BrzRouterHandler {
 
         // If we got a message that is for us
         if (packet.to.equals(this.router.hostNode.id)) {
-            BreezeAPI.getInstance().addMessage(packet.message());
+            BrzMessage m = packet.message();
+            BreezeAPI.getInstance().addMessage(m);
+
+            // Send delivery acknowledgement
+            BrzPacket p = BrzPacketBuilder.messageReceipt(m.from, m.chatId, true);
+            router.send(p);
         }
 
         // forward packets that aren't for us onwards

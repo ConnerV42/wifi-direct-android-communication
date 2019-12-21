@@ -11,7 +11,8 @@
         android:id="@+id/li_message_image"
         android:layout_width="35dp"
         android:layout_height="35dp"
-        android:layout_gravity="bottom"
+        android:layout_marginTop="18dp"
+        android:layout_gravity="top"
         android:layout_marginRight="10dp"
         android:src="@drawable/ic_person_black_24dp"
         app:civ_border_color="#000"
@@ -26,9 +27,7 @@
         <TextView
             android:id="@+id/messageName"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:padding="2dp"
+            android:layout_height="18dp"
             android:paddingStart="8dp"
             android:text="Sender"
             android:textColor="#000000" />
@@ -38,10 +37,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/message_bubble"
+            android:gravity="center"
             android:minHeight="35dp"
             android:padding="8dp"
             android:text="message body"
             android:textColor="#000000" />
+
+        <TextView
+            android:id="@+id/messageDatestamp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:text="TextView" />
     </LinearLayout>
 
 </LinearLayout>

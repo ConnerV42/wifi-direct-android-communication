@@ -10,9 +10,16 @@
         android:id="@+id/messageBody"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
+        android:layout_marginBottom="2dp"
         android:background="@drawable/message_bubble"
         android:padding="10dp"
         android:text="message body"
         android:textColor="#000000" />
+
+    <TextView
+        android:id="@+id/messageDatestamp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:text="TextView" />
 </LinearLayout>

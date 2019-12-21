@@ -22,8 +22,11 @@ import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder> {
 
@@ -39,8 +42,17 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
         }
 
         void bind(BrzMessage msg, Context ctx, int position) {
+
             TextView body = this.v.findViewById(R.id.messageBody);
             body.setText(msg.body);
+
+            /* date formatter in local timezone */
+            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm aa");
+            sdf.setTimeZone(TimeZone.getDefault());
+            String time = sdf.format(new Date(msg.datestamp));
+
+            TextView datestamp = this.v.findViewById(R.id.messageDatestamp);
+            datestamp.setText(time);
 
             if (viewType == 4) {
                 TextView name = this.v.findViewById(R.id.messageName);

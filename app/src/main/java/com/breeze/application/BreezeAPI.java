@@ -1,6 +1,5 @@
 package com.breeze.application;
 
-import android.app.IntentService;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -8,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -22,20 +20,12 @@ import com.breeze.datatypes.BrzNode;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.graph.BrzGraph;
-import com.breeze.encryption.BrzEncryption;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.ChatEvents.BrzChatHandshake;
 import com.breeze.packets.ChatEvents.BrzChatResponse;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
-import com.breeze.views.ProfileActivity;
-
-import java.util.List;
-
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 
 public class BreezeAPI extends Service {
 
@@ -47,12 +37,18 @@ public class BreezeAPI extends Service {
         return instance;
     }
 
-    // Service overrides
+    // Behavioral Modules
 
     public BrzRouter router = null;
     public BrzStorage storage = null;
     public BrzStateStore state = null;
     public DatabaseHandler db = null;
+
+    // Api modules
+
+    public BreezeMetastateModule meta = null;
+
+    // Data members
 
     public BrzNode hostNode = null;
 
@@ -69,54 +65,8 @@ public class BreezeAPI extends Service {
         this.state = BrzStateStore.getStore();
         this.db = new DatabaseHandler(this);
 
-        // Get stored hostNode info
-        SharedPreferences sp = getSharedPreferences("Breeze", Context.MODE_PRIVATE);
-        String hostNodeId = sp.getString(App.PREF_HOST_NODE_ID, "");
-        BrzNode hostNode = this.db.getNode(hostNodeId);
-        if (hostNode != null) {
-            this.setHostNode(hostNode);
-        } else {
-            // Get a new profile since one isn't set
-            Intent profileIntent = new Intent(this, ProfileActivity.class);
-            profileIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(profileIntent);
-        }
-
-        // Get stored chats
-        List<BrzChat> chats = null;
-        try {
-            chats = this.db.getAllChats();
-            if (chats != null) {
-                Log.i("STATE", "Found " + chats.size() + " chats in the database");
-//                for(BrzChat b : chats) {
-//                    this.db.deleteChat(b.id);
-//                    this.db.deleteChatMessages(b.id);
-//                }
-                this.state.addAllChats(chats);
-            } else {
-                Log.i("STATE", "No stored chats found!");
-            }
-
-        } catch (RuntimeException e) {
-            Log.e("BREEZE_API", "Trying to load chats", e);
-        }
-
-        // Get stored messages
-        try {
-            if (chats != null) {
-                for (BrzChat c : chats) {
-                    List<BrzMessage> messages = this.db.getChatMessages(c.id);
-                    if (messages != null) {
-                        Log.i("STATE", "Found " + messages.size() + " messages in chat " + c.id);
-                        this.state.addAllMessages(messages);
-                    } else {
-                        Log.i("STATE", "Failed to find messages in chat " + c.id);
-                    }
-                }
-            }
-        } catch (RuntimeException e) {
-            Log.e("BREEZE_API", "Trying to load chats", e);
-        }
+        // Initialize api modules
+        this.meta = new BreezeMetastateModule(this);
 
         // Upgrade to foreground process
         Intent notifIntent = new Intent(this, MainActivity.class);
@@ -130,21 +80,6 @@ public class BreezeAPI extends Service {
                 .build();
 
         startForeground(1, notification);
-
-//        BrzGraph.getInstance().addVertex(new BrzNode("1", "", "", "Jake", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("2", "", "", "Paul", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("3", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("4", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("5", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("6", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("7", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("8", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("9", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("10", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("11", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("12", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("13", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("14", "", "", "Conner", "@JJ"));
 
         // TODO: create a keypair for the current hostNode
 //        KeyPair keyPairForThisNode = null;

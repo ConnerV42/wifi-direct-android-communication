@@ -1,16 +1,14 @@
 package com.breeze.packets;
 
+import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.graph.BrzGraph;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.GraphEvents.BrzGraphEvent;
 import com.breeze.packets.GraphEvents.BrzGraphQuery;
+import com.breeze.packets.MessageEvents.BrzMessageReceipt;
 
 public class BrzPacketBuilder {
-
-    public static BrzPacket message(String id, String msgBody) {
-        return BrzPacketBuilder.message(id, msgBody);
-    }
 
     public static BrzPacket ack(BrzPacket packet, String to) {
         BrzPacket ackPacket = new BrzPacket();
@@ -37,6 +35,7 @@ public class BrzPacketBuilder {
 
         return packet;
     }
+
     public static BrzMessage makeMessage(String fromId, String msgBody, String chatId, Boolean isStatus) {
         BrzMessage body = new BrzMessage();
 
@@ -76,19 +75,19 @@ public class BrzPacketBuilder {
         return packet;
     }
 
-    public static BrzPacket Handshake(BrzGraph graph, String to, String pubKey, String id)
-    {
-        BrzMessage body = new BrzMessage();
+    public static BrzPacket messageReceipt(String to, String chatId, boolean delivered) {
+        String from = BreezeAPI.getInstance().hostNode.id;
 
-        body.body =pubKey;
-        body.chatId = "Zach";
-        body.datestamp = System.currentTimeMillis();
-        body.from = id;
+        BrzMessageReceipt mr = null;
+        if (delivered)
+            mr = new BrzMessageReceipt(from, chatId, BrzMessageReceipt.ReceiptType.DELIVERED);
+        else
+            mr = new BrzMessageReceipt(from, chatId, BrzMessageReceipt.ReceiptType.READ);
 
-        BrzPacket packet = new BrzPacket(body);
+        BrzPacket packet = new BrzPacket(mr);
+        packet.type = BrzPacket.BrzPacketType.MESSAGE_RECEIPT;
         packet.to = to;
+
         return packet;
-
-
     }
 }

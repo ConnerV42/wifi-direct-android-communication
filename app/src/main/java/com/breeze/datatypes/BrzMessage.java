@@ -7,8 +7,11 @@ import com.breeze.packets.BrzSerializable;
 
 import org.json.JSONObject;
 
+import java.util.UUID;
+
 public class BrzMessage implements BrzSerializable {
 
+    public String id = UUID.randomUUID().toString();
     public String from = "";
     public String body = "";
     public String chatId = "";
@@ -35,6 +38,7 @@ public class BrzMessage implements BrzSerializable {
         JSONObject json = new JSONObject();
 
         try {
+            json.put("id", this.id);
             json.put("from", this.from);
             json.put("body", this.body);
             json.put("chatId", this.chatId);
@@ -52,6 +56,7 @@ public class BrzMessage implements BrzSerializable {
         try {
             JSONObject jObj = new JSONObject(json);
 
+            this.id = jObj.getString("id");
             this.from = jObj.getString("from");
             this.body = jObj.getString("body");
             this.chatId = jObj.getString("chatId");

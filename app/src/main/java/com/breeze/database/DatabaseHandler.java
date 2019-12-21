@@ -14,10 +14,7 @@ import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzNode;
 import org.json.JSONArray;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
@@ -34,35 +31,41 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String BRZCHAT_TABLE_NAME = "BrzChat";
     private static final String BRZMESSAGE_TABLE_NAME = "BrzMessage";
     private static final String BRZNODE_TABLE_NAME = "BrzNode";
+    private static final String BRZRECEIPT_TABLE_NAME = "BrzMessageReceipt";
 
-    private static final String INIT_BRZCHAT_TABLE = "CREATE TABLE IF NOT EXISTS BrzChat ('id' TEXT PRIMARY KEY, " +
+    private static final String INIT_BRZCHAT_TABLE = "CREATE TABLE IF NOT EXISTS BrzChat (" +
+            "'id' TEXT PRIMARY KEY, " +
             "'name' TEXT NOT NULL, " +
             "'nodes' TEXT NOT NULL, " +
             "'isGroup' BOOLEAN NOT NULL, " +
             "'acceptedByHost' BOOLEAN NOT NULL, " +
             "'acceptedByRecipient' BOOLEAN NOT NULL " +
-//            "'publicKey' TEXT NOT NULL," +
-//            "'privateKeyTag' TEXT NOT NULL," +
-//            "'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP, " +
-//            "'updatedAt' DATETIME" +
             ")";
 
-    private static final String INIT_BRZMESSAGE_TABLE = "CREATE TABLE IF NOT EXISTS BrzMessage ('id' INTEGER PRIMARY KEY AUTOINCREMENT, " +
+    private static final String INIT_BRZMESSAGE_TABLE = "CREATE TABLE IF NOT EXISTS BrzMessage (" +
+            "'id' TEXT PRIMARY KEY, " +
             "'from' TEXT NOT NULL, " +
             "'body' TEXT NOT NULL, " +
             "'chatId' TEXT NOT NULL, " +
             "'isStatus' BOOLEAN NOT NULL, " +
-            "'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP, " +
-            "'updatedAt' DATETIME, " +
-            "'read' BOOLEAN NOT NULL DEFAULT 0," +
+            "'datestamp' INTEGER NOT NULL, " +
+
             "FOREIGN KEY ('chatId') REFERENCES BrzChat(id)," +
             "FOREIGN KEY ('from') REFERENCES BrzNode(id))";
 
-    private static final String INIT_BRZNODE_TABLE = "CREATE TABLE IF NOT EXISTS BrzNode ('id' TEXT PRIMARY KEY, " +
+    private static final String INIT_BRZNODE_TABLE = "CREATE TABLE IF NOT EXISTS BrzNode (" +
+            "'id' TEXT PRIMARY KEY, " +
             "'endpointId' TEXT NOT NULL UNIQUE, " +
             "'publicKey' TEXT NOT NULL UNIQUE," +
             "'name' TEXT NOT NULL, " +
             "'alias' TEXT NOT NULL)";
+
+    private static final String INIT_BRZRECEIPT_TABLE = "CREATE TABLE IF NOT EXISTS " + BRZRECEIPT_TABLE_NAME + " (" +
+            "'messageId' TEXT PRIMARY KEY NOT NULL, " +
+            "'delivered' BOOLEAN NOT NULL, " +
+            "'read' BOOLEAN NOT NULL," +
+            "FOREIGN KEY ('messageId') REFERENCES BrzMessage(id)" +
+            ")";
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -75,7 +78,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL(INIT_BRZCHAT_TABLE);
         db.execSQL(INIT_BRZMESSAGE_TABLE);
         db.execSQL(INIT_BRZNODE_TABLE);
-        Log.i("DatabaseInfo", "Table Creations succeeded for BrzChat, BrzMessage, BrzNode, and BrzProfile.");
+        db.execSQL(INIT_BRZRECEIPT_TABLE);
+        Log.i("DatabaseInfo", "SQLITE tables created successfully");
     }
 
     @Override
@@ -87,6 +91,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         this.onCreate(db);
     }
 
+
+    /*
+     *
+     *      BrzNode table
+     *
+     */
+
     public void setNode(@NonNull BrzNode node) {
         SQLiteDatabase db = this.getWritableDatabase();
         String[] args = {node.id, node.endpointId, node.publicKey, node.name, node.alias};
@@ -97,7 +108,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         db.close();
     }
-
     public BrzNode getNode(@NonNull String nodeId) {
         SQLiteDatabase db = this.getReadableDatabase();
         String[] args = {nodeId};
@@ -128,6 +138,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return n;
     }
 
+    /*
+     *
+     *      BrzChat table
+     *
+     */
 
     public void setChat(@NonNull BrzChat chat) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -139,7 +154,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         db.close();
     }
-
     public void deleteChat(@NonNull String chatId) {
         SQLiteDatabase db = this.getWritableDatabase();
         Object[] args = {chatId};
@@ -150,7 +164,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         db.close();
     }
-
     public List<BrzChat> getAllChats() {
         SQLiteDatabase db = this.getReadableDatabase();
         String[] args = {};
@@ -196,7 +209,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
         return chats;
     }
-
     public BrzChat getChat(@NonNull String chatId) {
         SQLiteDatabase db = this.getReadableDatabase();
         String[] args = { chatId };
@@ -235,14 +247,24 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return n;
     }
 
+
+    /*
+     *
+     *      BrzMessage table
+     *
+     */
+
     public void addMessage(@NonNull BrzMessage message) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues vals = new ContentValues();
-        vals.put("[from]", message.from);
 
+        vals.put("[id]", message.id);
+        vals.put("[from]", message.from);
         vals.put("body", message.body);
-        vals.put("isStatus", message.isStatus);
         vals.put("chatId", message.chatId);
+        vals.put("isStatus", message.isStatus);
+        vals.put("datestamp", message.datestamp);
+
         db.insert(BRZMESSAGE_TABLE_NAME, null, vals);
         db.close();
     }
@@ -250,36 +272,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(BRZMESSAGE_TABLE_NAME, "id = ?", new String[]{ id });
         db.close();
-    }
-    public BrzMessage getMessage(@NonNull int id){
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + BRZMESSAGE_TABLE_NAME + " WHERE id = ?;", new String[]{String.valueOf(id)});
-        if (c == null) {
-            db.close();
-            return null;
-        } else if (c.getCount() < 1) {
-            c.close();
-            db.close();
-            return null;
-        }
-        BrzMessage message = new BrzMessage();
-        c.moveToFirst();
-        message.from = c.getString(c.getColumnIndex("from"));
-        message.body = c.getString(c.getColumnIndex("body"));
-        message.chatId = c.getString(c.getColumnIndex("chatId"));
-        message.isStatus = c.getString(c.getColumnIndex("isStatus")).equals("1");
-        long milliseconds = 0;
-        SimpleDateFormat f = new SimpleDateFormat("dd-MMM-yyyy");
-        try {
-            Date d = f.parse(c.getString(c.getColumnIndex("createdAt")));
-            milliseconds = d.getTime();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        message.datestamp = milliseconds;
-        c.close();
-        db.close();
-        return message;
     }
 
     public List<BrzMessage> getChatMessages(@NonNull String chatId){
@@ -298,29 +290,94 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (c.moveToFirst()) {
             while (!c.isAfterLast()) {
                 BrzMessage message = new BrzMessage();
+                message.id = c.getString(c.getColumnIndex("id"));
                 message.from = c.getString(c.getColumnIndex("from"));
                 message.body = c.getString(c.getColumnIndex("body"));
                 message.chatId = c.getString(c.getColumnIndex("chatId"));
-                message.isStatus = c.getString(c.getColumnIndex("isStatus")).equals("1");
-                long milliseconds = 0;
-                SimpleDateFormat f = new SimpleDateFormat("dd-MMM-yyyy");
-                try {
-                    Date d = f.parse(c.getString(c.getColumnIndex("createdAt")));
-                    milliseconds = d.getTime();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                message.datestamp = milliseconds;
+
+                int isStatus = c.getInt(c.getColumnIndex("isStatus"));
+                message.isStatus = isStatus == 1;
+
+                message.datestamp = c.getLong(c.getColumnIndex("datestamp"));
+
                 list.add(message);
                 c.moveToNext();
             }
         }
         return list;
     }
-
     public void deleteChatMessages(@NonNull String chatId){
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(BRZMESSAGE_TABLE_NAME, "chatId = ?", new String[]{ chatId });
         db.close();
+    }
+
+
+    /*
+     *
+     *      BrzMessageReceipt table
+     *
+     */
+
+    public void setDelivered(String messageId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Object[] args = { messageId, true, false };
+        try {
+            db.execSQL("INSERT OR REPLACE INTO " + BRZRECEIPT_TABLE_NAME + " VALUES (?,?,?)", args);
+        } catch (Exception e) {
+            Log.i("Bad SQL Error", "Error with SQL Syntax");
+        }
+        db.close();
+    }
+    public void setRead(String messageId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Object[] args = { messageId, true, true };
+        try {
+            db.execSQL("INSERT OR REPLACE INTO " + BRZRECEIPT_TABLE_NAME + " VALUES (?,?,?)", args);
+        } catch (Exception e) {
+            Log.i("Bad SQL Error", "Error with SQL Syntax");
+        }
+        db.close();
+    }
+
+    public boolean isDelivered(String messageId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor c = db.rawQuery("SELECT delivered FROM " + BRZRECEIPT_TABLE_NAME + " WHERE messageId = ?;", new String[]{ messageId });
+        if (c == null) {
+            db.close();
+            return false;
+        } else if (c.getCount() < 1) {
+            c.close();
+            db.close();
+            return false;
+        }
+
+        c.moveToFirst();
+        int deliveredInt = c.getInt(c.getColumnIndex("delivered"));
+        boolean delivered = deliveredInt == 1;
+
+        c.close();
+        db.close();
+        return delivered;
+    }
+    public boolean isRead(String messageId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor c = db.rawQuery("SELECT read FROM " + BRZRECEIPT_TABLE_NAME + " WHERE messageId = ?;", new String[]{ messageId });
+        if (c == null) {
+            db.close();
+            return false;
+        } else if (c.getCount() < 1) {
+            c.close();
+            db.close();
+            return false;
+        }
+
+        c.moveToFirst();
+        int readInt = c.getInt(c.getColumnIndex("read"));
+        boolean read = readInt == 1;
+
+        c.close();
+        db.close();
+        return read;
     }
 }
