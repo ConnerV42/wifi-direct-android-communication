@@ -4,6 +4,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.breeze.datatypes.BrzMessage;
+import com.breeze.datatypes.BrzFileInfo;
 import com.breeze.packets.ChatEvents.BrzChatHandshake;
 import com.breeze.packets.ChatEvents.BrzChatResponse;
 import com.breeze.packets.GraphEvents.BrzGraphEvent;
@@ -20,6 +21,7 @@ public class BrzPacket implements BrzSerializable {
 
     public enum BrzPacketType {
         MESSAGE,
+        FILE_INFO,
         ACK,
 
         GRAPH_QUERY,
@@ -47,6 +49,7 @@ public class BrzPacket implements BrzSerializable {
     public BrzMessage message() {
         return new BrzMessage(this.body);
     }
+    public BrzFileInfo fileInfoPacket() { return new BrzFileInfo(this.body); }
 
     public BrzGraphQuery graphQuery() { return new BrzGraphQuery(this.body); }
     public BrzGraphEvent graphEvent() { return new BrzGraphEvent(this.body); }

@@ -1,11 +1,13 @@
 package com.breeze.packets;
 
+import com.breeze.datatypes.BrzFileInfo;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.graph.BrzGraph;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.GraphEvents.BrzGraphEvent;
 import com.breeze.packets.GraphEvents.BrzGraphQuery;
+import java.io.File;
 import com.breeze.packets.MessageEvents.BrzMessageReceipt;
 
 public class BrzPacketBuilder {
@@ -47,6 +49,22 @@ public class BrzPacketBuilder {
         body.datestamp = System.currentTimeMillis();
 
         return body;
+    }
+
+    public static BrzPacket fileInfoPacket(String fromUUID, String toUUID, String filePayloadId, String fileName) {
+        BrzFileInfo body = new BrzFileInfo();
+
+        body.from = fromUUID;
+        body.destinationUUID = toUUID;
+        body.filePayloadId = filePayloadId;
+        body.fileName = fileName;
+        body.datestamp = System.currentTimeMillis();
+
+        BrzPacket packet = new BrzPacket(body);
+        packet.type = BrzPacket.BrzPacketType.FILE_INFO;
+        packet.to = "";
+
+        return packet;
     }
 
     public static BrzPacket graphQuery(String to, String id) {

@@ -81,21 +81,24 @@ public class BreezeAPI extends Service {
 
         startForeground(1, notification);
 
-        // TODO: create a keypair for the current hostNode
-//        KeyPair keyPairForThisNode = null;
-//        try{
-//            keyPairForThisNode = BrzEncryption.generateAndSaveKeyPair();
-//        }catch (Exception e){
-//            Log.i("kp error", "Cannot generate key pair for this device");
-//        }
-//        if(keyPairForThisNode != null){
-//            this.publicKey = keyPairForThisNode.getPublic();
-//            this.privateKey = keyPairForThisNode.getPrivate();
-//        }
-//        else{
-//            Log.i("bad keypair", "This device has no valid keypair in the store");
-//        }
 
+        // TODO: create a keypair for the current hostNode.. Done
+        try {
+            if(!BrzEncryption.storeContainsKey("MY_KEY"))
+            {
+                KeyPair kp = BrzEncryption.generateAndSaveKeyPair("MY_KEY");
+                this.publicKey = kp.getPublic();
+                this.privateKey = kp.getPrivate();
+            }
+            else
+            {
+                this.publicKey = BrzEncryption.getPublicKeyFromKeyStore("MY_KEY");
+                this.privateKey = BrzEncryption.getPrivateKeyFromStore("MY_KEY");
+            }
+        }catch(Exception e)
+        {
+            Log.i("key error", "cannot gen and save keys");
+        }
     }
 
     @Override
@@ -271,8 +274,6 @@ public class BreezeAPI extends Service {
     //
 
     public void sendMessage(BrzMessage message, String chatId) {
-        BrzPacket p = new BrzPacket(message);
-        p.type = BrzPacket.BrzPacketType.MESSAGE;
 
         // Send message to each recipient
         BrzChat chat = this.state.getChat(chatId);
@@ -281,7 +282,7 @@ public class BreezeAPI extends Service {
             p.to = nodeId;
             this.router.send(p);
         }
-
+        chat.sendMessageToChat(message);
         this.addMessage(message);
     }
 
