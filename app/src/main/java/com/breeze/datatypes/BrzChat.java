@@ -4,15 +4,10 @@ import android.util.Log;
 
 import com.breeze.application.BreezeAPI;
 import com.breeze.packets.BrzSerializable;
-import com.breeze.router.BrzRouter;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +19,6 @@ public class BrzChat implements BrzSerializable {
 
     public List<String> nodes = new ArrayList<>();
     public boolean isGroup = false;
-    private String keyAlias;
 
     public boolean acceptedByHost = false;
     public boolean acceptedByRecipient = false;
@@ -94,12 +88,5 @@ public class BrzChat implements BrzSerializable {
         } catch (Exception e) {
             Log.e("DESERIALIZATION ERROR", "BrzChat", e);
         }
-    }
-    public String getKeyAlias() {
-        return keyAlias;
-    }
-
-    public void setKeyAlias(String keyAlias) {
-        this.keyAlias = keyAlias;
     }
 }

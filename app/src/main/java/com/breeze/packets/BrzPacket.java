@@ -1,6 +1,5 @@
 package com.breeze.packets;
 
-import android.util.Base64;
 import android.util.Log;
 
 import com.breeze.datatypes.BrzMessage;
@@ -10,11 +9,7 @@ import com.breeze.packets.ChatEvents.BrzChatResponse;
 import com.breeze.packets.GraphEvents.BrzGraphEvent;
 import com.breeze.packets.GraphEvents.BrzGraphQuery;
 import com.breeze.packets.MessageEvents.BrzMessageReceipt;
-import com.breeze.views.Messages.MessageList;
-
 import org.json.JSONObject;
-
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 public class BrzPacket implements BrzSerializable {
@@ -36,12 +31,15 @@ public class BrzPacket implements BrzSerializable {
     public String id = UUID.randomUUID().toString();
     public String to = "BROADCAST";
     public BrzPacketType type = BrzPacketType.MESSAGE;
-    private String body = "";
+    public String body = "";
 
-    public BrzPacket() {}
+    public BrzPacket() {
+    }
+
     public BrzPacket(BrzSerializable body) {
         this.body = body.toJSON();
     }
+
     public BrzPacket(String json) {
         this.fromJSON(json);
     }
@@ -49,15 +47,30 @@ public class BrzPacket implements BrzSerializable {
     public BrzMessage message() {
         return new BrzMessage(this.body);
     }
-    public BrzFileInfo fileInfoPacket() { return new BrzFileInfo(this.body); }
 
-    public BrzGraphQuery graphQuery() { return new BrzGraphQuery(this.body); }
-    public BrzGraphEvent graphEvent() { return new BrzGraphEvent(this.body); }
+    public BrzFileInfo fileInfoPacket() {
+        return new BrzFileInfo(this.body);
+    }
 
-    public BrzChatHandshake chatHandshake() { return new BrzChatHandshake(this.body); }
-    public BrzChatResponse chatResponse() { return new BrzChatResponse(this.body); }
+    public BrzGraphQuery graphQuery() {
+        return new BrzGraphQuery(this.body);
+    }
 
-    public BrzMessageReceipt messageReceipt() { return new BrzMessageReceipt(this.body); }
+    public BrzGraphEvent graphEvent() {
+        return new BrzGraphEvent(this.body);
+    }
+
+    public BrzChatHandshake chatHandshake() {
+        return new BrzChatHandshake(this.body);
+    }
+
+    public BrzChatResponse chatResponse() {
+        return new BrzChatResponse(this.body);
+    }
+
+    public BrzMessageReceipt messageReceipt() {
+        return new BrzMessageReceipt(this.body);
+    }
 
     @Override
     public String toJSON() {
@@ -68,9 +81,7 @@ public class BrzPacket implements BrzSerializable {
             json.put("id", this.id);
             json.put("to", this.to);
             json.put("type", this.type);
-
-            String body64 = Base64.encodeToString(this.body.getBytes(), Base64.DEFAULT);
-            json.put("body", body64);
+            json.put("body", this.body);
         } catch (Exception e) {
             Log.i("SERIALIZATION ERROR", e.toString());
         }
@@ -86,11 +97,7 @@ public class BrzPacket implements BrzSerializable {
             this.id = jObj.getString("id");
             this.to = jObj.getString("to");
             this.type = BrzPacketType.valueOf(jObj.getString("type"));
-
-            String body64 = jObj.getString("body");
-            byte[] bodyBytes = Base64.decode(body64, Base64.DEFAULT);
-            this.body = new String(bodyBytes, StandardCharsets.UTF_8);
-
+            this.body = jObj.getString("body");
         } catch (Exception e) {
             Log.i("DESERIALIZATION ERROR", e.toString());
         }

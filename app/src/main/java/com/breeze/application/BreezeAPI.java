@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -47,6 +48,7 @@ public class BreezeAPI extends Service {
     // Api modules
 
     public BreezeMetastateModule meta = null;
+    public BreezeEncryptionModule encryption = null;
 
     // Data members
 
@@ -66,6 +68,7 @@ public class BreezeAPI extends Service {
         this.db = new DatabaseHandler(this);
 
         // Initialize api modules
+        this.encryption = new BreezeEncryptionModule(this);
         this.meta = new BreezeMetastateModule(this);
 
         // Upgrade to foreground process
@@ -80,25 +83,6 @@ public class BreezeAPI extends Service {
                 .build();
 
         startForeground(1, notification);
-
-
-        // TODO: create a keypair for the current hostNode.. Done
-        try {
-            if(!BrzEncryption.storeContainsKey("MY_KEY"))
-            {
-                KeyPair kp = BrzEncryption.generateAndSaveKeyPair("MY_KEY");
-                this.publicKey = kp.getPublic();
-                this.privateKey = kp.getPrivate();
-            }
-            else
-            {
-                this.publicKey = BrzEncryption.getPublicKeyFromKeyStore("MY_KEY");
-                this.privateKey = BrzEncryption.getPrivateKeyFromStore("MY_KEY");
-            }
-        }catch(Exception e)
-        {
-            Log.i("key error", "cannot gen and save keys");
-        }
     }
 
     @Override
@@ -128,6 +112,9 @@ public class BreezeAPI extends Service {
     public void setHostNode(BrzNode hostNode) {
         if (hostNode == null) return;
 
+        // Set up encryption
+        this.encryption.setHostNode(hostNode);
+
         this.hostNode = hostNode;
 
         // Set our id in preferences
@@ -152,17 +139,17 @@ public class BreezeAPI extends Service {
         chat.acceptedByHost = true;
         chat.acceptedByRecipient = false;
 
-        if(!chat.nodes.contains(this.hostNode.id))
+        if (!chat.nodes.contains(this.hostNode.id))
             chat.nodes.add(this.hostNode.id);
 
-        // TODO: Generate chat encryption keys
+        BrzChatHandshake handshake = new BrzChatHandshake(this.router.hostNode.id, chat);
+        encryption.makeSecretKey(handshake);
 
-        BrzChatHandshake handshake = new BrzChatHandshake(this.router.hostNode.id, chat, "", "");
         BrzPacket p = new BrzPacket(handshake);
         p.type = BrzPacket.BrzPacketType.CHAT_HANDSHAKE;
 
         for (String nodeId : chat.nodes) {
-            if(nodeId.equals(hostNode.id)) continue;
+            if (nodeId.equals(hostNode.id)) continue;
             p.to = nodeId;
             this.router.send(p);
         }
@@ -193,21 +180,12 @@ public class BreezeAPI extends Service {
             }
         }
 
-        // Rejected and the chat is a group
-        else if (c.isGroup) {
-            c.nodes.remove(response.from);
-
-            BrzNode n = BrzGraph.getInstance().getVertex(response.from);
-            if (n != null) {
-                BrzMessage sm = new BrzMessage(n.name + " rejected the chat.");
-                sm.chatId = c.id;
-                this.state.addMessage(sm);
-                this.db.addMessage(sm);
-            }
-        }
-
-        // Rejected and the chat is singular
+        // Rejected
         else {
+
+            // The chat is a group
+            if (c.isGroup) c.nodes.remove(response.from);
+
             BrzNode n = BrzGraph.getInstance().getVertex(response.from);
             if (n != null) {
                 BrzMessage sm = new BrzMessage(n.name + " rejected the chat.");
@@ -244,7 +222,7 @@ public class BreezeAPI extends Service {
         p.to = handshake.from;
         this.router.send(p);
 
-        // TODO: Add the keys to our keystore
+        encryption.saveSecretKey(handshake);
 
         // Set state to have the chat accepted
         BrzChat c = this.state.getChat(handshake.chat.id);
@@ -274,6 +252,8 @@ public class BreezeAPI extends Service {
     //
 
     public void sendMessage(BrzMessage message, String chatId) {
+        BrzPacket p = new BrzPacket(message);
+        p.type = BrzPacket.BrzPacketType.MESSAGE;
 
         // Send message to each recipient
         BrzChat chat = this.state.getChat(chatId);
@@ -282,9 +262,10 @@ public class BreezeAPI extends Service {
             p.to = nodeId;
             this.router.send(p);
         }
-        chat.sendMessageToChat(message);
+
         this.addMessage(message);
     }
+
 
     public void addMessage(BrzMessage message) {
         this.state.addMessage(message);

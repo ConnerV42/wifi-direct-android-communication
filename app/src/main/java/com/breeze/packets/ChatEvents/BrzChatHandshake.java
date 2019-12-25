@@ -11,18 +11,15 @@ public class BrzChatHandshake implements BrzSerializable {
 
     public String from = "";
     public BrzChat chat = null;
-    public String publicKey = "";
-    public String privateKey = "";
+    public String secretKey = "";
 
     public BrzChatHandshake(String json) {
         this.fromJSON(json);
     }
 
-    public BrzChatHandshake(String from, BrzChat chat, String publicKey, String privateKey) {
+    public BrzChatHandshake(String from, BrzChat chat) {
         this.from = from;
         this.chat = chat;
-        this.publicKey = publicKey;
-        this.privateKey = privateKey;
     }
 
     @Override
@@ -33,8 +30,7 @@ public class BrzChatHandshake implements BrzSerializable {
             JSONObject chat = jObj.getJSONObject("chat");
             this.chat = new BrzChat(chat.toString());
 
-            this.privateKey = jObj.getString("privateKey");
-            this.publicKey = jObj.getString("publicKey");
+            this.secretKey = jObj.getString("secretKey");
             this.from = jObj.getString("from");
         } catch (Exception e) {
             Log.i("DESERIALIZATION ERROR", "BrzChatHandshake", e);
@@ -46,8 +42,7 @@ public class BrzChatHandshake implements BrzSerializable {
         JSONObject jObj = new JSONObject();
 
         try {
-            jObj.put("privateKey", this.privateKey);
-            jObj.put("publicKey", this.publicKey);
+            jObj.put("secretKey", this.secretKey);
             jObj.put("from", this.from);
             jObj.put("chat", new JSONObject(this.chat.toJSON()));
         } catch (Exception e) {

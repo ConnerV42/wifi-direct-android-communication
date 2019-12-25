@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,14 +23,15 @@ import android.widget.ImageButton;
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
+import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
 import com.google.android.gms.nearby.connection.Payload;
 import com.breeze.views.ChatSettingsActivity;
 
-    private static final int READ_REQUEST_CODE = 69;
 public class MessagesView extends AppCompatActivity {
+    private static final int READ_REQUEST_CODE = 69;
     private BrzChat chat;
 
     public static Intent getIntent(Context ctx, String chatId) {
@@ -74,7 +76,7 @@ public class MessagesView extends AppCompatActivity {
             BreezeAPI.getInstance().sendMessage(BrzPacketBuilder.makeMessage(router.hostNode.id, messageBoxText, chat.id, false), chat.id);
         });
 
-        Button sendPhoto = getView().findViewById(R.id.sendPhoto);
+        ImageButton sendPhoto = findViewById(R.id.sendPhoto);
         sendPhoto.setOnClickListener(view1 -> {
             // Bring up the option to select media to send from external storage
             Intent intent = new Intent(Intent.ACTION_PICK,
@@ -92,7 +94,7 @@ public class MessagesView extends AppCompatActivity {
                 Uri imageUri = data.getData();
 
                 // For Payload (FILE)
-                ParcelFileDescriptor parcel = this.getContext().getContentResolver().openFileDescriptor(imageUri, "r");
+                ParcelFileDescriptor parcel = this.getContentResolver().openFileDescriptor(imageUri, "r");
                 Payload filePayload = Payload.fromFile(parcel);
                 // Payload filePayloadAsStream = Payload.fromStream(parcel);
 
@@ -110,8 +112,6 @@ public class MessagesView extends AppCompatActivity {
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
     public void onStart() {
         super.onStart();
 
