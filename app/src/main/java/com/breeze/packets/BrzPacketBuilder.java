@@ -7,20 +7,12 @@ import com.breeze.graph.BrzGraph;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.GraphEvents.BrzGraphEvent;
 import com.breeze.packets.GraphEvents.BrzGraphQuery;
+
 import java.io.File;
+
 import com.breeze.packets.MessageEvents.BrzMessageReceipt;
 
 public class BrzPacketBuilder {
-
-    public static BrzPacket ack(BrzPacket packet, String to) {
-        BrzPacket ackPacket = new BrzPacket();
-
-        ackPacket.type = BrzPacket.BrzPacketType.ACK;
-        ackPacket.to = to;
-        ackPacket.id = packet.id;
-
-        return ackPacket;
-    }
 
     public static BrzPacket message(String id, String msgTo, String msgBody, String chatId, Boolean isStatus) {
         BrzMessage body = new BrzMessage();
@@ -32,10 +24,7 @@ public class BrzPacketBuilder {
         body.isStatus = isStatus;
         body.datestamp = System.currentTimeMillis();
 
-        BrzPacket packet = new BrzPacket(body);
-        packet.to = msgTo;
-
-        return packet;
+        return new BrzPacket(body, BrzPacket.BrzPacketType.MESSAGE, msgTo, false);
     }
 
     public static BrzMessage makeMessage(String fromId, String msgBody, String chatId, Boolean isStatus) {
@@ -60,37 +49,23 @@ public class BrzPacketBuilder {
         body.fileName = fileName;
         body.datestamp = System.currentTimeMillis();
 
-        BrzPacket packet = new BrzPacket(body);
-        packet.type = BrzPacket.BrzPacketType.FILE_INFO;
-        packet.to = "";
-
-        return packet;
+        return new BrzPacket(body, BrzPacket.BrzPacketType.FILE_INFO, toUUID, false);
     }
 
-    public static BrzPacket graphQuery(String to, String id) {
-        BrzGraphQuery body = new BrzGraphQuery(true, id);
-        BrzPacket packet = new BrzPacket(body);
-        packet.to = to;
-        packet.type = BrzPacket.BrzPacketType.GRAPH_QUERY;
-        return packet;
+    public static BrzPacket graphQuery(String to, String from) {
+        BrzGraphQuery body = new BrzGraphQuery(true, from);
+        return new BrzPacket(body, BrzPacket.BrzPacketType.GRAPH_QUERY, to, false);
     }
 
     public static BrzPacket graphResponse(BrzGraph graph, BrzNode hostNode, String to) {
-        BrzGraphQuery body = new BrzGraphQuery(false, "", graph.toJSON(), hostNode.toJSON());
-        BrzPacket packet = new BrzPacket(body);
-        packet.to = to;
-        packet.type = BrzPacket.BrzPacketType.GRAPH_QUERY;
-        return packet;
+        String from = BreezeAPI.getInstance().hostNode.id;
+        BrzGraphQuery body = new BrzGraphQuery(false, from, graph.toJSON(), hostNode.toJSON());
+        return new BrzPacket(body, BrzPacket.BrzPacketType.GRAPH_QUERY, to, false);
     }
 
     public static BrzPacket graphEvent(Boolean connection, BrzNode node1, BrzNode node2) {
         BrzGraphEvent body = new BrzGraphEvent(connection, node1, node2);
-        BrzPacket packet = new BrzPacket(body);
-
-        packet.type = BrzPacket.BrzPacketType.GRAPH_EVENT;
-        packet.to = "BROADCAST";
-
-        return packet;
+        return new BrzPacket(body, BrzPacket.BrzPacketType.GRAPH_EVENT, "BROADCAST", true);
     }
 
     public static BrzPacket messageReceipt(String to, String chatId, boolean delivered) {
@@ -102,10 +77,6 @@ public class BrzPacketBuilder {
         else
             mr = new BrzMessageReceipt(from, chatId, BrzMessageReceipt.ReceiptType.READ);
 
-        BrzPacket packet = new BrzPacket(mr);
-        packet.type = BrzPacket.BrzPacketType.MESSAGE_RECEIPT;
-        packet.to = to;
-
-        return packet;
+        return new BrzPacket(mr, BrzPacket.BrzPacketType.MESSAGE_RECEIPT, to, false);
     }
 }

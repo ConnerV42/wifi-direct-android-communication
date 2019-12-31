@@ -76,11 +76,8 @@ public class BreezeAPI extends Service {
         PendingIntent pending = PendingIntent.getActivity(this, 0, notifIntent, 0);
 
         Notification notification = new NotificationCompat.Builder(this, App.CHANNEL_ID)
-                .setContentTitle("Breeze Service")
-                .setContentText("Breeze is running in the background")
-                .setSmallIcon(R.drawable.ic_launcher)
-                .setContentIntent(pending)
-                .build();
+                .setContentTitle("Breeze Service").setContentText("Breeze is running in the background")
+                .setSmallIcon(R.drawable.ic_launcher).setContentIntent(pending).build();
 
         startForeground(1, notification);
     }
@@ -88,7 +85,8 @@ public class BreezeAPI extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
-        return START_STICKY;
+        return START_NOT_STICKY;
+//        return START_STICKY;
     }
 
     @Nullable
@@ -105,12 +103,13 @@ public class BreezeAPI extends Service {
 
     //
     //
-    //      Host Node
+    // Host Node
     //
     //
 
     public void setHostNode(BrzNode hostNode) {
-        if (hostNode == null) return;
+        if (hostNode == null)
+            return;
 
         // Set up encryption
         this.encryption.setHostNode(hostNode);
@@ -131,7 +130,7 @@ public class BreezeAPI extends Service {
 
     //
     //
-    //      Chat handshakes
+    // Chat handshakes
     //
     //
 
@@ -145,11 +144,11 @@ public class BreezeAPI extends Service {
         BrzChatHandshake handshake = new BrzChatHandshake(this.router.hostNode.id, chat);
         encryption.makeSecretKey(handshake);
 
-        BrzPacket p = new BrzPacket(handshake);
-        p.type = BrzPacket.BrzPacketType.CHAT_HANDSHAKE;
+        BrzPacket p = new BrzPacket(handshake, BrzPacket.BrzPacketType.CHAT_HANDSHAKE, "", false);
 
         for (String nodeId : chat.nodes) {
-            if (nodeId.equals(hostNode.id)) continue;
+            if (nodeId.equals(hostNode.id))
+                continue;
             p.to = nodeId;
             this.router.send(p);
         }
@@ -165,7 +164,8 @@ public class BreezeAPI extends Service {
 
     public void incomingChatResponse(BrzChatResponse response) {
         BrzChat c = this.state.getChat(response.chatId);
-        if (c == null) return;
+        if (c == null)
+            return;
 
         // Chat accepted!
         if (response.accepted) {
@@ -184,7 +184,8 @@ public class BreezeAPI extends Service {
         else {
 
             // The chat is a group
-            if (c.isGroup) c.nodes.remove(response.from);
+            if (c.isGroup)
+                c.nodes.remove(response.from);
 
             BrzNode n = BrzGraph.getInstance().getVertex(response.from);
             if (n != null) {
@@ -217,9 +218,7 @@ public class BreezeAPI extends Service {
         BrzChatResponse response = new BrzChatResponse(this.hostNode.id, handshake.chat.id, true);
 
         // Send the response
-        BrzPacket p = new BrzPacket(response);
-        p.type = BrzPacket.BrzPacketType.CHAT_RESPONSE;
-        p.to = handshake.from;
+        BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.CHAT_RESPONSE, handshake.from, false);
         this.router.send(p);
 
         encryption.saveSecretKey(handshake);
@@ -235,10 +234,7 @@ public class BreezeAPI extends Service {
     public void rejectHandshake(BrzChatHandshake handshake) {
         BrzChatResponse response = new BrzChatResponse(this.hostNode.id, handshake.chat.id, false);
 
-        BrzPacket p = new BrzPacket(response);
-        p.type = BrzPacket.BrzPacketType.CHAT_RESPONSE;
-        p.to = handshake.from;
-
+        BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.CHAT_RESPONSE, handshake.from, false);
         this.router.send(p);
 
         this.state.removeChat(handshake.chat.id);
@@ -247,25 +243,24 @@ public class BreezeAPI extends Service {
 
     //
     //
-    //      Messaging
+    // Messaging
     //
     //
 
     public void sendMessage(BrzMessage message, String chatId) {
-        BrzPacket p = new BrzPacket(message);
-        p.type = BrzPacket.BrzPacketType.MESSAGE;
+        BrzPacket p = new BrzPacket(message, BrzPacket.BrzPacketType.MESSAGE, "", false);
 
         // Send message to each recipient
         BrzChat chat = this.state.getChat(chatId);
         for (String nodeId : chat.nodes) {
-            if(nodeId.equals(hostNode.id)) continue;
+            if (nodeId.equals(hostNode.id))
+                continue;
             p.to = nodeId;
             this.router.send(p);
         }
 
         this.addMessage(message);
     }
-
 
     public void addMessage(BrzMessage message) {
         this.state.addMessage(message);

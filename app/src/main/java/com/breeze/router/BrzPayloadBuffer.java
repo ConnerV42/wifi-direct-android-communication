@@ -22,7 +22,7 @@ public class BrzPayloadBuffer {
     public String getStreamString(Payload p) {
         InputStream stream = p.asStream().asInputStream();
         Scanner sc = new Scanner(stream);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while (sc.hasNext()) {
             sb.append(sc.nextLine());
         }

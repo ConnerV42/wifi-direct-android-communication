@@ -38,7 +38,9 @@ public class ProfileActivity extends AppCompatActivity {
 
         // When the image uploader is clicked, choose a profile image
         ImageView profileImage = findViewById(R.id.profile_image);
-        profileImage.setImageBitmap(BrzStorage.getInstance().getProfileImage("default", this));
+        BrzStorage storage = BrzStorage.getInstance();
+        if (storage != null)
+            profileImage.setImageBitmap(BrzStorage.getInstance().getProfileImage("default", this));
         profileImage.setOnClickListener(e -> {
             Intent intent = new Intent(Intent.ACTION_PICK,
                     android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);

@@ -20,26 +20,20 @@ public class BrzMessageReceiptHandler implements BrzRouterHandler {
     public void handle(BrzPacket packet, String fromEndpointId) {
         BrzMessageReceipt mr = packet.messageReceipt();
 
-        // For us
-        if (packet.to.equals(this.api.hostNode.id)) {
-            try {
-                if (mr.type == BrzMessageReceipt.ReceiptType.DELIVERED) {
-                    Log.i("STATE", "Message delivery success!");
-                    api.db.setDelivered(mr.messageId);
-                } else if (mr.type == BrzMessageReceipt.ReceiptType.READ) {
-                    api.db.setRead(mr.messageId);
-                } else {
-                    throw new RuntimeException("Unsupported receipt type");
-                }
-            } catch (Exception e) {
-                Log.e("RECEIPT", "Failed to set message's receipt state");
+        try {
+            if (mr.type == BrzMessageReceipt.ReceiptType.DELIVERED) {
+                Log.i("STATE", "Message delivery success!");
+                api.db.setDelivered(mr.messageId);
+            } else if (mr.type == BrzMessageReceipt.ReceiptType.READ) {
+                Log.i("STATE", "Message read success!");
+                api.db.setRead(mr.messageId);
+            } else {
+                throw new RuntimeException("Unsupported receipt type");
             }
+        } catch (Exception e) {
+            Log.e("RECEIPT", "Failed to set message's receipt state");
         }
 
-        // Not for us
-        else {
-            this.router.send(packet);
-        }
     }
 
     @Override

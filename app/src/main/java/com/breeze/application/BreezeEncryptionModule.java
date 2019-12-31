@@ -31,8 +31,13 @@ public class BreezeEncryptionModule extends BreezeModule {
 
             // Set up public key
             PublicKey key = encryption.getPublicKeyFromKeyStore(n.id);
-            String keyStr = Base64.encodeToString(key.getEncoded(), Base64.DEFAULT);
-            n.publicKey = keyStr;
+            if (key == null)
+                throw new RuntimeException("Could not retrieve public key");
+
+            n.publicKey = Base64.encodeToString(key.getEncoded(), Base64.DEFAULT);
+
+            Log.i("ENCRYPTION", "Set public key to " + n.publicKey);
+
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Generating host node keys failed");
@@ -75,7 +80,7 @@ public class BreezeEncryptionModule extends BreezeModule {
 
     public void decryptPacket(BrzPacket p) {
         String body = encryption.asymmetricDecrypt(api.hostNode.id, p.body);
-        if (body == null) throw new RuntimeException("Could not encrypt packet");
+        if (body == null) throw new RuntimeException("Could not decrypt packet");
         p.body = body;
     }
 }

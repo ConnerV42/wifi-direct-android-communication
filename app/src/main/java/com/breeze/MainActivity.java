@@ -3,7 +3,6 @@ package com.breeze;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
@@ -12,26 +11,16 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.breeze.application.BreezeAPI;
-import com.breeze.database.DatabaseHandler;
-import com.breeze.encryption.BrzEncryption;
 import com.breeze.router.BrzRouter;
 
 import com.breeze.state.BrzStateStore;
-import com.breeze.storage.BrzStorage;
-import com.breeze.views.ProfileActivity;
-import com.google.android.gms.nearby.Nearby;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import java.security.KeyPair;
-import java.security.spec.ECField;
 
 public class MainActivity extends AppCompatActivity {
 

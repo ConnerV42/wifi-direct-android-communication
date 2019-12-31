@@ -2,6 +2,8 @@ package com.breeze.packets;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzFileInfo;
 import com.breeze.packets.ChatEvents.BrzChatHandshake;
@@ -9,28 +11,27 @@ import com.breeze.packets.ChatEvents.BrzChatResponse;
 import com.breeze.packets.GraphEvents.BrzGraphEvent;
 import com.breeze.packets.GraphEvents.BrzGraphQuery;
 import com.breeze.packets.MessageEvents.BrzMessageReceipt;
+
 import org.json.JSONObject;
+
 import java.util.UUID;
 
 public class BrzPacket implements BrzSerializable {
 
     public enum BrzPacketType {
-        MESSAGE,
-        FILE_INFO,
-        ACK,
+        MESSAGE, FILE_INFO, ACK,
 
-        GRAPH_QUERY,
-        GRAPH_EVENT,
+        GRAPH_QUERY, GRAPH_EVENT,
 
-        CHAT_HANDSHAKE,
-        CHAT_RESPONSE,
+        CHAT_HANDSHAKE, CHAT_RESPONSE,
 
         MESSAGE_RECEIPT
     }
 
     public String id = UUID.randomUUID().toString();
-    public String to = "BROADCAST";
     public BrzPacketType type = BrzPacketType.MESSAGE;
+    public String to = "BROADCAST";
+    public boolean broadcast = true;
     public String body = "";
 
     public BrzPacket() {
@@ -38,6 +39,13 @@ public class BrzPacket implements BrzSerializable {
 
     public BrzPacket(BrzSerializable body) {
         this.body = body.toJSON();
+    }
+
+    public BrzPacket(BrzSerializable body, BrzPacketType type, @NonNull String to, boolean broadcast) {
+        this.body = body.toJSON();
+        this.type = type;
+        this.to = to;
+        this.broadcast = broadcast;
     }
 
     public BrzPacket(String json) {
@@ -79,8 +87,9 @@ public class BrzPacket implements BrzSerializable {
 
         try {
             json.put("id", this.id);
-            json.put("to", this.to);
             json.put("type", this.type);
+            json.put("to", this.to);
+            json.put("broadcast", this.broadcast);
             json.put("body", this.body);
         } catch (Exception e) {
             Log.i("SERIALIZATION ERROR", e.toString());
@@ -95,8 +104,9 @@ public class BrzPacket implements BrzSerializable {
             JSONObject jObj = new JSONObject(json);
 
             this.id = jObj.getString("id");
-            this.to = jObj.getString("to");
             this.type = BrzPacketType.valueOf(jObj.getString("type"));
+            this.to = jObj.getString("to");
+            this.broadcast = jObj.getBoolean("broadcast");
             this.body = jObj.getString("body");
         } catch (Exception e) {
             Log.i("DESERIALIZATION ERROR", e.toString());

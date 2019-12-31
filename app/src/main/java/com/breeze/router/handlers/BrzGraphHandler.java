@@ -32,7 +32,7 @@ public class BrzGraphHandler implements BrzRouterHandler {
             // Respond to graph query
             if (query.type == BrzGraphQuery.BrzGQType.REQUEST) {
                 BrzPacket resPacket = BrzPacketBuilder.graphResponse(this.graph, router.hostNode, query.from);
-                this.router.sendToEndpoint(resPacket, fromEndpointId);
+                this.router.send(resPacket);
                 Log.i("ENDPOINT", "Responed to graph query");
             }
 
@@ -60,7 +60,8 @@ public class BrzGraphHandler implements BrzRouterHandler {
             BrzGraphEvent ge = packet.graphEvent();
 
             // Don't accept events involving yourself
-            if (ge.node1.id.equals(router.hostNode.id) || ge.node2.id.equals(router.hostNode.id)) return;
+            if (ge.node1.id.equals(router.hostNode.id) || ge.node2.id.equals(router.hostNode.id))
+                return;
 
             // If it's a new connection
             if (ge.type == BrzGraphEvent.BrzGEType.CONNECT) {
@@ -77,8 +78,7 @@ public class BrzGraphHandler implements BrzRouterHandler {
     }
 
     public boolean handles(BrzPacket.BrzPacketType type) {
-        return type == BrzPacket.BrzPacketType.GRAPH_EVENT ||
-                type == BrzPacket.BrzPacketType.GRAPH_QUERY;
+        return type == BrzPacket.BrzPacketType.GRAPH_EVENT || type == BrzPacket.BrzPacketType.GRAPH_QUERY;
     }
 
 }
