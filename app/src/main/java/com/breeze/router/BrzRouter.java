@@ -15,6 +15,7 @@ import com.breeze.router.handlers.BrzFileInfoPktHandler;
 import com.breeze.router.handlers.BrzGraphHandler;
 import com.breeze.router.handlers.BrzHandshakeHandler;
 import com.breeze.router.handlers.BrzMessageHandler;
+import com.breeze.router.handlers.BrzMessageReceiptHandler;
 import com.breeze.router.handlers.BrzRouterHandler;
 import com.breeze.state.BrzStateStore;
 import com.google.android.gms.nearby.Nearby;
@@ -84,6 +85,7 @@ public class BrzRouter {
         this.handlers.add(new BrzMessageHandler(this));
         this.handlers.add(new BrzHandshakeHandler(this));
         this.handlers.add(new BrzFileInfoPktHandler(this));
+        this.handlers.add(new BrzMessageReceiptHandler());
     }
 
     //

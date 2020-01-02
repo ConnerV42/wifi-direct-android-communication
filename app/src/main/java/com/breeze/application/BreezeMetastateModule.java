@@ -9,11 +9,13 @@ import com.breeze.App;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzNode;
+import com.breeze.packets.BrzPacket;
+import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.views.ProfileActivity;
 
 import java.util.List;
 
-class BreezeMetastateModule extends BreezeModule {
+public class BreezeMetastateModule extends BreezeModule {
     BreezeMetastateModule(BreezeAPI api) {
         super(api);
 
@@ -36,10 +38,6 @@ class BreezeMetastateModule extends BreezeModule {
             chats = api.db.getAllChats();
             if (chats != null) {
                 Log.i("STATE", "Found " + chats.size() + " chats in the database");
-                // for(BrzChat b : chats) {
-                // api.db.deleteChat(b.id);
-                // api.db.deleteChatMessages(b.id);
-                // }
                 api.state.addAllChats(chats);
             } else {
                 Log.i("STATE", "No stored chats found!");
@@ -66,6 +64,59 @@ class BreezeMetastateModule extends BreezeModule {
             Log.e("BREEZE_API", "Trying to load chats", e);
         }
 
+//        List<String> nodes = new ArrayList<>();
+
+//        nodes.add("test");
+//        BrzChat chat = new BrzChat("Test Chat", nodes);
+//
+//        BrzMessage msg = new BrzMessage("Testing date stuff", "test");
+//        msg.chatId = chat.id;
+//
+//        BrzMessage msg2 = new BrzMessage("Testing date stuff for outgoing", api.hostNode.id);
+//        msg2.chatId = chat.id;
+//
+//        api.state.addChat(chat);
+//        api.state.addMessage(msg);
+//        api.state.addMessage(msg2);
+//        BrzGraph.getInstance().addVertex(new BrzNode("test", "", "", "Jake", "@JJ"));
+//
+//        BrzGraph.getInstance().addVertex(new BrzNode("2", "", "", "Paul", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("3", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("4", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("5", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("6", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("7", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("8", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("9", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("10", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("11", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("12", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("13", "", "", "Conner", "@JJ"));
+//        BrzGraph.getInstance().addVertex(new BrzNode("14", "", "", "Conner", "@JJ"));
+
     }
 
+    public void sendDeliveryReceipt(BrzMessage m) {
+        BrzPacket p = BrzPacketBuilder.messageReceipt(m.from, m.chatId, m.id, true);
+        api.router.send(p);
+
+        // Tracking delivery isn't really necessary
+        // this.api.db.setDelivered(m.id);
+    }
+
+    public void sendReadReceipt(BrzMessage m) {
+        BrzPacket p = BrzPacketBuilder.messageReceipt(m.from, m.chatId, m.id, false);
+        api.router.send(p);
+        this.api.db.setRead(m.id);
+    }
+
+    public void setDelivered(String messageId) {
+        this.api.db.setDelivered(messageId);
+        this.emit("delivered", messageId);
+    }
+
+    public void setRead(String messageId) {
+        this.api.db.setRead(messageId);
+        this.emit("read", messageId);
+    }
 }

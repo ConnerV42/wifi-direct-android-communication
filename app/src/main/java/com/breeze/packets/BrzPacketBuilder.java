@@ -68,14 +68,14 @@ public class BrzPacketBuilder {
         return new BrzPacket(body, BrzPacket.BrzPacketType.GRAPH_EVENT, "BROADCAST", true);
     }
 
-    public static BrzPacket messageReceipt(String to, String chatId, boolean delivered) {
+    public static BrzPacket messageReceipt(String to, String chatId, String messageId, boolean delivered) {
         String from = BreezeAPI.getInstance().hostNode.id;
 
         BrzMessageReceipt mr = null;
         if (delivered)
-            mr = new BrzMessageReceipt(from, chatId, BrzMessageReceipt.ReceiptType.DELIVERED);
+            mr = new BrzMessageReceipt(from, chatId, messageId, BrzMessageReceipt.ReceiptType.DELIVERED);
         else
-            mr = new BrzMessageReceipt(from, chatId, BrzMessageReceipt.ReceiptType.READ);
+            mr = new BrzMessageReceipt(from, chatId, messageId, BrzMessageReceipt.ReceiptType.READ);
 
         return new BrzPacket(mr, BrzPacket.BrzPacketType.MESSAGE_RECEIPT, to, false);
     }

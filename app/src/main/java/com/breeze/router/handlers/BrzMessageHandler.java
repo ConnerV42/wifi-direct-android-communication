@@ -23,12 +23,11 @@ public class BrzMessageHandler implements BrzRouterHandler {
             throw new RuntimeException("This handler does not handle packets of type " + packet.type);
 
         BrzMessage m = packet.message();
-        BreezeAPI.getInstance().addMessage(m);
+        BreezeAPI api = BreezeAPI.getInstance();
+        api.addMessage(m);
 
         // Send delivery acknowledgement
-        BrzPacket p = BrzPacketBuilder.messageReceipt(m.from, m.chatId, true);
-        router.send(p);
-
+        api.meta.sendDeliveryReceipt(m);
     }
 
     public boolean handles(BrzPacket.BrzPacketType type) {

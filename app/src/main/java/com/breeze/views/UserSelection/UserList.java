@@ -46,20 +46,15 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
             user_alias.setText(node.alias);
 
             ImageView user_image = v.findViewById(R.id.user_image);
-            Bitmap b;
-            if(nodes.contains(node.id)) {
+            if (nodes.contains(node.id)) {
                 user_name.setTextColor(ctx.getColor(R.color.colorAccent));
                 user_alias.setTextColor(ctx.getColor(R.color.colorAccent));
                 user_image.setColorFilter(ctx.getColor(R.color.colorAccent));
-
-                b = BrzStorage.getInstance().bitmapFromVector(ctx, R.drawable.ic_done_black_24dp);
             } else {
                 user_name.setTextColor(ctx.getColor(android.R.color.black));
                 user_alias.setTextColor(ctx.getColor(android.R.color.black));
                 user_image.setColorFilter(ctx.getColor(android.R.color.black));
-                b = BrzStorage.getInstance().getProfileImage(node.id, ctx);
             }
-            user_image.setImageBitmap(b);
 
             this.position = position;
         }

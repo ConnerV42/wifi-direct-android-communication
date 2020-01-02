@@ -40,6 +40,8 @@ public class BreezeAPI extends Service {
 
     // Behavioral Modules
 
+    final private String ACTION_STOP_SERVICE = "STOP THIS NOW";
+
     public BrzRouter router = null;
     public BrzStorage storage = null;
     public BrzStateStore state = null;
@@ -58,10 +60,9 @@ public class BreezeAPI extends Service {
     public void onCreate() {
         super.onCreate();
 
-        // Singleton
         instance = this;
 
-        // Start our router and stuff with the service context
+        // Initialize api modules
         this.router = BrzRouter.initialize(this, "BREEZE_MESSENGER");
         this.storage = BrzStorage.initialize(this);
         this.state = BrzStateStore.getStore();
@@ -73,20 +74,36 @@ public class BreezeAPI extends Service {
 
         // Upgrade to foreground process
         Intent notifIntent = new Intent(this, MainActivity.class);
-        PendingIntent pending = PendingIntent.getActivity(this, 0, notifIntent, 0);
+        PendingIntent pending = PendingIntent.getActivity(this, 0, notifIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        Intent stopSelf = new Intent(this, BreezeAPI.class);
+        stopSelf.setAction(this.ACTION_STOP_SERVICE);
+        PendingIntent pStopSelf = PendingIntent.getService(this, 0, stopSelf, 0);
 
         Notification notification = new NotificationCompat.Builder(this, App.CHANNEL_ID)
-                .setContentTitle("Breeze Service").setContentText("Breeze is running in the background")
-                .setSmallIcon(R.drawable.ic_launcher).setContentIntent(pending).build();
+                .setContentTitle("Breeze Service")
+                .setContentText("Breeze is running in the background")
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentIntent(pending)
+                .addAction(R.drawable.ic_launcher, "Stop", pStopSelf)
+                .build();
 
         startForeground(1, notification);
+
+        Intent shellIntent = new Intent(this, MainActivity.class);
+        shellIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        this.startActivity(shellIntent);
+
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (ACTION_STOP_SERVICE.equals(intent.getAction())) {
+            stopSelf();
+        }
+
         Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
         return START_NOT_STICKY;
-//        return START_STICKY;
     }
 
     @Nullable

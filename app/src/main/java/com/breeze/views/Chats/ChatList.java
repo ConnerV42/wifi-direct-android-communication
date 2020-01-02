@@ -10,12 +10,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.breeze.R;
+import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class ChatList extends BaseAdapter {
 
@@ -26,16 +28,25 @@ public class ChatList extends BaseAdapter {
 
     private Context ctx;
     private List<BrzChat> chats = new ArrayList<>();
+    private Consumer<List<BrzChat>> chatListener;
 
     public ChatList(Context ctx) {
         this.ctx = ctx;
-
-        BrzStateStore.getStore().getAllChats(brzChats -> {
-            if (chats != null) {
+        BreezeAPI api = BreezeAPI.getInstance();
+        this.chatListener = brzChats -> {
+            if (brzChats != null) {
                 this.chats = brzChats;
                 notifyDataSetChanged();
             }
-        });
+        };
+
+        this.chatListener.accept(api.state.getAllChats());
+        api.state.on("allChats", this.chatListener);
+    }
+
+    public void cleanup() {
+        BreezeAPI api = BreezeAPI.getInstance();
+        api.state.off("allChats", this.chatListener);
     }
 
     @Override
@@ -72,7 +83,7 @@ public class ChatList extends BaseAdapter {
 
         chatCmp.chatImage = convertView.findViewById(R.id.chat_image);
 
-        if(!chat.isGroup) {
+        if (!chat.isGroup) {
             chatCmp.chatImage.setImageBitmap(BrzStorage.getInstance().getProfileImage(chat.otherPersonId(), ctx));
         } else {
             chatCmp.chatImage.setImageBitmap(BrzStorage.getInstance().getChatImage(chat.id, ctx));

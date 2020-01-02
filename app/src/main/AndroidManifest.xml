@@ -21,17 +21,25 @@
         android:roundIcon="@drawable/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".views.UserSelection.UserSelection"></activity>
+
+        <activity
+            android:name=".views.UserSelection.UserSelection"
+            android:theme="@style/AppTheme.NoActionBar" />
+
         <activity android:name=".views.Messages.MessagesView" />
         <activity android:name=".views.ProfileActivity" />
         <activity android:name=".views.ChatSettingsActivity" />
         <activity
             android:name=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".SplashActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>

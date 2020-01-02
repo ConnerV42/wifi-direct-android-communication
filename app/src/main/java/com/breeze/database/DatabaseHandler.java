@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzNode;
+
 import org.json.JSONArray;
 
 import java.util.ArrayList;
@@ -96,8 +97,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(@NonNull SQLiteDatabase db, int oldVersion, int newVersion) {
-        for(String tableName : DatabaseHandler.tableNames)
-        {
+        for (String tableName : DatabaseHandler.tableNames) {
             db.execSQL("DROP TABLE IF EXISTS " + tableName);
         }
         this.onCreate(db);
@@ -120,6 +120,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         db.close();
     }
+
     public BrzNode getNode(@NonNull String nodeId) {
         SQLiteDatabase db = this.getReadableDatabase();
         String[] args = {nodeId};
@@ -166,6 +167,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         db.close();
     }
+
     public void deleteChat(@NonNull String chatId) {
         SQLiteDatabase db = this.getWritableDatabase();
         Object[] args = {chatId};
@@ -176,6 +178,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         db.close();
     }
+
     public List<BrzChat> getAllChats() {
         SQLiteDatabase db = this.getReadableDatabase();
         String[] args = {};
@@ -194,7 +197,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         List<BrzChat> chats = new ArrayList<>();
 
-        for(int i = 0; i < c.getCount(); i++) {
+        for (int i = 0; i < c.getCount(); i++) {
             BrzChat n = new BrzChat();
 
             n.id = c.getString(c.getColumnIndex("id"));
@@ -221,9 +224,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
         return chats;
     }
+
     public BrzChat getChat(@NonNull String chatId) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String[] args = { chatId };
+        String[] args = {chatId};
 
         Cursor c = db.rawQuery("SELECT * FROM " + BRZCHAT_TABLE_NAME + " WHERE id = ?;", args);
 
@@ -269,27 +273,29 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void addMessage(@NonNull BrzMessage message) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues vals = new ContentValues();
-
         vals.put("[id]", message.id);
         vals.put("[from]", message.from);
         vals.put("body", message.body);
         vals.put("chatId", message.chatId);
         vals.put("isStatus", message.isStatus);
         vals.put("datestamp", message.datestamp);
-
         db.insert(BRZMESSAGE_TABLE_NAME, null, vals);
+
+        db.execSQL("INSERT INTO " + BRZRECEIPT_TABLE_NAME + " VALUES (?,?,?)", new Object[]{message.id, 0, 0});
+
         db.close();
     }
+
     public void deleteMessage(@NonNull String id) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(BRZMESSAGE_TABLE_NAME, "id = ?", new String[]{ id });
+        db.delete(BRZMESSAGE_TABLE_NAME, "id = ?", new String[]{id});
         db.close();
     }
 
-    public List<BrzMessage> getChatMessages(@NonNull String chatId){
+    public List<BrzMessage> getChatMessages(@NonNull String chatId) {
         SQLiteDatabase db = this.getWritableDatabase();
         String[] args = {chatId};
-        Cursor c = db.rawQuery("SELECT * FROM " + BRZMESSAGE_TABLE_NAME + " WHERE [chatId] = ? ORDER BY createdAt asc;", args);
+        Cursor c = db.rawQuery("SELECT * FROM " + BRZMESSAGE_TABLE_NAME + " WHERE [chatId] = ? ORDER BY datestamp asc;", args);
         if (c == null) {
             db.close();
             return null;
@@ -318,9 +324,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         return list;
     }
-    public void deleteChatMessages(@NonNull String chatId){
+
+    public void deleteChatMessages(@NonNull String chatId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(BRZMESSAGE_TABLE_NAME, "chatId = ?", new String[]{ chatId });
+        db.delete(BRZMESSAGE_TABLE_NAME, "chatId = ?", new String[]{chatId});
         db.close();
     }
 
@@ -333,19 +340,20 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public void setDelivered(String messageId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        Object[] args = { messageId, true, false };
+        Object[] args = {messageId};
         try {
-            db.execSQL("INSERT OR REPLACE INTO " + BRZRECEIPT_TABLE_NAME + " VALUES (?,?,?)", args);
+            db.execSQL("UPDATE " + BRZRECEIPT_TABLE_NAME + " set delivered = 1 where messageId = ?", args);
         } catch (Exception e) {
             Log.i("Bad SQL Error", "Error with SQL Syntax");
         }
         db.close();
     }
+
     public void setRead(String messageId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        Object[] args = { messageId, true, true };
+        Object[] args = {messageId};
         try {
-            db.execSQL("INSERT OR REPLACE INTO " + BRZRECEIPT_TABLE_NAME + " VALUES (?,?,?)", args);
+            db.execSQL("UPDATE " + BRZRECEIPT_TABLE_NAME + " set read = 1 where messageId = ?", args);
         } catch (Exception e) {
             Log.i("Bad SQL Error", "Error with SQL Syntax");
         }
@@ -354,7 +362,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public boolean isDelivered(String messageId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor c = db.rawQuery("SELECT delivered FROM " + BRZRECEIPT_TABLE_NAME + " WHERE messageId = ?;", new String[]{ messageId });
+        Cursor c = db.rawQuery("SELECT delivered FROM " + BRZRECEIPT_TABLE_NAME + " WHERE messageId = ?;", new String[]{messageId});
         if (c == null) {
             db.close();
             return false;
@@ -372,9 +380,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
         return delivered;
     }
+
     public boolean isRead(String messageId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor c = db.rawQuery("SELECT read FROM " + BRZRECEIPT_TABLE_NAME + " WHERE messageId = ?;", new String[]{ messageId });
+        Cursor c = db.rawQuery("SELECT read FROM " + BRZRECEIPT_TABLE_NAME + " WHERE messageId = ?;", new String[]{messageId});
         if (c == null) {
             db.close();
             return false;

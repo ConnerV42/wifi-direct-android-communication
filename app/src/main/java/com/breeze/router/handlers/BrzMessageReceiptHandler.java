@@ -9,24 +9,23 @@ import com.breeze.router.BrzRouter;
 
 public class BrzMessageReceiptHandler implements BrzRouterHandler {
     private BreezeAPI api = null;
-    private BrzRouter router;
 
-    public BrzMessageReceiptHandler(BrzRouter router) {
-        this.router = router;
+    public BrzMessageReceiptHandler() {
         this.api = BreezeAPI.getInstance();
     }
 
     @Override
     public void handle(BrzPacket packet, String fromEndpointId) {
         BrzMessageReceipt mr = packet.messageReceipt();
+        Log.i("STATE", "Message " + mr.messageId + " was " + mr.type);
 
         try {
             if (mr.type == BrzMessageReceipt.ReceiptType.DELIVERED) {
                 Log.i("STATE", "Message delivery success!");
-                api.db.setDelivered(mr.messageId);
+                api.meta.setDelivered(mr.messageId);
             } else if (mr.type == BrzMessageReceipt.ReceiptType.READ) {
                 Log.i("STATE", "Message read success!");
-                api.db.setRead(mr.messageId);
+                api.meta.setRead(mr.messageId);
             } else {
                 throw new RuntimeException("Unsupported receipt type");
             }

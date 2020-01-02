@@ -8,23 +8,21 @@ import org.json.JSONObject;
 
 public class BrzMessageReceipt implements BrzSerializable {
 
-    public static enum ReceiptType {DELIVERED, READ}
+    public enum ReceiptType {DELIVERED, READ}
 
     public String from = "";
     public String chatId = "";
     public String messageId = "";
     public ReceiptType type = null;
 
-    public BrzMessageReceipt() {
-    }
-
     public BrzMessageReceipt(String json) {
         this.fromJSON(json);
     }
 
-    public BrzMessageReceipt(String from, String chatId, ReceiptType type) {
+    public BrzMessageReceipt(String from, String chatId, String messageId, ReceiptType type) {
         this.from = from;
         this.chatId = chatId;
+        this.messageId = messageId;
         this.type = type;
     }
 

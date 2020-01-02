@@ -5,22 +5,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import com.breeze.application.BreezeAPI;
 import com.breeze.router.BrzRouter;
-
-import com.breeze.state.BrzStateStore;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,10 +39,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
+        this.startApplicationService();
+
         if (!hasPermissions(this, REQUIRED_PERMISSIONS)) {
             requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_REQUIRED_PERMISSIONS);
         }
     }
+
+    private void startApplicationService() {
+        Intent brzService = new Intent(this, BreezeAPI.class);
+        startService(brzService);
+    }
+
 
     @Override
     protected void onResume() {
@@ -65,13 +69,6 @@ public class MainActivity extends AppCompatActivity {
 
         this.toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        BrzStateStore store = BrzStateStore.getStore();
-        store.setTitle("Breeze");
-        store.getTitle(title -> this.toolbar.setTitle(title));
-
-        // Start the breeze background service
-        this.startApplicationService();
     }
 
     @Override
@@ -82,13 +79,6 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_PROFILE) {
         }
     }
-
-
-    private void startApplicationService() {
-        Intent brzService = new Intent(this, BreezeAPI.class);
-        startService(brzService);
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

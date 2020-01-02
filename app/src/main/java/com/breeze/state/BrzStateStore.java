@@ -2,6 +2,7 @@ package com.breeze.state;
 
 import android.util.Log;
 
+import com.breeze.EventEmitter;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzChat;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class BrzStateStore {
+public class BrzStateStore extends EventEmitter {
 
     private static BrzStateStore instance = new BrzStateStore();
 
@@ -22,41 +23,21 @@ public class BrzStateStore {
     }
 
     //
-    //
-    //  Title
-    //
+    // Title
     //
 
     private String title = "";
-    private List<Consumer<String>> titleListeners = new ArrayList<>();
-
-    public void getTitle(Consumer<String> callback) {
-        this.titleListeners.add(callback);
-        callback.accept(this.title);
-    }
-
-    public String getTitle() {
-        return this.title;
-    }
 
     public void setTitle(String title) {
         this.title = title;
-        for (Consumer<String> c : this.titleListeners) c.accept(this.title);
+        this.emit("title", this.title);
     }
 
     //
-    //
-    //  User
-    //
+    // Host node
     //
 
     private BrzNode hostNode = null;
-    private List<Consumer<BrzNode>> hostNodeListeners = new ArrayList<>();
-
-    public void getHostNode(Consumer<BrzNode> callback) {
-        this.hostNodeListeners.add(callback);
-        callback.accept(this.hostNode);
-    }
 
     public BrzNode getHostNode() {
         return this.hostNode;
@@ -64,36 +45,17 @@ public class BrzStateStore {
 
     public void setHostNode(BrzNode hostNode) {
         this.hostNode = hostNode;
-        for (Consumer<BrzNode> c : this.hostNodeListeners) c.accept(this.hostNode);
+        this.emit("hostNode", this.hostNode);
     }
 
-    //
     //
     //  Chats
     //
-    //
 
     private HashMap<String, BrzChat> chats = new HashMap<>();
-    private List<Consumer<List<BrzChat>>> chatListListeners = new ArrayList<>();
-    private HashMap<String, List<Consumer<BrzChat>>> chatListeners = new HashMap<>();
-
-    public void getAllChats(Consumer<List<BrzChat>> callback) {
-        chatListListeners.add(callback);
-        callback.accept(new ArrayList<>(this.chats.values()));
-    }
 
     public List<BrzChat> getAllChats() {
         return new ArrayList<>(this.chats.values());
-    }
-
-    public void getChat(String chatId, Consumer<BrzChat> callback) {
-        List<Consumer<BrzChat>> listeners = this.chatListeners.get(chatId);
-        if (listeners == null) {
-            listeners = new ArrayList<>();
-            this.chatListeners.put(chatId, listeners);
-        }
-        listeners.add(callback);
-        callback.accept(this.chats.get(chatId));
     }
 
     public BrzChat getChat(String chatId) {
@@ -103,60 +65,37 @@ public class BrzStateStore {
     public void addChat(BrzChat chat) {
         this.chats.put(chat.id, chat);
 
-        List<BrzChat> allChats = new ArrayList<>(this.chats.values());
-        for (Consumer<List<BrzChat>> c : this.chatListListeners) c.accept(allChats);
-
-        List<Consumer<BrzChat>> cl = this.chatListeners.get(chat.id);
-        if (cl != null) for (Consumer<BrzChat> c : cl) c.accept(chat);
+        this.emit("allChats", this.getAllChats());
+        this.emit("chat" + chat.id, chat);
     }
 
     public void addAllChats(List<BrzChat> chats) {
         for (BrzChat chat : chats) {
             this.chats.put(chat.id, chat);
-            List<Consumer<BrzChat>> cl = this.chatListeners.get(chat.id);
-            if (cl != null) for (Consumer<BrzChat> c : cl) c.accept(chat);
+            this.emit("chat" + chat.id, chat);
         }
 
-        List<BrzChat> allChats = new ArrayList<>(this.chats.values());
-        for (Consumer<List<BrzChat>> c : this.chatListListeners) c.accept(allChats);
+        this.emit("allChats", this.getAllChats());
     }
 
     public void removeChat(String chatId) {
         this.chats.remove(chatId);
 
-        List<BrzChat> allChats = new ArrayList<>(this.chats.values());
-        for (Consumer<List<BrzChat>> c : this.chatListListeners) c.accept(allChats);
-
-        List<Consumer<BrzChat>> cl = this.chatListeners.get(chatId);
-        if (cl != null) for (Consumer<BrzChat> c : cl) c.accept(null);
+        this.emit("allChats", this.getAllChats());
+        this.emit("chat" + chatId, null);
     }
 
-    //
     //
     //  Messages
     //
-    //
 
     private HashMap<String, List<BrzMessage>> messages = new HashMap<>();
-    private HashMap<String, List<Consumer<List<BrzMessage>>>> mlisteners = new HashMap<>();
-
-    public void getMessages(String chatId, Consumer<List<BrzMessage>> callback) {
-        List<Consumer<List<BrzMessage>>> listeners = this.mlisteners.get(chatId);
-        if (listeners == null) {
-            listeners = new ArrayList<>();
-            this.mlisteners.put(chatId, listeners);
-        }
-        listeners.add(callback);
-        callback.accept(this.messages.get(chatId));
-    }
 
     public List<BrzMessage> getMessages(String chatId) {
         return this.messages.get(chatId);
     }
 
     public void addMessage(BrzMessage msg) {
-        Log.i("STATE", msg.toJSON());
-
         List<BrzMessage> messages = this.messages.get(msg.chatId);
         if (messages == null) {
             messages = new ArrayList<>();
@@ -164,13 +103,12 @@ public class BrzStateStore {
         }
         messages.add(msg);
 
-        List<Consumer<List<BrzMessage>>> cl = this.mlisteners.get(msg.chatId);
-        if (cl != null) for (Consumer<List<BrzMessage>> c : cl) c.accept(messages);
+        this.emit("messages" + msg.chatId, this.getMessages(msg.chatId));
     }
 
     public void addAllMessages(List<BrzMessage> newMessages) {
         Set<String> chatIdsToUpdate = new HashSet<>();
-        for(BrzMessage msg : newMessages) {
+        for (BrzMessage msg : newMessages) {
             List<BrzMessage> messages = this.messages.get(msg.chatId);
             if (messages == null) {
                 messages = new ArrayList<>();
@@ -180,12 +118,8 @@ public class BrzStateStore {
             chatIdsToUpdate.add(msg.chatId);
         }
 
-        for(String chatId : chatIdsToUpdate) {
-            List<BrzMessage> messages = this.messages.get(chatId);
-            List<Consumer<List<BrzMessage>>> cl = this.mlisteners.get(chatId);
-            if (cl != null) for (Consumer<List<BrzMessage>> c : cl) c.accept(messages);
-        }
-
+        for (String chatId : chatIdsToUpdate)
+            this.emit("messages" + chatId, this.getMessages(chatId));
     }
 
 

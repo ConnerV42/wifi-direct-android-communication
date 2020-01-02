@@ -26,26 +26,13 @@ import static androidx.navigation.Navigation.findNavController;
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
  * to handle interaction events.
- * Use the {@link ChatsView#newInstance} factory method to
- * create an instance of this fragment.
  */
 public class ChatsView extends Fragment {
     public ChatsView() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @return A new instance of fragment ChatsView.
-     */
-    public static ChatsView newInstance() {
-        ChatsView fragment = new ChatsView();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
+    private ChatList list;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -63,11 +50,11 @@ public class ChatsView extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        final ChatList chatList = new ChatList(getActivity());
+        this.list = new ChatList(getActivity());
         ListView msgView = view.findViewById(R.id.contactList);
-        msgView.setAdapter(chatList);
+        msgView.setAdapter(this.list);
         msgView.setOnItemClickListener((parentView, childView, position, id) -> {
-            startActivity(MessagesView.getIntent(getContext(), chatList.getChatId(position)));
+            startActivity(MessagesView.getIntent(getContext(), this.list.getChatId(position)));
         });
 
         FloatingActionButton fab = view.findViewById(R.id.chat_view_fab);
@@ -91,5 +78,6 @@ public class ChatsView extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+        this.list.cleanup();
     }
 }

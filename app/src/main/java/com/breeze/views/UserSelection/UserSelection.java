@@ -3,18 +3,14 @@ package com.breeze.views.UserSelection;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -24,7 +20,6 @@ import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.graph.BrzGraph;
-import com.breeze.state.BrzStateStore;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -39,6 +34,17 @@ public class UserSelection extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_selection);
+
+        Toolbar userToolbar = findViewById(R.id.user_selection_toolbar);
+        setSupportActionBar(userToolbar);
+        ActionBar ab = getSupportActionBar();
+        if (ab == null) return;
+
+        // Set up the activity as not "backoutable"
+        ab.setDisplayHomeAsUpEnabled(true);
+        ab.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
+
+        ab.setTitle("New chat");
 
         // Set the done
         FloatingActionButton fab = findViewById(R.id.user_selection_fab);
@@ -117,20 +123,6 @@ public class UserSelection extends AppCompatActivity {
                 adapter.getFilter().filter(s);
             }
         });
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        // Set up our action bar
-        ActionBar ab = getSupportActionBar();
-        if (ab == null) return;
-
-        // Set up the activity as not "backoutable"
-        ab.setDisplayHomeAsUpEnabled(true);
-        ab.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
-
-        ab.setTitle("New chat");
     }
 
     @Override

@@ -1,12 +1,11 @@
 package com.breeze.views.Messages;
 
-import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -14,11 +13,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.breeze.R;
+import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.graph.BrzGraph;
-import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
 
@@ -27,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.function.Consumer;
 
 public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder> {
 
@@ -53,6 +53,24 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
 
             TextView datestamp = this.v.findViewById(R.id.messageDatestamp);
             datestamp.setText(time);
+
+            if (viewType == 1) {
+                ImageView status = this.v.findViewById(R.id.messageStatus);
+
+                BrzStorage stor = BrzStorage.getInstance();
+                BreezeAPI api = BreezeAPI.getInstance();
+                int statusIcon = R.drawable.ic_alarm_black_24dp;
+                status.setColorFilter(Color.parseColor("#555555"));
+
+                if (api.db.isRead(msg.id)) {
+                    statusIcon = R.drawable.ic_done_all_black_24dp;
+                    status.setColorFilter(R.color.colorAccent);
+                } else if (api.db.isDelivered(msg.id)) {
+                    statusIcon = R.drawable.ic_done_black_24dp;
+                }
+
+                status.setImageBitmap(stor.bitmapFromVector(ctx, statusIcon));
+            }
 
             if (viewType == 4) {
                 TextView name = this.v.findViewById(R.id.messageName);
@@ -82,17 +100,48 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
     private Context ctx;
     private BrzChat chat;
 
+    private Consumer<List<BrzMessage>> messageListener;
+    private Consumer receiptListener;
+
     MessageList(Context ctx, BrzChat chat) {
         this.ctx = ctx;
         this.chat = chat;
 
-        BrzStateStore.getStore().getMessages(chat.id, messages -> {
+        BreezeAPI api = BreezeAPI.getInstance();
+        this.messageListener = messages -> {
             if (messages != null) {
                 this.messages = messages;
                 notifyDataSetChanged();
+
+                for (BrzMessage m : this.messages) {
+                    // Message has not been read by the user yet, send receipt
+                    if (!m.from.equals(api.hostNode.id) && !api.db.isRead(m.id)) {
+                        Log.i("STATE", "Message " + m.body + " from " + m.from + " wasn't read yet!");
+                        api.meta.sendReadReceipt(m);
+                    }
+                }
             }
-        });
+        };
+
+        this.messageListener.accept(api.state.getMessages(chat.id));
+        api.state.on("messages" + chat.id, this.messageListener);
+
+        this.receiptListener = msgId -> {
+            notifyDataSetChanged();
+            Log.i("BLAH", "A receipt changed!");
+        };
+
+        api.meta.on("delivered", receiptListener);
+        api.meta.on("read", receiptListener);
     }
+
+    public void cleanup() {
+        BreezeAPI api = BreezeAPI.getInstance();
+        api.state.off("messages" + chat.id, this.messageListener);
+        api.meta.off("delivered", receiptListener);
+        api.meta.off("read", receiptListener);
+    }
+
 
     @Override
     public int getItemViewType(int position) {

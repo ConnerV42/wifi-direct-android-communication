@@ -23,6 +23,7 @@ import android.widget.ImageButton;
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
+import com.breeze.datatypes.BrzMessage;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;
@@ -30,9 +31,15 @@ import com.breeze.state.BrzStateStore;
 import com.google.android.gms.nearby.connection.Payload;
 import com.breeze.views.ChatSettingsActivity;
 
+import java.util.List;
+import java.util.function.Consumer;
+
 public class MessagesView extends AppCompatActivity {
     private static final int READ_REQUEST_CODE = 69;
     private BrzChat chat;
+    private MessageList list;
+
+    private Consumer<List<BrzMessage>> messageListener;
 
     public static Intent getIntent(Context ctx, String chatId) {
         Intent i = new Intent(ctx, MessagesView.class);
@@ -44,19 +51,29 @@ public class MessagesView extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messages_view);
+        BreezeAPI api = BreezeAPI.getInstance();
 
         // Get the chat from the argument
         Intent i = getIntent();
         String chatId = i.getStringExtra("ARG_CHAT_ID");
-        BrzStateStore.getStore().getChat(chatId, chat -> this.chat = chat);
+        this.chat = api.state.getChat(chatId);
 
         // Set up content
-
         final BrzRouter router = BrzRouter.getInstance();
 
-        MessageList msgList = new MessageList(this, this.chat);
+        this.list = new MessageList(this, this.chat);
         RecyclerView msgView = findViewById(R.id.messageList);
-        msgView.setAdapter(msgList);
+        msgView.setAdapter(this.list);
+
+
+        this.messageListener = messages -> {
+            if (messages != null) {
+                msgView.scrollToPosition(messages.size() - 1);
+                Log.i("BLAH", "Scrolling list");
+            }
+        };
+        api.state.on("messages" + chatId, messageListener);
+
 
         LinearLayoutManager msgLayout = new LinearLayoutManager(this);
         msgLayout.setStackFromEnd(true);
@@ -141,5 +158,12 @@ public class MessagesView extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        BreezeAPI.getInstance().state.off("messages" + chat.id, this.messageListener);
+        this.list.cleanup();
     }
 }
