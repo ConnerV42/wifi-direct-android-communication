@@ -99,7 +99,7 @@ public class MessagesView extends AppCompatActivity {
         });
 
         // Bring up the option to select media to send from external storage
-        
+
         ImageButton sendPhoto = findViewById(R.id.sendPhoto);
         sendPhoto.setOnClickListener(view1 -> {
             Intent intent = new Intent(Intent.ACTION_PICK,
@@ -110,18 +110,17 @@ public class MessagesView extends AppCompatActivity {
         ImageButton sendVideo = findViewById(R.id.sendVideo);
         sendPhoto.setOnClickListener(view1 -> {
             Intent intent = new Intent(Intent.ACTION_PICK,
-                    android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+                    android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(intent, VIDEO_REQUEST_CODE);
         });
 
-        ImageButton sendAudio = findViewById(R.id.sendVideo);
+        ImageButton sendAudio = findViewById(R.id.sendAudio);
         sendPhoto.setOnClickListener(view1 -> {
             Intent intent = new Intent(Intent.ACTION_PICK,
-                    android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+                    android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(intent, AUDIO_REQUEST_CODE);
         });
     }
-
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -129,6 +128,7 @@ public class MessagesView extends AppCompatActivity {
         Log.i("Send Attachment", "Attachment data: " + data.getAction());
 
         if (requestCode == PHOTO_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+
             try {
                 Uri imageUri = data.getData();
 
