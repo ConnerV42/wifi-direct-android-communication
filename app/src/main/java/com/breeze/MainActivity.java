@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        item.setCheckable(true);
 
         if (id == R.id.action_settings) {
             Log.i("STATE", "Settings selected");
