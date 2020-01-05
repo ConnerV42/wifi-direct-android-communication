@@ -1,36 +1,32 @@
 package com.breeze.application;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+
 import com.breeze.App;
+import com.breeze.MainActivity;
+import com.breeze.R;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
+import com.breeze.views.Messages.MessagesView;
 import com.breeze.views.ProfileActivity;
 
 import java.util.List;
+import java.util.Random;
 
 public class BreezeMetastateModule extends BreezeModule {
     BreezeMetastateModule(BreezeAPI api) {
         super(api);
-
-        // Get stored hostNode info
-        SharedPreferences sp = api.getSharedPreferences("Breeze", Context.MODE_PRIVATE);
-        String hostNodeId = sp.getString(App.PREF_HOST_NODE_ID, "");
-        BrzNode hostNode = api.db.getNode(hostNodeId);
-        if (hostNode != null) {
-            api.setHostNode(hostNode);
-        } else {
-            // Get a new profile since one isn't set
-            Intent profileIntent = new Intent(api, ProfileActivity.class);
-            profileIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            api.startActivity(profileIntent);
-        }
 
         // Get stored chats
         List<BrzChat> chats = null;
@@ -96,6 +92,19 @@ public class BreezeMetastateModule extends BreezeModule {
 
     }
 
+    public boolean getCachedHostNode() {
+        // Get stored hostNode info
+        SharedPreferences sp = api.getSharedPreferences("Breeze", Context.MODE_PRIVATE);
+        String hostNodeId = sp.getString(App.PREF_HOST_NODE_ID, "");
+        BrzNode hostNode = api.db.getNode(hostNodeId);
+        if (hostNode != null) {
+            api.setHostNode(hostNode);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public void sendDeliveryReceipt(BrzMessage m) {
         BrzPacket p = BrzPacketBuilder.messageReceipt(m.from, m.chatId, m.id, true);
         api.router.send(p);
@@ -118,5 +127,28 @@ public class BreezeMetastateModule extends BreezeModule {
     public void setRead(String messageId) {
         this.api.db.setRead(messageId);
         this.emit("read", messageId);
+    }
+
+    public void showNotification(BrzMessage message) {
+        BrzChat c = this.api.state.getChat(message.chatId);
+
+        Intent chatIntent = MessagesView.getIntent(this.api, message.chatId);
+        PendingIntent pending = PendingIntent.getActivity(this.api, 0, chatIntent, 0);
+
+        Notification notification = new NotificationCompat.Builder(this.api, App.MESSAGE_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentTitle(c.name)
+                .setContentText(message.body)
+                .setAutoCancel(true)
+                .setContentIntent(pending)
+                .setChannelId(App.MESSAGE_CHANNEL_ID)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setDefaults(Notification.DEFAULT_ALL)
+                .build();
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.api);
+        notificationManager.notify(2, notification);
+
+        Log.i("STATE", "Showing a notification");
     }
 }

@@ -6,8 +6,11 @@ import android.app.NotificationManager;
 import android.os.Build;
 
 public class App extends Application {
-    public static final String CHANNEL_ID = "breezeForegroundChannel";
+    public static final String SERVICE_CHANNEL_ID = "breezeForegroundChannel";
+    public static final String MESSAGE_CHANNEL_ID = "breezeMessageChannel";
     public static final String PREF_HOST_NODE_ID = "hostNodeID";
+
+    public NotificationManager notificationManager = null;
 
     @Override
     public void onCreate() {
@@ -16,12 +19,20 @@ public class App extends Application {
     }
 
     private void createNotificationChannel() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel serviceChannel = new NotificationChannel(
-                    CHANNEL_ID, "Breeze Service Channel", NotificationManager.IMPORTANCE_NONE
+                    SERVICE_CHANNEL_ID, "Breeze Service Channel", NotificationManager.IMPORTANCE_NONE
             );
+            NotificationChannel messageChannel = new NotificationChannel(
+                    MESSAGE_CHANNEL_ID, "Breeze Messages", NotificationManager.IMPORTANCE_HIGH
+            );
+
             NotificationManager m = getSystemService(NotificationManager.class);
-            m.createNotificationChannel(serviceChannel);
+            if (m != null) {
+                this.notificationManager = m;
+                m.createNotificationChannel(serviceChannel);
+                m.createNotificationChannel(messageChannel);
+            }
         }
     }
 

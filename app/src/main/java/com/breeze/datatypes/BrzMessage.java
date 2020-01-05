@@ -23,14 +23,12 @@ public class BrzMessage implements BrzSerializable {
     public BrzMessage(String json) {
       this.fromJSON(json);
     }
-    public BrzMessage(String body, boolean isStatus) {
-      this.body = body;
-      this.isStatus = isStatus;
-    }
-    public BrzMessage(String body, String from) {
-      this.body = body;
+    public BrzMessage(String from, String chatId, String body, long datestamp, boolean isStatus) {
       this.from = from;
-      this.isStatus = false;
+      this.chatId = chatId;
+      this.body = body;
+      this.datestamp = datestamp;
+      this.isStatus = isStatus;
     }
 
     @Override

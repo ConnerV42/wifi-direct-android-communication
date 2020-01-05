@@ -24,6 +24,7 @@ public class BrzMessageHandler implements BrzRouterHandler {
 
         BrzMessage m = packet.message();
         BreezeAPI api = BreezeAPI.getInstance();
+        api.meta.showNotification(m);
         api.addMessage(m);
 
         // Send delivery acknowledgement

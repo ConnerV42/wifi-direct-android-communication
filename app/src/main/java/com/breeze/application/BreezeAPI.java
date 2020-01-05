@@ -22,11 +22,13 @@ import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.graph.BrzGraph;
 import com.breeze.packets.BrzPacket;
+import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.packets.ChatEvents.BrzChatHandshake;
 import com.breeze.packets.ChatEvents.BrzChatResponse;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
+import com.breeze.views.ProfileActivity;
 
 public class BreezeAPI extends Service {
 
@@ -80,7 +82,7 @@ public class BreezeAPI extends Service {
         stopSelf.setAction(this.ACTION_STOP_SERVICE);
         PendingIntent pStopSelf = PendingIntent.getService(this, 0, stopSelf, 0);
 
-        Notification notification = new NotificationCompat.Builder(this, App.CHANNEL_ID)
+        Notification notification = new NotificationCompat.Builder(this, App.SERVICE_CHANNEL_ID)
                 .setContentTitle("Breeze Service")
                 .setContentText("Breeze is running in the background")
                 .setSmallIcon(R.drawable.ic_launcher)
@@ -94,6 +96,12 @@ public class BreezeAPI extends Service {
         shellIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         this.startActivity(shellIntent);
 
+        // There isn't a saved host node yet
+        if (!meta.getCachedHostNode()) {
+            Intent profileIntent = new Intent(this, ProfileActivity.class);
+            profileIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            this.startActivity(profileIntent);
+        }
     }
 
     @Override
@@ -190,10 +198,9 @@ public class BreezeAPI extends Service {
 
             BrzNode n = BrzGraph.getInstance().getVertex(response.from);
             if (n != null) {
-                BrzMessage sm = new BrzMessage(n.name + " accepeted the chat request!");
-                sm.chatId = c.id;
-                this.state.addMessage(sm);
-                this.db.addMessage(sm);
+                BrzPacket p = BrzPacketBuilder.message(this.hostNode.id, "", n.name + " accepeted the chat request!", c.id, true);
+                this.state.addMessage(p.message());
+                this.db.addMessage(p.message());
             }
         }
 
@@ -206,10 +213,9 @@ public class BreezeAPI extends Service {
 
             BrzNode n = BrzGraph.getInstance().getVertex(response.from);
             if (n != null) {
-                BrzMessage sm = new BrzMessage(n.name + " rejected the chat.");
-                sm.chatId = c.id;
-                this.state.addMessage(sm);
-                this.db.addMessage(sm);
+                BrzPacket p = BrzPacketBuilder.message(this.hostNode.id, "", n.name + " rejected the chat.", c.id, true);
+                this.state.addMessage(p.message());
+                this.db.addMessage(p.message());
             }
         }
 
@@ -264,11 +270,11 @@ public class BreezeAPI extends Service {
     //
     //
 
-    public void sendMessage(BrzMessage message, String chatId) {
+    public void sendMessage(BrzMessage message) {
         BrzPacket p = new BrzPacket(message, BrzPacket.BrzPacketType.MESSAGE, "", false);
 
         // Send message to each recipient
-        BrzChat chat = this.state.getChat(chatId);
+        BrzChat chat = this.state.getChat(message.chatId);
         for (String nodeId : chat.nodes) {
             if (nodeId.equals(hostNode.id))
                 continue;

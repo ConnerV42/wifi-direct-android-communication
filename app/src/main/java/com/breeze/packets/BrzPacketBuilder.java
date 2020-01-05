@@ -14,30 +14,9 @@ import com.breeze.packets.MessageEvents.BrzMessageReceipt;
 
 public class BrzPacketBuilder {
 
-    public static BrzPacket message(String id, String msgTo, String msgBody, String chatId, Boolean isStatus) {
-        BrzMessage body = new BrzMessage();
-
-        body.from = id;
-        body.body = msgBody;
-        body.chatId = chatId;
-
-        body.isStatus = isStatus;
-        body.datestamp = System.currentTimeMillis();
-
+    public static BrzPacket message(String fromId, String msgTo, String msgBody, String chatId, Boolean isStatus) {
+        BrzMessage body = new BrzMessage(fromId, chatId, msgBody, System.currentTimeMillis(), isStatus);
         return new BrzPacket(body, BrzPacket.BrzPacketType.MESSAGE, msgTo, false);
-    }
-
-    public static BrzMessage makeMessage(String fromId, String msgBody, String chatId, Boolean isStatus) {
-        BrzMessage body = new BrzMessage();
-
-        body.from = fromId;
-        body.body = msgBody;
-        body.chatId = chatId;
-
-        body.isStatus = isStatus;
-        body.datestamp = System.currentTimeMillis();
-
-        return body;
     }
 
     public static BrzPacket fileInfoPacket(String fromUUID, String toUUID, String filePayloadId, String fileName) {

@@ -90,7 +90,8 @@ public class MessagesView extends AppCompatActivity {
             // Reset message box
             messageBox.setText("");
 
-            BreezeAPI.getInstance().sendMessage(BrzPacketBuilder.makeMessage(router.hostNode.id, messageBoxText, chat.id, false), chat.id);
+            BrzPacket p = BrzPacketBuilder.message(router.hostNode.id, "", messageBoxText, chat.id, false);
+            BreezeAPI.getInstance().sendMessage(p.message());
         });
 
         ImageButton sendPhoto = findViewById(R.id.sendPhoto);

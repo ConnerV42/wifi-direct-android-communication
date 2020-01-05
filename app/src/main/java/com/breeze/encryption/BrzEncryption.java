@@ -241,8 +241,8 @@ public final class BrzEncryption {
                                 setKeySize(2048).
                                 setEncryptionPaddings(DEFAULT_ENCRYPTION_PADDING).
                                 setDigests(KeyProperties.DIGEST_SHA256);
-
                 keyPairGenerator.initialize(builder.build());
+                keyPairGenerator.generateKeyPair();
             }
         } catch (NoSuchAlgorithmException |
                 InvalidAlgorithmParameterException | KeyStoreException | NoSuchProviderException e) {
