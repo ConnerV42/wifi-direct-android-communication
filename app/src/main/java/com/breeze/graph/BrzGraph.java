@@ -36,6 +36,7 @@ public class BrzGraph implements BrzSerializable, Iterable<BrzNode> {
     // Graph manipulation methods
 
     public List<String> bfs(String currentUUID, String destinationUUID) {
+        Log.i("bfs path", currentUUID + " to " + destinationUUID);
 
         HashMap<String, Boolean> nodeVisited = new HashMap<String, Boolean>();
         vertexList.keySet().forEach(id -> nodeVisited.put(id, false));
@@ -51,8 +52,10 @@ public class BrzGraph implements BrzSerializable, Iterable<BrzNode> {
             pathToNode = queue.poll();
             String currId = pathToNode.get(pathToNode.size() - 1);
 
-            if (currId.equals(destinationUUID))
+            if (currId.equals(destinationUUID)) {
+                Log.i("bfs path", Arrays.toString(pathToNode.toArray()));
                 return pathToNode;
+            }
 
             for (String neighbor : getNeighbors(currId)) {
                 Boolean visited = nodeVisited.get(neighbor);
@@ -72,7 +75,7 @@ public class BrzGraph implements BrzSerializable, Iterable<BrzNode> {
     public String nextHop(String currentUUID, String destinationUUID) {
         List<String> path = this.bfs(currentUUID, destinationUUID);
         if (path == null) return null;
-        if(path.size() < 2) return destinationUUID;
+        if(path.size() <= 2) return destinationUUID;
         return path.get(1);
     }
 

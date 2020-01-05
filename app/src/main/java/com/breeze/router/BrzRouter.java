@@ -355,6 +355,7 @@ public class BrzRouter {
 
         @Override
         public void onEndpointLost(@NonNull String endpointId) {
+            Log.i("ENDPOINT", "Endpoint lost callback fired");
         }
     };
 
@@ -386,18 +387,20 @@ public class BrzRouter {
         public void onDisconnected(@NonNull String endpointId) {
             Log.i("ENDPOINT", "Endpoint disconnected!");
 
-            // Remove edge from our graph
-            String endpointUUID = endpointUUIDs.get(endpointId);
-            endpointIDs.remove(endpointUUID);
-            graph.removeEdge(hostNode.id, endpointUUID);
+            BrzNode lostNode = graph.getVertex(endpointUUIDs.get(endpointId));
+            if (hostNode != null && lostNode != null) {
+                String endpointUUID = endpointUUIDs.get(endpointId);
+                endpointIDs.remove(endpointUUID);
+                // graph.removeEdge(hostNode.id, endpointUUID);
 
-            BrzStateStore.getStore().removeChat(endpointUUID);
+                // removes the vertex and any associated edges
+                graph.removeVertex(endpointUUID);
 
-            // Broadcast disconnect event
-            BrzNode node1 = hostNode;
-            BrzNode node2 = graph.getVertex(endpointUUIDs.get(endpointId));
-            if (node1 != null && node2 != null)
-                broadcast(BrzPacketBuilder.graphEvent(false, node1, node2));
+                BrzStateStore.getStore().removeChat(endpointUUID);
+
+                // Broadcast disconnect event
+                broadcast(BrzPacketBuilder.graphEvent(false, hostNode, lostNode));
+            }
         }
     };
 }
