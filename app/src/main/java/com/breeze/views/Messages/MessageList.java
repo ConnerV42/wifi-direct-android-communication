@@ -44,7 +44,10 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
         void bind(BrzMessage msg, Context ctx, int position) {
 
             TextView body = this.v.findViewById(R.id.messageBody);
-            body.setText(msg.body);
+            if(body != null){
+                body.setText(msg.body);
+            }
+
 
             /* date formatter in local timezone */
             SimpleDateFormat sdf = new SimpleDateFormat("hh:mm aa");
@@ -52,8 +55,9 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
             String time = sdf.format(new Date(msg.datestamp));
 
             TextView datestamp = this.v.findViewById(R.id.messageDatestamp);
-            datestamp.setText(time);
-
+            if(datestamp != null) {
+                datestamp.setText(time);
+            }
             if (viewType == 1) {
                 ImageView status = this.v.findViewById(R.id.messageStatus);
 

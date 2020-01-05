@@ -235,6 +235,7 @@ public class BreezeAPI extends Service {
 
         this.state.addChat(handshake.chat);
         this.db.setChat(handshake.chat);
+        this.acceptHandshake(handshake);
     }
 
     public void acceptHandshake(BrzChatHandshake handshake) {

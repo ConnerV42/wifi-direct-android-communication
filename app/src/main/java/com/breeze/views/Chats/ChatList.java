@@ -24,6 +24,7 @@ public class ChatList extends BaseAdapter {
     private class ChatComponent {
         ImageView chatImage;
         TextView chatName;
+        TextView numberUnread;
     }
 
     private Context ctx;
@@ -89,6 +90,7 @@ public class ChatList extends BaseAdapter {
             chatCmp.chatImage.setImageBitmap(BrzStorage.getInstance().getChatImage(chat.id, ctx));
         }
 
+//
         return convertView;
     }
 }

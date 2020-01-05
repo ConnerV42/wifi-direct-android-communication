@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzFileInfo;
+import com.breeze.datatypes.BrzMessage;
 import com.breeze.graph.BrzGraph;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
@@ -111,8 +112,13 @@ public class BrzRouter {
 
     public void send(BrzPacket packet) {
         // Encrypt the packet first
-        BreezeAPI.getInstance().encryption.encryptPacket(packet);
-
+        BreezeAPI api = BreezeAPI.getInstance();
+        if(packet.type == BrzPacket.BrzPacketType.MESSAGE) {
+            BrzMessage temp = packet.message();
+            api.encryption.encryptMessage(temp);
+            packet.body = temp.toJSON();
+        }
+        api.encryption.encryptPacket(packet);
         forwardPacket(packet, true);
     }
 
@@ -283,8 +289,15 @@ public class BrzRouter {
         else if (packet.to.equals(this.hostNode.id)) {
 
             // Decrypt the packet unless it's not an encryptable type
-            if (packet.type != BrzPacket.BrzPacketType.GRAPH_QUERY)
-                BreezeAPI.getInstance().encryption.decryptPacket(packet);
+            if (packet.type != BrzPacket.BrzPacketType.GRAPH_QUERY) {
+                BreezeAPI api = BreezeAPI.getInstance();
+                api.encryption.decryptPacket(packet);
+                if(packet.type == BrzPacket.BrzPacketType.MESSAGE) {
+                    BrzMessage temp = packet.message();
+                    api.encryption.decryptMessage(temp);
+                    packet.body = temp.toJSON();
+                }
+            }
 
             // Then pass it to a handler
             for (BrzRouterHandler handler : this.handlers)

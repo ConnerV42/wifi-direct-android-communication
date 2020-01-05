@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingTop="10dp"
@@ -18,22 +19,33 @@
         app:civ_border_width="2dp"
         app:civ_border_color="#000"/>
 
-        <TextView
-            android:id="@+id/chat_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="name"
-            android:textColor="#000000"
-            android:textSize="9pt"
-            android:layout_gravity="center_vertical"
-            />
+    <TextView
+        android:id="@+id/chat_name"
+        android:layout_width="281dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:text="name"
+        android:textColor="#000000"
+        android:textSize="9pt" />
 
-        <!--<TextView
-            android:id="@+id/user_alias"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:text="\@alias"
-            android:textColor="#555" />-->
+    <TextView
+        android:id="@+id/number_unread_messages"
+        android:layout_width="45dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:background="@drawable/message_bubble"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textColor="@color/design_default_color_surface"
+        android:visibility="invisible" />
+
+    <!--<TextView
+        android:id="@+id/user_alias"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:text="\@alias"
+        android:textColor="#555" />-->
 
 </LinearLayout>
