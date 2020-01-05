@@ -96,8 +96,14 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } else if (id == R.id.action_toggle_discovery) {
             BrzRouter router = BreezeAPI.getInstance().router;
-            if (router.isDiscovering) router.stopDiscovery();
-            else router.startDiscovery();
+            if (router.isDiscovering) {
+                item.setChecked(false);
+                router.stopDiscovery();
+            }
+            else {
+                item.setChecked(true);
+                router.startDiscovery();
+            }
         }
 
         return super.onOptionsItemSelected(item);

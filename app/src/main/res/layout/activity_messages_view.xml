@@ -31,8 +31,26 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="8dp"
             android:src="@drawable/ic_camera_alt_black_24dp"
+            android:background="@android:color/transparent" />
+
+        <ImageButton
+            android:id="@+id/sendVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="10dp"
+            android:src="@drawable/ic_videocam_24px"
+            android:background="@android:color/transparent" />
+
+        <ImageButton
+            android:id="@+id/sendAudio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="7dp"
+            android:src="@drawable/ic_audiotrack_24px"
             android:background="@android:color/transparent" />
 
         <EditText

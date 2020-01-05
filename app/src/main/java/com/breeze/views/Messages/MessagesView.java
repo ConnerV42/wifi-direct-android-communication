@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,7 +36,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class MessagesView extends AppCompatActivity {
-    private static final int READ_REQUEST_CODE = 69;
+    private static final int PHOTO_REQUEST_CODE = 69;
+    private static final int VIDEO_REQUEST_CODE = 70;
+    private static final int AUDIO_REQUEST_CODE = 71;
     private BrzChat chat;
     private MessageList list;
 
@@ -76,6 +79,7 @@ public class MessagesView extends AppCompatActivity {
 
 
         LinearLayoutManager msgLayout = new LinearLayoutManager(this);
+
         msgLayout.setStackFromEnd(true);
         msgView.setLayoutManager(msgLayout);
 
@@ -94,12 +98,27 @@ public class MessagesView extends AppCompatActivity {
             BreezeAPI.getInstance().sendMessage(p.message());
         });
 
+        // Bring up the option to select media to send from external storage
+        
         ImageButton sendPhoto = findViewById(R.id.sendPhoto);
         sendPhoto.setOnClickListener(view1 -> {
-            // Bring up the option to select media to send from external storage
             Intent intent = new Intent(Intent.ACTION_PICK,
                     android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(intent, READ_REQUEST_CODE);
+            startActivityForResult(intent, PHOTO_REQUEST_CODE);
+        });
+
+        ImageButton sendVideo = findViewById(R.id.sendVideo);
+        sendPhoto.setOnClickListener(view1 -> {
+            Intent intent = new Intent(Intent.ACTION_PICK,
+                    android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, VIDEO_REQUEST_CODE);
+        });
+
+        ImageButton sendAudio = findViewById(R.id.sendVideo);
+        sendPhoto.setOnClickListener(view1 -> {
+            Intent intent = new Intent(Intent.ACTION_PICK,
+                    android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, AUDIO_REQUEST_CODE);
         });
     }
 
@@ -107,7 +126,9 @@ public class MessagesView extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+        Log.i("Send Attachment", "Attachment data: " + data.getAction());
+
+        if (requestCode == PHOTO_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             try {
                 Uri imageUri = data.getData();
 
@@ -126,6 +147,11 @@ public class MessagesView extends AppCompatActivity {
             } catch (Exception e) {
                 Log.e("FILE_ACCESS", "Failure ", e);
             }
+        } else if (requestCode == VIDEO_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            // TODO: Send mp4
+
+        } else if (requestCode == AUDIO_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            // TODO: send mp3
         }
     }
 
