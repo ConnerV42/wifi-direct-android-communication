@@ -24,7 +24,7 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
-    private boolean serviceStarted = false;
+
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
     private static final int REQUEST_CODE_PROFILE = 2;
     private static final String[] REQUIRED_PERMISSIONS =
@@ -50,11 +50,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startApplicationService() {
-        if(!serviceStarted) {
-            Intent brzService = new Intent(this, BreezeAPI.class);
-            startService(brzService);
-            serviceStarted = true;
-        }
+        Intent brzService = new Intent(this, BreezeAPI.class);
+        startService(brzService);
     }
 
 
@@ -151,11 +148,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-    }
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState){
-        savedInstanceState.putBoolean("serviceStarted", serviceStarted);
-        super.onSaveInstanceState(savedInstanceState);
     }
 
 }
