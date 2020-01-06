@@ -18,6 +18,9 @@ import androidx.core.content.ContextCompat;
 import com.breeze.application.BreezeAPI;
 import com.breeze.router.BrzRouter;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
@@ -68,9 +71,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(savedInstanceState != null){
-            serviceStarted = savedInstanceState.getBoolean("serviceStarted");
-        }
+        this.startApplicationService();
+        BreezeAPI.getInstance().initialize();
+
         setContentView(R.layout.activity_main);
 
         this.toolbar = findViewById(R.id.toolbar);
@@ -93,24 +96,31 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        item.setCheckable(true);
+        BreezeAPI api = BreezeAPI.getInstance();
 
         if (id == R.id.action_settings) {
             Log.i("STATE", "Settings selected");
             return true;
         } else if (id == R.id.action_toggle_discovery) {
-            BrzRouter router = BreezeAPI.getInstance().router;
-            if (router.isDiscovering) {
+            if (api.router.isDiscovering) {
                 item.setChecked(false);
-                router.stopDiscovery();
-            }
-            else {
+                api.router.stopDiscovery();
+            } else {
                 item.setChecked(true);
-                router.startDiscovery();
+                api.router.startDiscovery();
             }
+        } else if (id == R.id.action_discovery_scan) {
+            api.router.startDiscovery();
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    api.router.stopDiscovery();
+                }
+            }, 5 * 1000);
         }
 
         return super.onOptionsItemSelected(item);

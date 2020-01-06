@@ -62,21 +62,8 @@ public class BreezeAPI extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
         instance = this;
-
-        // Initialize api modules
-        this.router = BrzRouter.initialize(this, "BREEZE_MESSENGER");
-        this.storage = BrzStorage.initialize(this);
-        this.state = BrzStateStore.getStore();
-        this.db = new DatabaseHandler(this);
-
-        // Initialize api modules
-        this.encryption = new BreezeEncryptionModule(this);
-        this.meta = new BreezeMetastateModule(this);
-
-        // Initialize preferences
-        this.preferences = this.getSharedPreferences("Breeze", Context.MODE_PRIVATE);
+        this.initialize();
 
         // Upgrade to foreground process
         Intent notifIntent = new Intent(this, MainActivity.class);
@@ -112,9 +99,10 @@ public class BreezeAPI extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (ACTION_STOP_SERVICE.equals(intent.getAction())) {
             stopSelf();
+            router.stop();
         }
 
-        Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
         return START_NOT_STICKY;
     }
 
@@ -126,8 +114,31 @@ public class BreezeAPI extends Service {
 
     @Override
     public void onDestroy() {
-        Toast.makeText(this, "service destroyed", Toast.LENGTH_SHORT).show();
+        router.stop();
+//        Toast.makeText(this, "service destroyed", Toast.LENGTH_SHORT).show();
         super.onDestroy();
+    }
+
+    public void initialize() {
+        // Initialize api modules
+        if (this.router == null)
+            this.router = BrzRouter.initialize(this, "BREEZE_MESSENGER");
+        if (this.storage == null)
+            this.storage = BrzStorage.initialize(this);
+        if (this.state == null)
+            this.state = BrzStateStore.getStore();
+        if (this.db == null)
+            this.db = new DatabaseHandler(this);
+
+        // Initialize api modules
+        if (this.encryption == null)
+            this.encryption = new BreezeEncryptionModule(this);
+        if (this.meta == null)
+            this.meta = new BreezeMetastateModule(this);
+
+        // Initialize preferences
+        if (this.preferences == null)
+            this.preferences = this.getSharedPreferences("Breeze", Context.MODE_PRIVATE);
     }
 
     //
@@ -250,8 +261,8 @@ public class BreezeAPI extends Service {
 
         // Send acceptance responses to all participants
         BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.CHAT_RESPONSE, "", false);
-        for(String nodeId : c.nodes) {
-            if(!nodeId.equals(this.hostNode.id)) {
+        for (String nodeId : c.nodes) {
+            if (!nodeId.equals(this.hostNode.id)) {
                 p.to = nodeId;
                 this.router.send(p);
             }
@@ -259,7 +270,8 @@ public class BreezeAPI extends Service {
 
         // Get the stored secret key from temp
         String secretKey = this.preferences.getString("HANDSHAKE_KEY_" + chatId, "");
-        if(secretKey.isEmpty()) throw new RuntimeException("Handshake's encryption was not stored somehow");
+        if (secretKey.isEmpty())
+            throw new RuntimeException("Handshake's encryption was not stored somehow");
 
         // Save the encryption key to the keystore and remove it from temp
         encryption.saveSecretKey(chatId, secretKey);
@@ -279,8 +291,8 @@ public class BreezeAPI extends Service {
 
         // Send rejection responses to all participants
         BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.CHAT_RESPONSE, "", false);
-        for(String nodeId : c.nodes) {
-            if(!nodeId.equals(this.hostNode.id)) {
+        for (String nodeId : c.nodes) {
+            if (!nodeId.equals(this.hostNode.id)) {
                 p.to = nodeId;
                 this.router.send(p);
             }

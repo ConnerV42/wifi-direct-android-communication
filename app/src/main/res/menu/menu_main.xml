@@ -5,11 +5,16 @@
     <item
         android:id="@+id/action_toggle_discovery"
         android:checkable="true"
-        android:orderInCategory="100"
+        android:orderInCategory="1"
         android:title="Toggle discovery"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_discovery_scan"
+        android:orderInCategory="2"
+        android:title="Scan for nearby networks"
         app:showAsAction="never" />
     <item android:id="@+id/action_settings"
           android:title="@string/action_settings"
-          android:orderInCategory="100"
+          android:orderInCategory="3"
           app:showAsAction="never"/>
 </menu>

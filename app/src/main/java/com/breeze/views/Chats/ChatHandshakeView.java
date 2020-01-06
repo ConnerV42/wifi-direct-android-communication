@@ -42,6 +42,7 @@ public class ChatHandshakeView extends AppCompatActivity {
     public static Intent getIntent(Context ctx, String chatId) {
         Intent i = new Intent(ctx, ChatHandshakeView.class);
         i.putExtra("ARG_CHAT_ID", chatId);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return i;
     }
 

@@ -5,6 +5,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.breeze.EventEmitter;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzFileInfo;
 import com.breeze.graph.BrzGraph;
@@ -39,7 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class BrzRouter {
+public class BrzRouter extends EventEmitter {
 
     // Single instance
 
@@ -113,8 +114,8 @@ public class BrzRouter {
         BreezeAPI api = BreezeAPI.getInstance();
         try {
             api.encryption.encryptPacket(packet);
-        forwardPacket(packet, true);
-        } catch(Exception e) {
+            forwardPacket(packet, true);
+        } catch (Exception e) {
             Log.i("ENDPOINT", "Failed to encrypt and send packet");
         }
     }
@@ -353,14 +354,17 @@ public class BrzRouter {
     private final EndpointDiscoveryCallback endpointDiscoveryCallback = new EndpointDiscoveryCallback() {
         @Override
         public void onEndpointFound(@NonNull String endpointId, DiscoveredEndpointInfo info) {
-            Log.i("ENDPOINT", "Endpoint found");
-            if (info.getServiceId().equals(pkgName))
+            if (info.getServiceId().equals(pkgName)) {
+                Log.i("ENDPOINT", "Endpoint found");
                 connectionsClient.requestConnection(hostNode.id, endpointId, connectionLifecycleCallback);
+                emit("endpointFound", endpointId);
+            }
         }
 
         @Override
         public void onEndpointLost(@NonNull String endpointId) {
             Log.i("ENDPOINT", "Endpoint lost callback fired");
+            emit("endpointDisconnected", endpointId);
         }
     };
 
@@ -378,6 +382,7 @@ public class BrzRouter {
         public void onConnectionResult(@NonNull String endpointId, ConnectionResolution result) {
             if (result.getStatus().isSuccess()) {
                 Log.i("ENDPOINT", "Endpoint connected");
+                emit("endpointConnected", endpointId);
 
                 String endpointUUID = endpointUUIDs.get(endpointId);
                 endpointIDs.put(endpointUUID, endpointId);
@@ -391,6 +396,7 @@ public class BrzRouter {
         @Override
         public void onDisconnected(@NonNull String endpointId) {
             Log.i("ENDPOINT", "Endpoint disconnected!");
+            emit("endpointDisconnected", endpointId);
 
             BrzNode lostNode = graph.getVertex(endpointUUIDs.get(endpointId));
             if (hostNode != null && lostNode != null) {

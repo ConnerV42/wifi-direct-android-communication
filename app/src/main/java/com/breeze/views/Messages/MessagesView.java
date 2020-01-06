@@ -52,6 +52,7 @@ public class MessagesView extends AppCompatActivity {
     public static Intent getIntent(Context ctx, String chatId) {
         Intent i = new Intent(ctx, MessagesView.class);
         i.putExtra("ARG_CHAT_ID", chatId);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return i;
     }
 
@@ -220,6 +221,7 @@ public class MessagesView extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         BreezeAPI.getInstance().state.off("messages" + chat.id, this.messageListener);
+        BreezeAPI.getInstance().state.off("chat" + this.chat.id, this.onChatUpdate);
         this.list.cleanup();
     }
 }

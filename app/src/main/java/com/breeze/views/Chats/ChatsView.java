@@ -69,6 +69,7 @@ public class ChatsView extends Fragment {
         FloatingActionButton fab = view.findViewById(R.id.chat_view_fab);
         fab.setOnClickListener(e -> {
             Intent i = new Intent(this.getContext(), UserSelection.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             this.startActivity(i);
         });
     }

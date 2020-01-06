@@ -4,6 +4,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.breeze.EventEmitter;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzSerializable;
 
@@ -12,7 +13,7 @@ import org.json.JSONObject;
 
 import java.util.*;
 
-public class BrzGraph implements BrzSerializable, Iterable<BrzNode> {
+public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<BrzNode>  {
 
     private Map<String, Set<String>> adjList = new HashMap<>();
     private Map<String, BrzNode> vertexList = new HashMap<>();
@@ -90,17 +91,20 @@ public class BrzGraph implements BrzSerializable, Iterable<BrzNode> {
     public void addVertex(BrzNode node) {
         vertexList.putIfAbsent(node.id, node);
         adjList.putIfAbsent(node.id, new HashSet<>());
+        this.emit("addVertex", node);
     }
 
     public void setVertex(BrzNode node) {
         vertexList.put(node.id, node);
         adjList.putIfAbsent(node.id, new HashSet<>());
+        this.emit("setVertex", node);
     }
 
     public void removeVertex(String id) {
         adjList.values().forEach(e -> e.remove(id));
         adjList.remove(id);
         vertexList.remove(id);
+        this.emit("deleteVertex", id);
     }
 
     public void addEdge(String id1, String id2) {
@@ -163,6 +167,8 @@ public class BrzGraph implements BrzSerializable, Iterable<BrzNode> {
                 adjList.get(nodeId).add(edgeStr);
             }
         }
+
+        this.emit("graphMerge");
     }
 
     @NonNull

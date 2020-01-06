@@ -36,4 +36,10 @@ public abstract class EventEmitter {
 
         for (Consumer c : l) c.accept(payload);
     }
+    public void emit(String event) {
+        List<Consumer> l = this.listenerMap.get(event);
+        if (l == null) return;
+
+        for (Consumer c : l) c.accept(null);
+    }
 }

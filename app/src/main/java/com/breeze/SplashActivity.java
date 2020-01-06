@@ -27,12 +27,6 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        this.startApplicationService();
-    }
-
-    private void startApplicationService() {
-        Intent brzService = new Intent(this, BreezeAPI.class);
-        startService(brzService);
     }
 
 }

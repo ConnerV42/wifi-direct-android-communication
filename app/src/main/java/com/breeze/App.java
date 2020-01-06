@@ -3,7 +3,10 @@ package com.breeze;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Intent;
 import android.os.Build;
+
+import com.breeze.application.BreezeAPI;
 
 public class App extends Application {
     public static final String SERVICE_CHANNEL_ID = "breezeForegroundChannel";
@@ -16,6 +19,12 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         createNotificationChannel();
+        startApplicationService();
+    }
+
+    private void startApplicationService() {
+        Intent brzService = new Intent(this, BreezeAPI.class);
+        startService(brzService);
     }
 
     private void createNotificationChannel() {

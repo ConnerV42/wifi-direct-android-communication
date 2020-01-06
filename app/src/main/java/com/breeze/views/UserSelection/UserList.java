@@ -19,6 +19,7 @@ import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.graph.BrzGraph;
 import com.breeze.datatypes.BrzNode;
+import com.breeze.router.BrzRouter;
 import com.breeze.storage.BrzStorage;
 
 import java.util.ArrayList;
@@ -58,23 +59,70 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
 
             this.position = position;
         }
+
+        public void bind(String placeholderId, Context ctx) {
+            TextView user_name = v.findViewById(R.id.user_name);
+            user_name.setText("Connecting...");
+
+            TextView user_alias = v.findViewById(R.id.user_alias);
+            user_alias.setText("");
+
+            ImageView user_image = v.findViewById(R.id.user_image);
+            user_name.setTextColor(ctx.getColor(android.R.color.black));
+            user_alias.setTextColor(ctx.getColor(android.R.color.black));
+            user_image.setColorFilter(ctx.getColor(android.R.color.black));
+
+            this.position = -1;
+        }
     }
 
     private List<BrzNode> filteredNodes = new ArrayList<>();
     private List<BrzNode> allNodes = new ArrayList<>();
+    private List<String> placeholders = new ArrayList<>();
     private Consumer<BrzNode> itemSelectedListener = null;
 
     private Context ctx;
     private List<String> nodes;
 
+    private Consumer<Object> graphListener;
+    private Consumer<String> placeholderListener;
+    private Consumer<String> removePlaceholderListener;
+
     public UserList(Context ctx, List<String> nodes) {
         this.ctx = ctx;
         this.nodes = nodes;
+        BrzGraph graph = BrzGraph.getInstance();
+        BrzRouter router = BreezeAPI.getInstance().router;
 
-        for (BrzNode node : BrzGraph.getInstance()) {
-            this.allNodes.add(node);
+        this.graphListener = newNode -> {
+            this.allNodes = new ArrayList<>();
+
+            for (BrzNode node : graph) {
+                this.allNodes.add(node);
+            }
+
             this.getFilter().filter("");
-        }
+            notifyDataSetChanged();
+        };
+
+        // Set up event listeners
+        this.graphListener.accept(null);
+        graph.on("addVertex", this.graphListener);
+        graph.on("deleteVertex", this.graphListener);
+        graph.on("setVertex", this.graphListener);
+
+        this.placeholderListener = endpointId -> {
+            this.placeholders.add(endpointId);
+            this.notifyDataSetChanged();
+        };
+        this.removePlaceholderListener = endpointId -> {
+            this.placeholders.remove(endpointId);
+            this.notifyDataSetChanged();
+        };
+
+        router.on("endpointFound", this.placeholderListener);
+        router.on("endpointConnected", this.removePlaceholderListener);
+        router.on("endpointDisconnected", this.removePlaceholderListener);
     }
 
 
@@ -102,13 +150,17 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
     }
 
     @Override
-    public void onBindViewHolder(UserItemHolder holder, int position) {
-        holder.bind(filteredNodes.get(position), position, ctx, nodes);
+    public void onBindViewHolder(@NonNull UserItemHolder holder, int position) {
+        if (position >= filteredNodes.size()) {
+            holder.bind(this.placeholders.get(position - filteredNodes.size()), ctx);
+        } else {
+            holder.bind(filteredNodes.get(position), position, ctx, nodes);
+        }
     }
 
     @Override
     public int getItemCount() {
-        return this.filteredNodes.size();
+        return this.filteredNodes.size() + this.placeholders.size();
     }
 
     @Override
@@ -143,4 +195,18 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
     public void setItemSelectedListener(Consumer<BrzNode> itemSelectedListener) {
         this.itemSelectedListener = itemSelectedListener;
     }
+
+    public void cleanup() {
+        BrzGraph graph = BrzGraph.getInstance();
+        BrzRouter router = BreezeAPI.getInstance().router;
+
+        graph.off("addVertex", this.graphListener);
+        graph.off("deleteVertex", this.graphListener);
+        graph.off("setVertex", this.graphListener);
+
+        router.off("endpointFound", this.placeholderListener);
+        router.off("endpointConnected", this.removePlaceholderListener);
+        router.off("endpointDisconnected", this.removePlaceholderListener);
+    }
+
 }

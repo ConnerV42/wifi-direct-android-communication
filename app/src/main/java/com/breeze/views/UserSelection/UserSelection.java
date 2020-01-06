@@ -29,6 +29,7 @@ import java.util.List;
 public class UserSelection extends AppCompatActivity {
     List<String> nodes = new LinkedList<>();
     List<TextView> nodeViews = new LinkedList<>();
+    private UserList list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,11 +69,11 @@ public class UserSelection extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        UserList adapter = new UserList(this, this.nodes);
-        recyclerView.setAdapter(adapter);
+        this.list = new UserList(this, this.nodes);
+        recyclerView.setAdapter(this.list);
 
         // When the user selects a node, add it to the list
-        adapter.setItemSelectedListener(node -> {
+        this.list.setItemSelectedListener(node -> {
             int nodeI = nodes.indexOf(node.id);
             if (nodeI == -1) {
                 LinearLayout.LayoutParams nodeLayout = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -120,14 +121,22 @@ public class UserSelection extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter.getFilter().filter(s);
+                list.getFilter().filter(s);
             }
         });
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        list.cleanup();
+
         finish();
         return true;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        list.cleanup();
     }
 }
