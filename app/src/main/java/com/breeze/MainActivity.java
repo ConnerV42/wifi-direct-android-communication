@@ -21,7 +21,7 @@ import com.breeze.router.BrzRouter;
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
-
+    private boolean serviceStarted = false;
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
     private static final int REQUEST_CODE_PROFILE = 2;
     private static final String[] REQUIRED_PERMISSIONS =
@@ -47,8 +47,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startApplicationService() {
-        Intent brzService = new Intent(this, BreezeAPI.class);
-        startService(brzService);
+        if(!serviceStarted) {
+            Intent brzService = new Intent(this, BreezeAPI.class);
+            startService(brzService);
+            serviceStarted = true;
+        }
     }
 
 
@@ -65,6 +68,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(savedInstanceState != null){
+            serviceStarted = savedInstanceState.getBoolean("serviceStarted");
+        }
         setContentView(R.layout.activity_main);
 
         this.toolbar = findViewById(R.id.toolbar);
@@ -135,6 +141,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+    }
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState){
+        savedInstanceState.putBoolean("serviceStarted", serviceStarted);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
 }
