@@ -121,7 +121,11 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
                     // Message has not been read by the user yet, send receipt
                     if (!m.from.equals(api.hostNode.id) && !api.db.isRead(m.id)) {
                         Log.i("STATE", "Message " + m.body + " from " + m.from + " wasn't read yet!");
-                        api.meta.sendReadReceipt(m);
+                        try {
+                            api.meta.sendReadReceipt(m);
+                        }catch(Exception e){
+                            Log.i("STATE", "Cannot send read receipt to " + m.from);
+                        }
                     }
                 }
             }

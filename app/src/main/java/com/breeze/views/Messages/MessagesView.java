@@ -20,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
@@ -95,7 +96,12 @@ public class MessagesView extends AppCompatActivity {
             messageBox.setText("");
 
             BrzPacket p = BrzPacketBuilder.message(router.hostNode.id, "", messageBoxText, chat.id, false);
-            BreezeAPI.getInstance().sendMessage(p.message());
+            try {
+                BreezeAPI.getInstance().sendMessage(p.message());
+            }catch(Exception e){
+                Log.i("MESSAGE_SEND_ERROR", "Cannot send message to " + p.to);
+                Toast.makeText(this.getApplicationContext(), "Cannot send message to " + p.to + "; verify they're in the graph", Toast.LENGTH_SHORT).show();
+            }
         });
 
         // Bring up the option to select media to send from external storage
