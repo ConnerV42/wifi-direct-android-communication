@@ -43,6 +43,7 @@ public class BreezeAPI extends Service {
     // Behavioral Modules
 
     final private String ACTION_STOP_SERVICE = "STOP THIS NOW";
+    public SharedPreferences preferences;
 
     public BrzRouter router = null;
     public BrzStorage storage = null;
@@ -73,6 +74,9 @@ public class BreezeAPI extends Service {
         // Initialize api modules
         this.encryption = new BreezeEncryptionModule(this);
         this.meta = new BreezeMetastateModule(this);
+
+        // Initialize preferences
+        this.preferences = this.getSharedPreferences("Breeze", Context.MODE_PRIVATE);
 
         // Upgrade to foreground process
         Intent notifIntent = new Intent(this, MainActivity.class);
@@ -142,8 +146,7 @@ public class BreezeAPI extends Service {
         this.hostNode = hostNode;
 
         // Set our id in preferences
-        SharedPreferences sp = getSharedPreferences("Breeze", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sp.edit();
+        SharedPreferences.Editor editor = preferences.edit();
         editor.putString(App.PREF_HOST_NODE_ID, hostNode.id);
         editor.apply();
 
@@ -178,8 +181,7 @@ public class BreezeAPI extends Service {
             this.router.send(p);
         }
 
-        this.state.addChat(chat);
-        this.db.setChat(chat);
+        this.updateChat(chat);
     }
 
     public void updateChat(BrzChat chat) {
@@ -235,34 +237,61 @@ public class BreezeAPI extends Service {
 
         this.state.addChat(handshake.chat);
         this.db.setChat(handshake.chat);
-        this.acceptHandshake(handshake);
+
+        // Store the encryption key temporarially
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("HANDSHAKE_KEY_" + chat.id, handshake.secretKey);
+        editor.apply();
     }
 
-    public void acceptHandshake(BrzChatHandshake handshake) {
-        BrzChatResponse response = new BrzChatResponse(this.hostNode.id, handshake.chat.id, true);
+    public void acceptHandshake(String chatId) {
+        BrzChatResponse response = new BrzChatResponse(this.hostNode.id, chatId, true);
+        BrzChat c = this.state.getChat(chatId);
 
-        // Send the response
-        BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.CHAT_RESPONSE, handshake.from, false);
-        this.router.send(p);
+        // Send acceptance responses to all participants
+        BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.CHAT_RESPONSE, "", false);
+        for(String nodeId : c.nodes) {
+            if(!nodeId.equals(this.hostNode.id)) {
+                p.to = nodeId;
+                this.router.send(p);
+            }
+        }
 
-        encryption.saveSecretKey(handshake);
+        // Get the stored secret key from temp
+        String secretKey = this.preferences.getString("HANDSHAKE_KEY_" + chatId, "");
+        if(secretKey.isEmpty()) throw new RuntimeException("Handshake's encryption was not stored somehow");
+
+        // Save the encryption key to the keystore and remove it from temp
+        encryption.saveSecretKey(chatId, secretKey);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.remove("HANDSHAKE_KEY_" + chatId).apply();
 
         // Set state to have the chat accepted
-        BrzChat c = this.state.getChat(handshake.chat.id);
         c.acceptedByHost = true;
         c.acceptedByRecipient = true;
         this.state.addChat(c);
         this.db.setChat(c);
     }
 
-    public void rejectHandshake(BrzChatHandshake handshake) {
-        BrzChatResponse response = new BrzChatResponse(this.hostNode.id, handshake.chat.id, false);
+    public void rejectHandshake(String chatId) {
+        BrzChatResponse response = new BrzChatResponse(this.hostNode.id, chatId, false);
+        BrzChat c = this.state.getChat(chatId);
 
-        BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.CHAT_RESPONSE, handshake.from, false);
-        this.router.send(p);
+        // Send rejection responses to all participants
+        BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.CHAT_RESPONSE, "", false);
+        for(String nodeId : c.nodes) {
+            if(!nodeId.equals(this.hostNode.id)) {
+                p.to = nodeId;
+                this.router.send(p);
+            }
+        }
 
-        this.state.removeChat(handshake.chat.id);
-        this.db.deleteChat(handshake.chat.id);
+        // Remove the encryption key from temp
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.remove("HANDSHAKE_KEY_" + chatId).apply();
+
+        this.state.removeChat(chatId);
+        this.db.deleteChat(chatId);
     }
 
     //
@@ -272,10 +301,16 @@ public class BreezeAPI extends Service {
     //
 
     public void sendMessage(BrzMessage message) {
-        BrzPacket p = new BrzPacket(message, BrzPacket.BrzPacketType.MESSAGE, "", false);
+        BrzMessage clone = new BrzMessage(message.toJSON());
+
+        // Encrypt the message
+        this.encryption.encryptMessage(clone);
+
+        // Build a packet
+        BrzPacket p = new BrzPacket(clone, BrzPacket.BrzPacketType.MESSAGE, "", false);
 
         // Send message to each recipient
-        BrzChat chat = this.state.getChat(message.chatId);
+        BrzChat chat = this.state.getChat(clone.chatId);
         for (String nodeId : chat.nodes) {
             if (nodeId.equals(hostNode.id))
                 continue;

@@ -50,8 +50,8 @@ public class BreezeEncryptionModule extends BreezeModule {
         handshake.secretKey = Base64.encodeToString(key.getEncoded(), Base64.DEFAULT);
     }
 
-    public void saveSecretKey(BrzChatHandshake handshake) {
-        encryption.saveSymKey(handshake.chat.id, handshake.secretKey);
+    public void saveSecretKey(String chatId, String secretKey) {
+        encryption.saveSymKey(chatId, secretKey);
     }
 
     // Message stuff

@@ -24,11 +24,18 @@ public class BrzMessageHandler implements BrzRouterHandler {
 
         BrzMessage m = packet.message();
         BreezeAPI api = BreezeAPI.getInstance();
-        api.meta.showNotification(m);
-        api.addMessage(m);
 
-        // Send delivery acknowledgement
-        api.meta.sendDeliveryReceipt(m);
+        // Attempt to decrypt the message, or ignore it if there's an error
+        try {
+            api.encryption.decryptMessage(m);
+            api.meta.showNotification(m);
+            api.addMessage(m);
+
+            // Send delivery acknowledgement
+            api.meta.sendDeliveryReceipt(m);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean handles(BrzPacket.BrzPacketType type) {

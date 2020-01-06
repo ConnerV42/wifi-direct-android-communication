@@ -13,18 +13,31 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:divider="@null"
-        android:dividerHeight="0dp" />
+        android:dividerHeight="0dp" >
+
+    </androidx.recyclerview.widget.RecyclerView>
 
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/messages_not_accepted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@drawable/status_bubble"
-        android:layout_marginBottom="10dp"
-        android:layout_marginRight="10dp"
+        android:padding="10dp"
+        android:text="No one has accepted the chat invitation yet"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@color/design_default_color_error"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/messages_editor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
-        >
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/status_bubble"
+        android:orientation="horizontal">
 
         <ImageButton
             android:id="@+id/sendPhoto"
@@ -32,8 +45,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginStart="8dp"
-            android:src="@drawable/ic_camera_alt_black_24dp"
-            android:background="@android:color/transparent" />
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_camera_alt_black_24dp" />
 
         <ImageButton
             android:id="@+id/sendVideo"
@@ -41,9 +54,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginStart="10dp"
+            android:background="@android:color/transparent"
             android:padding="10dp"
-            android:src="@drawable/ic_videocam_24px"
-            android:background="@android:color/transparent" />
+            android:src="@drawable/ic_videocam_24px" />
 
         <ImageButton
             android:id="@+id/sendAudio"
@@ -51,8 +64,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginStart="7dp"
-            android:src="@drawable/ic_audiotrack_24px"
-            android:background="@android:color/transparent" />
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_audiotrack_24px" />
 
         <EditText
             android:id="@+id/editText"
@@ -75,8 +88,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginEnd="10dp"
-            android:src="@drawable/ic_send_black_24dp"
-            android:background="@android:color/transparent" />
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_send_black_24dp" />
 
     </LinearLayout>
 </LinearLayout>

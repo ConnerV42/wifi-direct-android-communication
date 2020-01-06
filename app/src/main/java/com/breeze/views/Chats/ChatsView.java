@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.breeze.R;
+import com.breeze.application.BreezeAPI;
+import com.breeze.datatypes.BrzChat;
 import com.breeze.state.BrzStateStore;
 import com.breeze.views.Messages.MessagesView;
 import com.breeze.views.UserSelection.UserSelection;
@@ -54,7 +56,14 @@ public class ChatsView extends Fragment {
         ListView msgView = view.findViewById(R.id.contactList);
         msgView.setAdapter(this.list);
         msgView.setOnItemClickListener((parentView, childView, position, id) -> {
-            startActivity(MessagesView.getIntent(getContext(), this.list.getChatId(position)));
+            BreezeAPI api = BreezeAPI.getInstance();
+            BrzChat c =  api.state.getChat(this.list.getChatId(position));
+
+            if(c.acceptedByHost) {
+                startActivity(MessagesView.getIntent(getContext(), this.list.getChatId(position)));
+            } else {
+                startActivity(ChatHandshakeView.getIntent(getContext(), this.list.getChatId(position)));
+            }
         });
 
         FloatingActionButton fab = view.findViewById(R.id.chat_view_fab);

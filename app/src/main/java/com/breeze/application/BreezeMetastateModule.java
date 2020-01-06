@@ -13,7 +13,6 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.breeze.App;
-import com.breeze.MainActivity;
 import com.breeze.R;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
@@ -21,10 +20,8 @@ import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.views.Messages.MessagesView;
-import com.breeze.views.ProfileActivity;
 
 import java.util.List;
-import java.util.Random;
 
 public class BreezeMetastateModule extends BreezeModule {
     BreezeMetastateModule(BreezeAPI api) {
@@ -135,7 +132,7 @@ public class BreezeMetastateModule extends BreezeModule {
         BrzChat c = this.api.state.getChat(message.chatId);
 
         Intent chatIntent = MessagesView.getIntent(this.api, message.chatId);
-        PendingIntent pending = PendingIntent.getActivity(this.api, 0, chatIntent, 0);
+        PendingIntent pending = PendingIntent.getActivity(this.api, 0, chatIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Notification notification = new NotificationCompat.Builder(this.api, App.MESSAGE_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher)
@@ -144,9 +141,8 @@ public class BreezeMetastateModule extends BreezeModule {
                 .setContentText(message.body)
                 .setAutoCancel(true)
                 .setContentIntent(pending)
-                .setChannelId(App.MESSAGE_CHANNEL_ID)
-                .setPriority(Notification.PRIORITY_HIGH)
                 .setDefaults(Notification.DEFAULT_ALL)
+                .setPriority(Notification.PRIORITY_HIGH)
                 .build();
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.api);

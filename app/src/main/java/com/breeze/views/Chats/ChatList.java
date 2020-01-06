@@ -24,6 +24,7 @@ public class ChatList extends BaseAdapter {
     private class ChatComponent {
         ImageView chatImage;
         TextView chatName;
+        TextView chatSubText;
         TextView numberUnread;
     }
 
@@ -81,6 +82,17 @@ public class ChatList extends BaseAdapter {
 
         chatCmp.chatName = convertView.findViewById(R.id.chat_name);
         chatCmp.chatName.setText(chat.name);
+
+        // Chat awaiting acceptance
+        chatCmp.chatSubText = convertView.findViewById(R.id.chat_sub_text);
+
+        if(!chat.acceptedByHost) {
+            chatCmp.chatSubText.setText("You've been invited to join this chat");
+            chatCmp.chatSubText.setVisibility(View.VISIBLE);
+        } else {
+            chatCmp.chatSubText.setText("");
+            chatCmp.chatSubText.setVisibility(View.GONE);
+        }
 
         chatCmp.chatImage = convertView.findViewById(R.id.chat_image);
 
