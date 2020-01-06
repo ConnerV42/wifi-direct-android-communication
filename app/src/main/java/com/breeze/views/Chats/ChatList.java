@@ -34,6 +34,7 @@ public class ChatList extends BaseAdapter {
     private class ChatComponent {
         ImageView chatImage;
         TextView chatName;
+        TextView chatSubText;
         TextView numberUnread;
         Button deleteButton;
     }
@@ -104,6 +105,18 @@ public class ChatList extends BaseAdapter {
 
         chatCmp.chatName = convertView.findViewById(R.id.chat_name);
         chatCmp.chatName.setText(chat.name);
+
+        // Chat awaiting acceptance
+        chatCmp.chatSubText = convertView.findViewById(R.id.chat_sub_text);
+
+        if(!chat.acceptedByHost) {
+            chatCmp.chatSubText.setText("You've been invited to join this chat");
+            chatCmp.chatSubText.setVisibility(View.VISIBLE);
+        } else {
+            chatCmp.chatSubText.setText("");
+            chatCmp.chatSubText.setVisibility(View.GONE);
+        }
+
         chatCmp.chatName.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {

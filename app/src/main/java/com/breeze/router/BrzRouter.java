@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzFileInfo;
-import com.breeze.datatypes.BrzMessage;
 import com.breeze.graph.BrzGraph;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
@@ -61,7 +60,6 @@ public class BrzRouter {
     private static final Strategy STRATEGY = Strategy.P2P_CLUSTER;
     private ConnectionsClient connectionsClient;
     private String pkgName;
-    private boolean running = false;
 
     private BrzPayloadBuffer payloadBuffer = new BrzPayloadBuffer();
     private List<BrzRouterHandler> handlers = new ArrayList<>();
@@ -113,13 +111,12 @@ public class BrzRouter {
     public void send(BrzPacket packet) {
         // Encrypt the packet first
         BreezeAPI api = BreezeAPI.getInstance();
-        if(packet.type == BrzPacket.BrzPacketType.MESSAGE) {
-            BrzMessage temp = packet.message();
-            api.encryption.encryptMessage(temp);
-            packet.body = temp.toJSON();
-        }
-        api.encryption.encryptPacket(packet);
+        try {
+            api.encryption.encryptPacket(packet);
         forwardPacket(packet, true);
+        } catch(Exception e) {
+            Log.i("ENDPOINT", "Failed to encrypt and send packet");
+        }
     }
 
     public void sendFilePayload(Payload filePayload, BrzPacket packet) {
@@ -292,11 +289,6 @@ public class BrzRouter {
             if (packet.type != BrzPacket.BrzPacketType.GRAPH_QUERY) {
                 BreezeAPI api = BreezeAPI.getInstance();
                 api.encryption.decryptPacket(packet);
-                if(packet.type == BrzPacket.BrzPacketType.MESSAGE) {
-                    BrzMessage temp = packet.message();
-                    api.encryption.decryptMessage(temp);
-                    packet.body = temp.toJSON();
-                }
             }
 
             // Then pass it to a handler

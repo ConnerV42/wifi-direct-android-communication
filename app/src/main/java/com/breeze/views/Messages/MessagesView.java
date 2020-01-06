@@ -18,9 +18,12 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
@@ -42,6 +45,7 @@ public class MessagesView extends AppCompatActivity {
     private static final int AUDIO_REQUEST_CODE = 71;
     private BrzChat chat;
     private MessageList list;
+    private Consumer<BrzChat> onChatUpdate;
 
     private Consumer<List<BrzMessage>> messageListener;
 
@@ -61,6 +65,9 @@ public class MessagesView extends AppCompatActivity {
         Intent i = getIntent();
         String chatId = i.getStringExtra("ARG_CHAT_ID");
         this.chat = api.state.getChat(chatId);
+        Log.i("STATE", this.chat.toJSON());
+
+        if(chat == null) return;
 
         // Set up content
         final BrzRouter router = BrzRouter.getInstance();
@@ -68,23 +75,9 @@ public class MessagesView extends AppCompatActivity {
         this.list = new MessageList(this, this.chat);
         RecyclerView msgView = findViewById(R.id.messageList);
         msgView.setAdapter(this.list);
-
-
-        this.messageListener = messages -> {
-            if (messages != null) {
-                msgView.scrollToPosition(messages.size() - 1);
-                Log.i("BLAH", "Scrolling list");
-            }
-        };
-        api.state.on("messages" + chatId, messageListener);
-
-
         LinearLayoutManager msgLayout = new LinearLayoutManager(this);
-
         msgLayout.setStackFromEnd(true);
         msgView.setLayoutManager(msgLayout);
-
-        Log.i("STATE", "Bound message list to " + this.chat.id);
 
         ImageButton sendMessage = findViewById(R.id.sendMessage);
         sendMessage.setOnClickListener(view1 -> { // send message
@@ -164,12 +157,42 @@ public class MessagesView extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        BreezeAPI api = BreezeAPI.getInstance();
 
         ActionBar ab = getSupportActionBar();
         if (ab == null) return;
-        ab.setTitle(this.chat.name);
         ab.setDisplayHomeAsUpEnabled(true);
         ab.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
+
+        if(this.chat != null) ab.setTitle(this.chat.name);
+
+        RecyclerView msgView = findViewById(R.id.messageList);
+        this.messageListener = messages -> {
+            if (messages != null) {
+                msgView.scrollToPosition(messages.size() - 1);
+                Log.i("BLAH", "Scrolling list");
+            }
+        };
+        api.state.on("messages" + this.chat.id, messageListener);
+
+        //-------------------------------------------------------------------------------//
+
+        LinearLayout messageEditor = findViewById(R.id.messages_editor);
+        TextView messageNotAccepted = findViewById(R.id.messages_not_accepted);
+        this.onChatUpdate = chat -> {
+            if(chat == null) return;
+            this.chat = chat;
+            if(this.chat.acceptedByRecipient) {
+                messageEditor.setVisibility(View.VISIBLE);
+                messageNotAccepted.setVisibility(View.GONE);
+            } else {
+                messageEditor.setVisibility(View.GONE);
+                messageNotAccepted.setVisibility(View.VISIBLE);
+            }
+        };
+
+        api.state.on("chat" + this.chat.id, this.onChatUpdate);
+        this.onChatUpdate.accept(chat);
     }
 
     @Override
@@ -194,8 +217,8 @@ public class MessagesView extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStop() {
+        super.onStop();
         BreezeAPI.getInstance().state.off("messages" + chat.id, this.messageListener);
         this.list.cleanup();
     }
