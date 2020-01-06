@@ -89,7 +89,7 @@ public class ChatList extends BaseAdapter {
         } else {
             chatCmp.chatImage.setImageBitmap(BrzStorage.getInstance().getChatImage(chat.id, ctx));
         }
-
+    
 //
         return convertView;
     }

@@ -18,4 +18,5 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="instructions">Click to start a chat</string>
+    <string name="name">name</string>
 </resources>

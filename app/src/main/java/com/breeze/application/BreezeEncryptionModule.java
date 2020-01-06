@@ -70,8 +70,9 @@ public class BreezeEncryptionModule extends BreezeModule {
     // Packet stuff
     public void encryptPacket(BrzPacket p) {
         BrzNode destNode = BrzGraph.getInstance().getVertex(p.to);
-        if (destNode == null)
+        if (destNode == null) {
             throw new IllegalArgumentException("Could not find the packet's destination node");
+        }
 
         String body = encryption.asymmetricEncrypt(destNode.publicKey, p.body);
         if (body == null) throw new RuntimeException("Could not encrypt packet");

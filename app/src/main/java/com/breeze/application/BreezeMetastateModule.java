@@ -5,6 +5,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.Icon;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
@@ -137,6 +139,7 @@ public class BreezeMetastateModule extends BreezeModule {
 
         Notification notification = new NotificationCompat.Builder(this.api, App.MESSAGE_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher)
+                .setColor(Color.WHITE)
                 .setContentTitle(c.name)
                 .setContentText(message.body)
                 .setAutoCancel(true)
