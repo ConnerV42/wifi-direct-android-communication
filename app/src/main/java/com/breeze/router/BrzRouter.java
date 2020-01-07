@@ -179,7 +179,7 @@ public class BrzRouter extends EventEmitter {
 
             // Send off to sendFilePayload, if this is not the destination uuid
             if (!hostNode.id.equals(fileInfo.destinationId)) {
-                sendFilePayload(filePayload, packet);
+                sendFilePayload(filePayload, packet.fileInfoPacket());
             } else {
                 // Get the received file (which will be in the Downloads folder)
                 File payloadFile = filePayload.asFile().asJavaFile();
