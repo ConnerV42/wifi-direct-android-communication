@@ -72,7 +72,7 @@ public class BrzRouter extends EventEmitter {
     public Map<Long, Payload> completedFilePayloads = new HashMap<>();
     public Map<Long, BrzPacket> fileInfoPackets = new HashMap<>();
 
-    private BrzGraph graph;
+    public BrzGraph graph;
     public BrzNode hostNode = null;
 
     private BrzRouter(ConnectionsClient cc, String pkgName) {
@@ -120,25 +120,12 @@ public class BrzRouter extends EventEmitter {
         }
     }
 
-    public void sendFilePayload(Payload filePayload, BrzPacket packet) {
+    public void sendFilePayload(Payload filePayload, BrzFileInfo packet) {
         if (filePayload == null || packet == null)
             return;
 
-        BrzFileInfo fileInfoPacket = packet.fileInfoPacket();
-
-        String nextHopUUID = graph.nextHop(this.hostNode.id, fileInfoPacket.destinationUUID);
-
-        if (nextHopUUID == null) {
-            Log.i("ENDPOINT_ERROR", "Failed to find path to " + fileInfoPacket.destinationUUID);
-        }
-        BrzNode nextHopNode = this.graph.getVertex(nextHopUUID);
-
+        BrzNode nextHopNode = this.graph.getVertex(packet.nextId);
         connectionsClient.sendPayload(nextHopNode.endpointId, filePayload);
-
-        // FileInfoPackets arrive at each hop along the way, to guide file payloads
-        // throughout network traversal
-        packet.to = nextHopUUID;
-        send(packet);
     }
 
     public void sendToEndpoint(BrzPacket packet, String endpointId) {
@@ -191,7 +178,7 @@ public class BrzRouter extends EventEmitter {
             BrzFileInfo fileInfo = packet.fileInfoPacket();
 
             // Send off to sendFilePayload, if this is not the destination uuid
-            if (!hostNode.id.equals(fileInfo.destinationUUID)) {
+            if (!hostNode.id.equals(fileInfo.destinationId)) {
                 sendFilePayload(filePayload, packet);
             } else {
                 // Get the received file (which will be in the Downloads folder)

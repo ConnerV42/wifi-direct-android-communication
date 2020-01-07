@@ -108,14 +108,14 @@ public class MessagesView extends AppCompatActivity {
         });
 
         ImageButton sendVideo = findViewById(R.id.sendVideo);
-        sendPhoto.setOnClickListener(view1 -> {
+        sendVideo.setOnClickListener(view1 -> {
             Intent intent = new Intent(Intent.ACTION_PICK,
                     android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(intent, VIDEO_REQUEST_CODE);
         });
 
         ImageButton sendAudio = findViewById(R.id.sendAudio);
-        sendPhoto.setOnClickListener(view1 -> {
+        sendAudio.setOnClickListener(view1 -> {
             Intent intent = new Intent(Intent.ACTION_PICK,
                     android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(intent, AUDIO_REQUEST_CODE);
@@ -125,29 +125,39 @@ public class MessagesView extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.i("Send Attachment", "Attachment data: " + data.getAction());
+        Log.i("Preparing file to send", "Attachment data: " + data.getDataString());
 
         if (requestCode == PHOTO_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            String filePayloadId = "";
+            String fileName = "";
+            Payload filePayload = null;
+            ParcelFileDescriptor fileParcel = null;
 
             try {
                 Uri imageUri = data.getData();
 
-                // For Payload (FILE)
-                ParcelFileDescriptor parcel = this.getContentResolver().openFileDescriptor(imageUri, "r");
-                Payload filePayload = Payload.fromFile(parcel);
-                // Payload filePayloadAsStream = Payload.fromStream(parcel);
+                // Create File Payload
+                fileParcel = this.getContentResolver().openFileDescriptor(imageUri, "r");
+                filePayload = Payload.fromFile(fileParcel);
 
-                // For File Name Payload (BYTES)
-                String filePayloadId = "" + filePayload.getId();
-                String fileName = imageUri.getLastPathSegment();
-
-                final BrzRouter router = BrzRouter.getInstance();
-                BrzPacket packet = BrzPacketBuilder.fileInfoPacket(router.hostNode.id, chat.id, filePayloadId, fileName);
-                BrzRouter.getInstance().sendFilePayload(filePayload, packet);
+                // Create FileInfoPacket
+                filePayloadId = "" + filePayload.getId();
+                fileName = imageUri.getLastPathSegment();
             } catch (Exception e) {
                 Log.e("FILE_ACCESS", "Failure ", e);
             }
-        } else if (requestCode == VIDEO_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+
+            final BrzRouter router = BrzRouter.getInstance();
+            BrzPacket p = BrzPacketBuilder.fileInfoPacket(router.hostNode.id, "", chat.id, "", filePayloadId, fileName);
+
+            try {
+                BreezeAPI.getInstance().sendFileMessage(p.fileInfoPacket(), filePayload);
+            } catch (Exception e) {
+                Log.i("MESSAGE_SEND_ERROR", "Cannot send message to " + p.to);
+                Toast.makeText(this.getApplicationContext(), "Cannot send message to " + p.to + "; verify they're in the graph", Toast.LENGTH_SHORT).show();
+            }
+        }
+        else if (requestCode == VIDEO_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             // TODO: Send mp4
 
         } else if (requestCode == AUDIO_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {

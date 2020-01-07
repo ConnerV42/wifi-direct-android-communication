@@ -9,12 +9,22 @@ import org.json.JSONObject;
 public class BrzFileInfo implements BrzSerializable {
     public String filePayloadId = "";
     public String fileName = "";
-    public String from = "";
-    public String destinationUUID = "";
+    public String fromId = "";
+    public String nextId = "";
+    public String destinationId = "";
     public String chatId = "";
     public Long datestamp = (long) 0;
 
-    public BrzFileInfo() {
+    public BrzFileInfo() { }
+
+    public BrzFileInfo(String fromId, String chatId, String filePayloadId, String fileName, long datestamp) {
+        this.fromId = fromId;
+        this.nextId = "";
+        this.chatId = chatId;
+        this.destinationId = "";
+        this.filePayloadId = filePayloadId;
+        this.fileName = fileName;
+        this.datestamp = datestamp;
     }
 
     public BrzFileInfo(String json) {
@@ -26,11 +36,12 @@ public class BrzFileInfo implements BrzSerializable {
         JSONObject json = new JSONObject();
 
         try {
+            json.put("fromId", this.fromId);
+            json.put("nextId", this.nextId);
+            json.put("chatId", this.chatId);
+            json.put("destinationId", this.destinationId);
             json.put("filePayloadId", this.filePayloadId);
             json.put("fileName", this.fileName);
-            json.put("from", this.from);
-            json.put("destinationUUID", this.destinationUUID);
-            json.put("chatId", this.chatId);
             json.put("datestamp", this.datestamp);
         } catch (Exception e) {
             Log.i("SERIALIZATION ERROR", e.toString());
@@ -44,17 +55,16 @@ public class BrzFileInfo implements BrzSerializable {
         try {
             JSONObject jObj = new JSONObject(json);
 
+            this.fromId = jObj.getString("fromId");
+            this.nextId = jObj.getString("nextId");
+            this.chatId = jObj.getString("chatId");
+            this.destinationId = jObj.getString("destinationId");
             this.filePayloadId = jObj.getString("filePayloadId");
             this.fileName = jObj.getString("fileName");
-            this.from = jObj.getString("from");
-            this.destinationUUID = jObj.getString("destinationUUID");
-            this.chatId = jObj.getString("chatId");
             this.datestamp = jObj.getLong("datestamp");
 
         } catch (Exception e) {
             Log.i("DESERIALIZATION ERROR", e.toString());
         }
     }
-
-
 }

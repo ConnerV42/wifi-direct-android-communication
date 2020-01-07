@@ -17,6 +17,7 @@ import com.breeze.App;
 import com.breeze.MainActivity;
 import com.breeze.R;
 import com.breeze.database.DatabaseHandler;
+import com.breeze.datatypes.BrzFileInfo;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
@@ -29,6 +30,7 @@ import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
 import com.breeze.views.ProfileActivity;
+import com.google.android.gms.nearby.connection.Payload;
 
 public class BreezeAPI extends Service {
 
@@ -331,6 +333,35 @@ public class BreezeAPI extends Service {
         }
 
         this.addMessage(message);
+    }
+
+    public void sendFileMessage(BrzFileInfo fileInfoPacket, Payload filePayload) {
+        BrzFileInfo clone = new BrzFileInfo(fileInfoPacket.toJSON());
+
+        // Encrypt the message
+        // this.encryption.encryptMessage(clone);
+
+        // Obtain nextId and destinationId before sending
+        BrzChat chat = this.state.getChat(fileInfoPacket.chatId);
+
+        for (String nodeId : chat.nodes) {
+            if (nodeId.equals(hostNode.id))
+                continue;
+
+            fileInfoPacket.destinationId = nodeId;
+            fileInfoPacket.nextId = this.router.graph.nextHop(hostNode.id, nodeId);
+            if (fileInfoPacket.nextId == null) {
+                Log.i("ENDPOINT_ERROR", "Failed to find path to " + fileInfoPacket.destinationId);
+            }
+
+            // Build a packet
+            BrzPacket p = new BrzPacket(clone, BrzPacket.BrzPacketType.FILE_INFO, fileInfoPacket.nextId, false);
+
+            this.router.send(p);
+            this.router.sendFilePayload(filePayload, fileInfoPacket);
+        }
+
+        //this.addFileMessage(filePayload, fileInfoPacket);
     }
 
     public void addMessage(BrzMessage message) {
