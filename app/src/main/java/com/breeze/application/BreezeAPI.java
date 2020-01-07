@@ -65,7 +65,7 @@ public class BreezeAPI extends Service {
     public void onCreate() {
         super.onCreate();
         instance = this;
-        this.initialize();
+        this.initialize(this);
 
         // Upgrade to foreground process
         Intent notifIntent = new Intent(this, MainActivity.class);
@@ -121,16 +121,16 @@ public class BreezeAPI extends Service {
         super.onDestroy();
     }
 
-    public void initialize() {
+    public void initialize(Context ctx) {
         // Initialize api modules
         if (this.router == null)
-            this.router = BrzRouter.initialize(this, "BREEZE_MESSENGER");
+            this.router = BrzRouter.initialize(ctx, "BREEZE_MESSENGER");
         if (this.storage == null)
-            this.storage = BrzStorage.initialize(this);
+            this.storage = BrzStorage.initialize(ctx);
         if (this.state == null)
             this.state = BrzStateStore.getStore();
         if (this.db == null)
-            this.db = new DatabaseHandler(this);
+            this.db = new DatabaseHandler(ctx);
 
         // Initialize api modules
         if (this.encryption == null)
@@ -200,6 +200,15 @@ public class BreezeAPI extends Service {
     public void updateChat(BrzChat chat) {
         this.state.addChat(chat);
         this.db.setChat(chat);
+    }
+
+    public void deleteChat(String chatId) {
+        this.db.deleteChat(chatId);
+        this.db.deleteChatMessages(chatId);
+        this.state.removeChat(chatId);
+        this.encryption.deleteSecretKey(chatId);
+
+        Toast.makeText(this, "Chat with id " + chatId + " has been deleted successfully", Toast.LENGTH_SHORT).show();
     }
 
     public void incomingChatResponse(BrzChatResponse response) {

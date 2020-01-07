@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
+    android:orientation="horizontal"
     android:paddingStart="10dp"
+    android:paddingTop="10dp"
     android:paddingEnd="5dp"
-    >
+    android:paddingBottom="10dp">
 
     <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/chat_image"
@@ -15,56 +16,54 @@
         android:layout_height="50dp"
         android:layout_marginEnd="20dp"
         android:src="@drawable/ic_person_black_24dp"
-        app:civ_border_width="2dp"
-        app:civ_border_color="#000"/>
+        app:civ_border_color="#000"
+        app:civ_border_width="2dp" />
 
-    <TextView
-        android:id="@+id/chat_name"
-        android:layout_width="166dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:gravity="fill_horizontal"
-        android:text="@string/name"
-        android:textColor="#000000"
-        android:textSize="9pt" />
+    <com.google.android.flexbox.FlexboxLayout
+        app:flexDirection="column"
+        app:alignItems="flex_start"
+        app:justifyContent="center"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="2">
+
+        <TextView
+            android:id="@+id/chat_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:gravity="fill_horizontal"
+            android:text="@string/name"
+            android:textColor="#000000"
+            android:textSize="9pt" />
 
         <TextView
             android:id="@+id/chat_sub_text"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="5pt"
-            android:text="sub text" />
+            android:text="sub text"
+            android:textSize="5pt" />
+    </com.google.android.flexbox.FlexboxLayout>
 
     <TextView
         android:id="@+id/number_unread_messages"
-        android:layout_width="0dp"
+        android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_gravity="center_vertical"
-        android:layout_weight="1"
         android:background="@drawable/message_bubble"
         android:text="0"
         android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textColor="@color/design_default_color_surface"
-        android:visibility="invisible" />
+        android:visibility="gone" />
 
     <Button
         android:id="@+id/delete_button"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:background="@color/design_default_color_error"
         android:text="Delete"
-        android:visibility="invisible" />
-    <!-- android:textColor="@color/design_default_color_surface" -->
-
-
-    <!--<TextView
-        android:id="@+id/user_alias"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start"
-        android:text="\@alias"
-        android:textColor="#555" />-->
-
+        android:textColor="#FFFFFF"
+        android:visibility="gone" />
 </LinearLayout>

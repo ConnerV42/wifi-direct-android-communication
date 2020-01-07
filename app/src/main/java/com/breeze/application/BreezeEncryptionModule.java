@@ -54,6 +54,10 @@ public class BreezeEncryptionModule extends BreezeModule {
         encryption.saveSymKey(chatId, secretKey);
     }
 
+    public void deleteSecretKey(String chatId) {
+        encryption.deleteKeyEntry(chatId);
+    }
+
     // Message stuff
     public void encryptMessage(BrzMessage msg) {
         String body = encryption.symmetricEncrypt(msg.chatId, msg.body);

@@ -7,6 +7,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +20,7 @@ import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.state.BrzStateStore;
 import com.breeze.views.Messages.MessagesView;
+import com.breeze.views.UserSelection.UserList;
 import com.breeze.views.UserSelection.UserSelection;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -53,16 +56,18 @@ public class ChatsView extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         this.list = new ChatList(getActivity());
-        ListView msgView = view.findViewById(R.id.contactList);
-        msgView.setAdapter(this.list);
-        msgView.setOnItemClickListener((parentView, childView, position, id) -> {
-            BreezeAPI api = BreezeAPI.getInstance();
-            BrzChat c =  api.state.getChat(this.list.getChatId(position));
 
-            if(c.acceptedByHost) {
-                startActivity(MessagesView.getIntent(getContext(), this.list.getChatId(position)));
+        // Set up the list
+        RecyclerView recyclerView = view.findViewById(R.id.contactList);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(this.list);
+
+        this.list.setItemSelectedListener((selectedChat) -> {
+            if (selectedChat.acceptedByHost) {
+                startActivity(MessagesView.getIntent(getContext(), selectedChat.id));
             } else {
-                startActivity(ChatHandshakeView.getIntent(getContext(), this.list.getChatId(position)));
+                startActivity(ChatHandshakeView.getIntent(getContext(), selectedChat.id));
             }
         });
 

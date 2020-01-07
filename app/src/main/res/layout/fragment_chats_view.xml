@@ -6,14 +6,13 @@
     android:orientation="vertical"
     tools:context=".views.Chats.ChatsView">
 
-    <ListView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/contactList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="4dp"
         android:paddingRight="4dp">
-
-    </ListView>
+    </androidx.recyclerview.widget.RecyclerView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_width="wrap_content"
@@ -22,13 +21,4 @@
         android:layout_gravity="bottom|right"
         android:layout_margin="15dp"
         android:src="@drawable/ic_add_black_24dp" />
-
-    <!--<ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:padding="10dp"/>
--->
-
 </FrameLayout>

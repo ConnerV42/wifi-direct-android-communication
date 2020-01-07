@@ -13,14 +13,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.breeze.MainActivity;
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
+import com.breeze.datatypes.BrzNode;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
 import com.breeze.views.Messages.MessagesView;
+import com.breeze.views.UserSelection.UserList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,20 +34,76 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
-public class ChatList extends BaseAdapter {
+public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
 
-    private class ChatComponent {
-        ImageView chatImage;
-        TextView chatName;
-        TextView chatSubText;
-        TextView numberUnread;
-        Button deleteButton;
+    public static class ChatHolder extends RecyclerView.ViewHolder {
+        View v;
+        int position = 0;
+
+        public ChatHolder(View v) {
+            super(v);
+            this.v = v;
+        }
+
+        public void bind(BrzChat chat, int position, Context ctx) {
+
+            TextView chatName = this.v.findViewById(R.id.chat_name);
+            chatName.setText(chat.name);
+
+            // Chat awaiting acceptance
+            TextView chatSubText = this.v.findViewById(R.id.chat_sub_text);
+            if (!chat.acceptedByHost) {
+                chatSubText.setText("You've been invited to join this chat");
+                chatSubText.setVisibility(View.VISIBLE);
+            } else {
+                chatSubText.setText("");
+                chatSubText.setVisibility(View.GONE);
+            }
+
+            // Chat's image
+            ImageView chatImage = this.v.findViewById(R.id.chat_image);
+            if (!chat.isGroup)
+                chatImage.setImageBitmap(BrzStorage.getInstance().getProfileImage(chat.otherPersonId(), ctx));
+            else
+                chatImage.setImageBitmap(BrzStorage.getInstance().getChatImage(chat.id, ctx));
+
+            // Unread
+            TextView numberUnread = this.v.findViewById(R.id.number_unread_messages);
+            int unread = BreezeAPI.getInstance().db.getUnreadCount(chat.id);
+            Log.i("STATE", "Unread " + unread);
+            if (unread == 0) {
+                numberUnread.setVisibility(View.GONE);
+            } else {
+                numberUnread.setText("" + unread);
+                numberUnread.setVisibility(View.VISIBLE);
+            }
+
+            // Delete
+            Button deleteButton = this.v.findViewById(R.id.delete_button);
+            deleteButton.setOnClickListener(v -> {
+                BreezeAPI.getInstance().deleteChat(chat.id);
+            });
+
+            this.v.setOnLongClickListener(v -> {
+                if (deleteButton.getVisibility() == View.GONE)
+                    deleteButton.setVisibility(View.VISIBLE);
+                else
+                    deleteButton.setVisibility(View.GONE);
+                return true;
+            });
+
+            this.position = position;
+        }
+
     }
+
 
     private Context ctx;
     private List<BrzChat> chats = new ArrayList<>();
+
     private Consumer<List<BrzChat>> chatListener;
-    private boolean showDelete = true;
+    private Consumer<Object> messageListener;
+
     public ChatList(Context ctx) {
         this.ctx = ctx;
         BreezeAPI api = BreezeAPI.getInstance();
@@ -53,115 +114,56 @@ public class ChatList extends BaseAdapter {
             }
         };
 
+        this.messageListener = msgs -> {
+            notifyDataSetChanged();
+        };
+
         this.chatListener.accept(api.state.getAllChats());
         api.state.on("allChats", this.chatListener);
+        api.state.on("messages", this.messageListener);
     }
 
     public void cleanup() {
         BreezeAPI api = BreezeAPI.getInstance();
         api.state.off("allChats", this.chatListener);
+        api.state.off("messages", this.messageListener);
     }
 
+    @NonNull
     @Override
-    public int getCount() {
-        return chats.size();
-    }
+    public ChatHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-    @Override
-    public Object getItem(int i) {
-        return chats.get(i);
-    }
+        // Get inflater
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
-    public String getChatId(int i) {
-        return chats.get(i).id;
-    }
+        // Inflate a new li_chat
+        View chat_list_item = inflater.inflate(R.layout.li_chat, parent, false);
 
-    @Override
-    public long getItemId(int i) {
-        return i;
-    }
-    @Override
-    public View getView(int i, View convertView, ViewGroup viewGroup) {
-        BrzChat chat = chats.get(i);
-        LayoutInflater chatInflater = (LayoutInflater) ctx.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+        // Make our holder
+        ChatHolder holder = new ChatHolder(chat_list_item);
 
-        ChatComponent chatCmp = new ChatComponent();
-
-        convertView = chatInflater.inflate(R.layout.li_chat, null);
-        convertView.setTag(chatCmp);
-
-        chatCmp.deleteButton = convertView.findViewById(R.id.delete_button);
-        View finalConvertView = convertView;
-        chatCmp.deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                BreezeAPI api = BreezeAPI.getInstance();
-                finalConvertView.setVisibility(View.GONE);
-                api.db.deleteChat(chat.id);
-                api.state.removeChat(chat.id);
-                Toast.makeText(ctx, "Chat with id " + chat.id + " has been deleted successfully", Toast.LENGTH_SHORT).show();
-            }
+        // Make the item clickable!
+        chat_list_item.setOnClickListener(e -> {
+            if (this.itemSelectedListener != null)
+                this.itemSelectedListener.accept(this.chats.get(holder.position));
         });
 
-        chatCmp.chatName = convertView.findViewById(R.id.chat_name);
-        chatCmp.chatName.setText(chat.name);
+        return holder;
+    }
 
-        // Chat awaiting acceptance
-        chatCmp.chatSubText = convertView.findViewById(R.id.chat_sub_text);
+    @Override
+    public void onBindViewHolder(@NonNull ChatHolder holder, int position) {
+        holder.bind(chats.get(position), position, ctx);
+    }
 
-        if(!chat.acceptedByHost) {
-            chatCmp.chatSubText.setText("You've been invited to join this chat");
-            chatCmp.chatSubText.setVisibility(View.VISIBLE);
-        } else {
-            chatCmp.chatSubText.setText("");
-            chatCmp.chatSubText.setVisibility(View.GONE);
-        }
+    @Override
+    public int getItemCount() {
+        return this.chats.size();
+    }
 
-        chatCmp.chatName.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                if (chatCmp.deleteButton.getVisibility() == View.INVISIBLE) {
-                    chatCmp.deleteButton.setVisibility(View.VISIBLE);
-                } else {
-                    chatCmp.deleteButton.setVisibility(View.INVISIBLE);
-                }
-                return true;
-            }
-        });
-        chatCmp.chatName.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ctx.startActivity(MessagesView.getIntent(ctx, chat.id));
-            }
-        });
-        chatCmp.chatImage = convertView.findViewById(R.id.chat_image);
+    private Consumer<BrzChat> itemSelectedListener = null;
 
-        if (!chat.isGroup) {
-            chatCmp.chatImage.setImageBitmap(BrzStorage.getInstance().getProfileImage(chat.otherPersonId(), ctx));
-        } else {
-            chatCmp.chatImage.setImageBitmap(BrzStorage.getInstance().getChatImage(chat.id, ctx));
-        }
-        BreezeAPI api = BreezeAPI.getInstance();
-        try{
-            int count = 0;
-            chatCmp.numberUnread = convertView.findViewById(R.id.number_unread_messages);
-            Stream<BrzMessage> stream = api.db.getChatMessages(chat.id).stream();
-            List<BrzMessage> unread = stream.filter(msg -> api.db.isRead(msg.id)).collect(Collectors.toList());
-            if(unread.size() == 0){
-                chatCmp.numberUnread.setText("" + 0);
-                chatCmp.numberUnread.setVisibility(View.INVISIBLE);
-            }
-            else {
-                chatCmp.numberUnread.setText("" + unread.size());
-                chatCmp.numberUnread.setVisibility(View.VISIBLE);
-            }
-        }catch(Exception e){
-            chatCmp.numberUnread.setText("" + 0);
-            chatCmp.numberUnread.setVisibility(View.INVISIBLE);
-        }
-
-
-//
-        return convertView;
+    public void setItemSelectedListener(Consumer<BrzChat> itemSelectedListener) {
+        this.itemSelectedListener = itemSelectedListener;
     }
 }

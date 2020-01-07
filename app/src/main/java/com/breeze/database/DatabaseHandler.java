@@ -74,10 +74,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             "FOREIGN KEY ('brzChatId') REFERENCES BrzChat(id))";
 
     private static final String INIT_BRZRECEIPT_TABLE = "CREATE TABLE IF NOT EXISTS " + BRZRECEIPT_TABLE_NAME + " (" +
-            "'messageId' TEXT PRIMARY KEY NOT NULL, " +
+            "'id' TEXT PRIMARY KEY NOT NULL, " +
             "'delivered' BOOLEAN NOT NULL, " +
             "'read' BOOLEAN NOT NULL," +
-            "FOREIGN KEY ('messageId') REFERENCES BrzMessage(id)" +
+            "FOREIGN KEY ('id') REFERENCES BrzMessage(id)" +
             ")";
 
     public DatabaseHandler(Context context) {
@@ -331,6 +331,28 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    public int getUnreadCount(@NonNull String chatId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] args = {chatId};
+        Cursor c = db.rawQuery(
+                "SELECT COUNT(*) as count FROM BrzMessage " +
+                    "natural join ( select * from BrzMessageReceipt where read == 0 ) " +
+                    "where chatId = ?;"
+                , args);
+
+        if (c == null) {
+            db.close();
+            return 0;
+        }
+
+        c.moveToFirst();
+        int unread = c.getInt(c.getColumnIndex("count"));
+
+        c.close();
+        db.close();
+
+        return unread;
+    }
 
     /*
      *
@@ -342,7 +364,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         Object[] args = {messageId};
         try {
-            db.execSQL("UPDATE " + BRZRECEIPT_TABLE_NAME + " set delivered = 1 where messageId = ?", args);
+            db.execSQL("UPDATE " + BRZRECEIPT_TABLE_NAME + " set delivered = 1 where id = ?", args);
         } catch (Exception e) {
             Log.i("Bad SQL Error", "Error with SQL Syntax");
         }
@@ -353,7 +375,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         Object[] args = {messageId};
         try {
-            db.execSQL("UPDATE " + BRZRECEIPT_TABLE_NAME + " set read = 1 where messageId = ?", args);
+            db.execSQL("UPDATE " + BRZRECEIPT_TABLE_NAME + " set read = 1 where id = ?", args);
         } catch (Exception e) {
             Log.i("Bad SQL Error", "Error with SQL Syntax");
         }
@@ -362,7 +384,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public boolean isDelivered(String messageId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor c = db.rawQuery("SELECT delivered FROM " + BRZRECEIPT_TABLE_NAME + " WHERE messageId = ?;", new String[]{messageId});
+        Cursor c = db.rawQuery("SELECT delivered FROM " + BRZRECEIPT_TABLE_NAME + " WHERE id = ?;", new String[]{messageId});
         if (c == null) {
             db.close();
             return false;
@@ -383,7 +405,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public boolean isRead(String messageId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor c = db.rawQuery("SELECT read FROM " + BRZRECEIPT_TABLE_NAME + " WHERE messageId = ?;", new String[]{messageId});
+        Cursor c = db.rawQuery("SELECT read FROM " + BRZRECEIPT_TABLE_NAME + " WHERE id = ?;", new String[]{messageId});
         if (c == null) {
             db.close();
             return false;
