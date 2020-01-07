@@ -104,6 +104,7 @@ public class BrzStateStore extends EventEmitter {
         messages.add(msg);
 
         this.emit("messages" + msg.chatId, this.getMessages(msg.chatId));
+        this.emit("messages");
     }
 
     public void addAllMessages(List<BrzMessage> newMessages) {
@@ -120,6 +121,8 @@ public class BrzStateStore extends EventEmitter {
 
         for (String chatId : chatIdsToUpdate)
             this.emit("messages" + chatId, this.getMessages(chatId));
+
+        this.emit("messages");
     }
 
 
