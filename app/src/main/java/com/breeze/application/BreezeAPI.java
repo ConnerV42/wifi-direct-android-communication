@@ -202,13 +202,15 @@ public class BreezeAPI extends Service {
         this.db.setChat(chat);
     }
 
+    public void leaveChat(String chatId) {
+        this.rejectHandshake(chatId);
+    }
+
     public void deleteChat(String chatId) {
         this.db.deleteChat(chatId);
         this.db.deleteChatMessages(chatId);
         this.state.removeChat(chatId);
         this.encryption.deleteSecretKey(chatId);
-
-        Toast.makeText(this, "Chat with id " + chatId + " has been deleted successfully", Toast.LENGTH_SHORT).show();
     }
 
     public void incomingChatResponse(BrzChatResponse response) {
@@ -222,7 +224,7 @@ public class BreezeAPI extends Service {
 
             BrzNode n = BrzGraph.getInstance().getVertex(response.from);
             if (n != null) {
-                BrzPacket p = BrzPacketBuilder.message(this.hostNode.id, "", n.name + " accepeted the chat request!", c.id, true);
+                BrzPacket p = BrzPacketBuilder.message(this.hostNode.id, "", n.name + " joined the chat", c.id, true);
                 this.state.addMessage(p.message());
                 this.db.addMessage(p.message());
             }
@@ -237,7 +239,7 @@ public class BreezeAPI extends Service {
 
             BrzNode n = BrzGraph.getInstance().getVertex(response.from);
             if (n != null) {
-                BrzPacket p = BrzPacketBuilder.message(this.hostNode.id, "", n.name + " rejected the chat.", c.id, true);
+                BrzPacket p = BrzPacketBuilder.message(this.hostNode.id, "", n.name + " left the chat.", c.id, true);
                 this.state.addMessage(p.message());
                 this.db.addMessage(p.message());
             }
@@ -313,8 +315,7 @@ public class BreezeAPI extends Service {
         SharedPreferences.Editor editor = preferences.edit();
         editor.remove("HANDSHAKE_KEY_" + chatId).apply();
 
-        this.state.removeChat(chatId);
-        this.db.deleteChat(chatId);
+        this.deleteChat(chatId);
     }
 
     //

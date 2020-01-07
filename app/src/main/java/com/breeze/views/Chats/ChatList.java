@@ -81,7 +81,7 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
             // Delete
             Button deleteButton = this.v.findViewById(R.id.delete_button);
             deleteButton.setOnClickListener(v -> {
-                BreezeAPI.getInstance().deleteChat(chat.id);
+                BreezeAPI.getInstance().leaveChat(chat.id);
             });
 
             this.v.setOnLongClickListener(v -> {
