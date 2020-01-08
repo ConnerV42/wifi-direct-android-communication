@@ -113,7 +113,9 @@ public class BrzRouter extends EventEmitter {
         // Encrypt the packet first
         BreezeAPI api = BreezeAPI.getInstance();
         try {
-            api.encryption.encryptPacket(packet);
+            // FileInfoPackets need to be unencrypted to guide FilePayloads throughout the network
+            if (packet.type != BrzPacket.BrzPacketType.FILE_INFO)
+                api.encryption.encryptPacket(packet);
             forwardPacket(packet, true);
         } catch (Exception e) {
             Log.i("ENDPOINT", "Failed to encrypt and send packet");
@@ -167,27 +169,27 @@ public class BrzRouter extends EventEmitter {
         // BYTES and FILE could be received in any order, so we call when either the
         // BYTES or the FILE
         // payload is completely received. The file payload is considered complete only
-        // when both have
-        // been received.
+        // when both have been received.
         Payload filePayload = completedFilePayloads.get(payloadId);
         BrzPacket packet = fileInfoPackets.get(payloadId);
         if (filePayload != null && packet != null) {
             completedFilePayloads.remove(payloadId);
             fileInfoPackets.remove(payloadId);
 
-            BrzFileInfo fileInfo = packet.fileInfoPacket();
+            BrzFileInfo fileInfoPacket = packet.fileInfoPacket();
 
             // Send off to sendFilePayload, if this is not the destination uuid
-            if (!hostNode.id.equals(fileInfo.destinationId)) {
+            if (!hostNode.id.equals(fileInfoPacket.destinationId)) {
+                Log.i("FilePayload", "Transferring filePayload through network");
                 sendFilePayload(filePayload, packet.fileInfoPacket());
             } else {
                 // Get the received file (which will be in the Downloads folder)
                 File payloadFile = filePayload.asFile().asJavaFile();
 
                 // Rename the file.
-                payloadFile.renameTo(new File(payloadFile.getParentFile(), fileInfo.fileName));
+                payloadFile.renameTo(new File(payloadFile.getParentFile(), fileInfoPacket.fileName));
 
-                Log.i("ENDPOINT", "Received and Saved Payload file to downloads folder");
+                Log.i("ENDPOINT", "Received and Saved Payload file to downloads folder from " + fileInfoPacket.fromId);
             }
         }
     }
@@ -272,6 +274,14 @@ public class BrzRouter extends EventEmitter {
         // If the packet is not a valid broadcast
         // and it is for the host node
         else if (packet.to.equals(this.hostNode.id)) {
+
+            if (packet.type == BrzPacket.BrzPacketType.FILE_INFO) {
+                BrzFileInfo fileInfoPacket = packet.fileInfoPacket();
+
+                if (this.hostNode.id == fileInfoPacket.destinationId) {
+                    // handle case
+                }
+            }
 
             // Decrypt the packet unless it's not an encryptable type
             if (packet.type != BrzPacket.BrzPacketType.GRAPH_QUERY) {
