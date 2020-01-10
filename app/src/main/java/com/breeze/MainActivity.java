@@ -1,5 +1,7 @@
 package com.breeze;
 
+import android.widget.*;
+import android.view.*;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
@@ -16,7 +18,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import com.breeze.application.BreezeAPI;
-import com.breeze.router.BrzRouter;
+import com.breeze.views.Messages.PublicMessagesView;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -119,7 +121,11 @@ public class MainActivity extends AppCompatActivity {
                 }
             }, 5 * 1000);
         }
-
+        else if (id == R.id.action_public_thread)
+        {
+            setContentView(R.layout.public_activity_messages_view);
+            //startActivity(new Intent(MainActivity.this, PublicMessagesView.class));
+        }
         return super.onOptionsItemSelected(item);
     }
 
