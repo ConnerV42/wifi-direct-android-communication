@@ -5,16 +5,21 @@
     <item
         android:id="@+id/action_toggle_discovery"
         android:checkable="true"
-        android:orderInCategory="1"
+        android:orderInCategory="2"
         android:title="Toggle discovery"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_discovery_scan"
-        android:orderInCategory="2"
+        android:orderInCategory="3"
         android:title="Scan for nearby networks"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_public_thread"
+        android:orderInCategory="4"
+        android:title="Public Thread"
         app:showAsAction="never" />
     <item android:id="@+id/action_settings"
           android:title="@string/action_settings"
-          android:orderInCategory="3"
+          android:orderInCategory="5"
           app:showAsAction="never"/>
 </menu>
