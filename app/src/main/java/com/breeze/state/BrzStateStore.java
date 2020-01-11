@@ -34,6 +34,19 @@ public class BrzStateStore extends EventEmitter {
     }
 
     //
+    // Viewing Chat ID
+    //
+
+    private String currentChat = "";
+    public String getCurrentChat() {
+        return this.currentChat;
+    }
+    public void setCurrentChat(String chatId) {
+        this.currentChat = chatId;
+        this.emit("currentChat", chatId);
+    }
+
+    //
     // Host node
     //
 

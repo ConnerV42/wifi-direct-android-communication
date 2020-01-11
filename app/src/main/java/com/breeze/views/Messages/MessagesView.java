@@ -70,6 +70,8 @@ public class MessagesView extends AppCompatActivity {
 
         if(chat == null) return;
 
+        api.state.setCurrentChat(chatId);
+
         // Set up content
         final BrzRouter router = BrzRouter.getInstance();
 
@@ -230,8 +232,10 @@ public class MessagesView extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        BreezeAPI.getInstance().state.off("messages" + chat.id, this.messageListener);
-        BreezeAPI.getInstance().state.off("chat" + this.chat.id, this.onChatUpdate);
+        BreezeAPI api =  BreezeAPI.getInstance();
+        api.state.setCurrentChat("");
+        api.state.off("messages" + chat.id, this.messageListener);
+        api.state.off("chat" + this.chat.id, this.onChatUpdate);
         this.list.cleanup();
     }
 }

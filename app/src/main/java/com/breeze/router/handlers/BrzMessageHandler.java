@@ -1,13 +1,9 @@
 package com.breeze.router.handlers;
 
-import android.util.Log;
-
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.packets.BrzPacket;
-import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;
-import com.breeze.state.BrzStateStore;
 
 public class BrzMessageHandler implements BrzRouterHandler {
 
@@ -28,7 +24,7 @@ public class BrzMessageHandler implements BrzRouterHandler {
         // Attempt to decrypt the message, or ignore it if there's an error
         try {
             api.encryption.decryptMessage(m);
-            api.meta.showNotification(m);
+            api.meta.showMessageNotification(m);
             api.addMessage(m);
 
             // Send delivery acknowledgement

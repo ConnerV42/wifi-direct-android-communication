@@ -17,6 +17,7 @@ import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
+import com.breeze.views.Chats.ChatHandshakeView;
 import com.breeze.views.Messages.MessagesView;
 
 import java.util.List;
@@ -126,8 +127,9 @@ public class BreezeMetastateModule extends BreezeModule {
         this.emit("read", messageId);
     }
 
-    public void showNotification(BrzMessage message) {
+    public void showMessageNotification(BrzMessage message) {
         BrzChat c = this.api.state.getChat(message.chatId);
+        if(api.state.getCurrentChat().equals(message.chatId)) return;
 
         Intent chatIntent = MessagesView.getIntent(this.api, message.chatId);
         PendingIntent pending = PendingIntent.getActivity(this.api, 0, chatIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -146,5 +148,24 @@ public class BreezeMetastateModule extends BreezeModule {
         notificationManager.notify(2, notification);
 
         Log.i("STATE", "Showing a notification");
+    }
+
+    public void showHandshakeNotification(String chatId) {
+        BrzChat c = this.api.state.getChat(chatId);
+        Intent chatIntent = ChatHandshakeView.getIntent(api, chatId);
+        PendingIntent pending = PendingIntent.getActivity(this.api, 0, chatIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification notification = new NotificationCompat.Builder(this.api, App.MESSAGE_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentTitle(c.name)
+                .setContentText("You've been invited to join this chat!")
+                .setAutoCancel(true)
+                .setContentIntent(pending)
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .build();
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.api);
+        notificationManager.notify(3, notification);
     }
 }

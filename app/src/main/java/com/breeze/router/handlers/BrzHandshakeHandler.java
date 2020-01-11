@@ -2,6 +2,7 @@ package com.breeze.router.handlers;
 
 import com.breeze.application.BreezeAPI;
 import com.breeze.packets.BrzPacket;
+import com.breeze.packets.ChatEvents.BrzChatHandshake;
 import com.breeze.router.BrzRouter;
 
 public class BrzHandshakeHandler implements BrzRouterHandler {
@@ -13,6 +14,7 @@ public class BrzHandshakeHandler implements BrzRouterHandler {
 
     @Override
     public void handle(BrzPacket packet, String fromEndpointId) {
+        BreezeAPI api = BreezeAPI.getInstance();
 
         // TODO CHECK if user name from is in store already or database (check with the
         // user ID)
@@ -24,13 +26,12 @@ public class BrzHandshakeHandler implements BrzRouterHandler {
         // later
 
         if (packet.type == BrzPacket.BrzPacketType.CHAT_HANDSHAKE) {
-            BreezeAPI.getInstance().incomingHandshake(packet.chatHandshake());
+            BrzChatHandshake handshake = packet.chatHandshake();
+            api.incomingHandshake(handshake);
+            api.meta.showHandshakeNotification(handshake.chat.id);
         } else if (packet.type == BrzPacket.BrzPacketType.CHAT_RESPONSE) {
-            BreezeAPI.getInstance().incomingChatResponse(packet.chatResponse());
-        } else {
-            // TODO: Do something when the user either accepts or rejects the chat
+            api.incomingChatResponse(packet.chatResponse());
         }
-
     }
 
     @Override

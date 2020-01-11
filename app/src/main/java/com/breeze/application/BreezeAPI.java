@@ -215,19 +215,16 @@ public class BreezeAPI extends Service {
 
     public void incomingChatResponse(BrzChatResponse response) {
         BrzChat c = this.state.getChat(response.chatId);
-        if (c == null)
+        BrzNode n = BrzGraph.getInstance().getVertex(response.from);
+        if (c == null || n == null)
             return;
 
         // Chat accepted!
         if (response.accepted) {
             c.acceptedByRecipient = true;
 
-            BrzNode n = BrzGraph.getInstance().getVertex(response.from);
-            if (n != null) {
-                BrzPacket p = BrzPacketBuilder.message(this.hostNode.id, "", n.name + " joined the chat", c.id, true);
-                this.state.addMessage(p.message());
-                this.db.addMessage(p.message());
-            }
+            BrzMessage statusMessage = new BrzMessage(this.hostNode.id, response.chatId, n.name + " joined the chat", System.currentTimeMillis(), true);
+            this.addMessage(statusMessage);
         }
 
         // Rejected
@@ -237,12 +234,8 @@ public class BreezeAPI extends Service {
             if (c.isGroup)
                 c.nodes.remove(response.from);
 
-            BrzNode n = BrzGraph.getInstance().getVertex(response.from);
-            if (n != null) {
-                BrzPacket p = BrzPacketBuilder.message(this.hostNode.id, "", n.name + " left the chat.", c.id, true);
-                this.state.addMessage(p.message());
-                this.db.addMessage(p.message());
-            }
+            BrzMessage statusMessage = new BrzMessage(this.hostNode.id, response.chatId, n.name + " left the chat.", System.currentTimeMillis(), true);
+            this.addMessage(statusMessage);
         }
 
         this.state.addChat(c);
