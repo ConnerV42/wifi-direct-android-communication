@@ -19,4 +19,6 @@
     <string name="login_failed">"Login failed"</string>
     <string name="instructions">Click to start a chat</string>
     <string name="name">name</string>
+    <string name="restart_service">Restart Service</string>
+    <string name="wipe_database">Wipe Database</string>
 </resources>

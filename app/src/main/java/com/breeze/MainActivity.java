@@ -18,6 +18,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import com.breeze.application.BreezeAPI;
+import com.breeze.views.MainSettingsActivity;
 import com.breeze.views.Messages.PublicMessagesView;
 
 import java.util.Timer;
@@ -101,10 +102,7 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
         BreezeAPI api = BreezeAPI.getInstance();
 
-        if (id == R.id.action_settings) {
-            Log.i("STATE", "Settings selected");
-            return true;
-        } else if (id == R.id.action_toggle_discovery) {
+        if (id == R.id.action_toggle_discovery) {
             if (api.router.isDiscovering) {
                 item.setChecked(false);
                 api.router.stopDiscovery();
@@ -125,6 +123,10 @@ public class MainActivity extends AppCompatActivity {
         {
             setContentView(R.layout.public_activity_messages_view);
             //startActivity(new Intent(MainActivity.this, PublicMessagesView.class));
+        }
+        else if ( id == R.id.action_settings){
+            Intent i = new Intent(MainActivity.this, MainSettingsActivity.class);
+            startActivity(i);
         }
         return super.onOptionsItemSelected(item);
     }

@@ -46,6 +46,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".views.MainSettingsActivity" />
+
         <service android:name=".application.BreezeAPI" />
     </application>
 

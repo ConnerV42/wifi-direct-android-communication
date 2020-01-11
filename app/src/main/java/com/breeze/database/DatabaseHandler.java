@@ -61,18 +61,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             "'name' TEXT NOT NULL, " +
             "'alias' TEXT NOT NULL)";
 
-
-    /**
-     * TODO:
-     * In order to connect BrzNodes to their respective chats in the database, I'm creating a
-     * table that links them (BrzNode and BrzChat) together because it'll be a many to many relationship
-     */
-    private static final String INIT_CHAT_HAS_BRZNODE_TABLE = "CREATE TABLE IF NOT EXISTS BrzChatHasBrzNode ('id' INTEGER PRIMARY KEY AUTOINCREMENT, " +
-            "'brzNodeId' TEXT NOT NULL," +
-            "'brzChatId' TEXT NOT NULL," +
-            "FOREIGN KEY ('brzNodeId') REFERENCES BrzNode(id)," +
-            "FOREIGN KEY ('brzChatId') REFERENCES BrzChat(id))";
-
     private static final String INIT_BRZRECEIPT_TABLE = "CREATE TABLE IF NOT EXISTS " + BRZRECEIPT_TABLE_NAME + " (" +
             "'id' TEXT PRIMARY KEY NOT NULL, " +
             "'delivered' BOOLEAN NOT NULL, " +
@@ -101,6 +89,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS " + tableName);
         }
         this.onCreate(db);
+    }
+
+    public void wipeDB(){
+        this.onUpgrade(this.getWritableDatabase(), 0, 0);
     }
 
 
@@ -405,7 +397,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public boolean isRead(String messageId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor c = db.rawQuery("SELECT read FROM " + BRZRECEIPT_TABLE_NAME + " WHERE id = ?;", new String[]{messageId});
+        if(messageId == null || messageId.isEmpty()){
+            return false;
+        }
+        String[] arr = new String[1];
+        arr[0] = messageId;
+        Cursor c = db.rawQuery("SELECT read FROM " + BRZRECEIPT_TABLE_NAME + " WHERE id = ?;", arr);
         if (c == null) {
             db.close();
             return false;
