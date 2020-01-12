@@ -339,37 +339,39 @@ public class BreezeAPI extends Service {
     }
 
     public void sendFileMessage(BrzFileInfo fileInfoPacket, Payload filePayload) {
-        BrzFileInfo clone = new BrzFileInfo(fileInfoPacket.toJSON());
 
-        // Encrypt the message
-        // this.encryption.encryptMessage(clone);
-
-        // Obtain nextId and destinationId before sending
         BrzChat chat = this.state.getChat(fileInfoPacket.chatId);
 
+        // Send message to each recipient
         for (String nodeId : chat.nodes) {
             if (nodeId.equals(hostNode.id))
                 continue;
 
+            // Set destinationId and nextId
             fileInfoPacket.destinationId = nodeId;
             fileInfoPacket.nextId = this.router.graph.nextHop(hostNode.id, nodeId);
+
             if (fileInfoPacket.nextId == null) {
                 Log.i("ENDPOINT_ERROR", "Failed to find path to " + fileInfoPacket.destinationId);
+            } else {
+                // Build a packet
+                BrzPacket p = new BrzPacket(fileInfoPacket, BrzPacket.BrzPacketType.FILE_INFO, fileInfoPacket.nextId, false);
+
+                this.router.send(p);
+                this.router.sendFilePayload(filePayload, fileInfoPacket);
             }
-
-            // Build a packet
-            BrzPacket p = new BrzPacket(clone, BrzPacket.BrzPacketType.FILE_INFO, fileInfoPacket.nextId, false);
-
-            this.router.send(p);
-            this.router.sendFilePayload(filePayload, fileInfoPacket);
         }
-
-        //this.addFileMessage(filePayload, fileInfoPacket);
+        this.addFileMessage(fileInfoPacket, filePayload);
     }
 
     public void addMessage(BrzMessage message) {
         this.state.addMessage(message);
         this.db.addMessage(message);
+    }
+
+    public void addFileMessage(BrzFileInfo fileInfoPacket, Payload filePayload) {
+        // TODO: Add file message to persistent database storage
+        // TODO: Render file message in the view
     }
 
 }

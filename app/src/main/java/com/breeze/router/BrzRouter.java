@@ -181,12 +181,22 @@ public class BrzRouter extends EventEmitter {
             // Send off to sendFilePayload, if this is not the destination uuid
             if (!hostNode.id.equals(fileInfoPacket.destinationId)) {
                 Log.i("FilePayload", "Transferring filePayload through network");
-                sendFilePayload(filePayload, packet.fileInfoPacket());
+
+                // Update nextId to the nextHop
+                fileInfoPacket.nextId = graph.nextHop(hostNode.id, fileInfoPacket.destinationId);
+
+                BrzPacket p = new BrzPacket(fileInfoPacket.toJSON());
+
+                send(p);
+                sendFilePayload(filePayload, p.fileInfoPacket());
             } else {
+                // TODO: Add file message to persistent database storage
+                // TODO: Render file message in the view
+
                 // Get the received file (which will be in the Downloads folder)
                 File payloadFile = filePayload.asFile().asJavaFile();
 
-                // Rename the file.
+                // Rename file
                 payloadFile.renameTo(new File(payloadFile.getParentFile(), fileInfoPacket.fileName));
 
                 Log.i("ENDPOINT", "Received and Saved Payload file to downloads folder from " + fileInfoPacket.fromId);
