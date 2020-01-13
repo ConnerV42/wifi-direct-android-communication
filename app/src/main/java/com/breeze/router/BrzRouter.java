@@ -172,6 +172,9 @@ public class BrzRouter extends EventEmitter {
         // when both have been received.
         Payload filePayload = completedFilePayloads.get(payloadId);
         BrzPacket packet = fileInfoPackets.get(payloadId);
+
+        Log.i("Location: BrzRouter -> handleFilePayload", "filePayload: " + filePayload.getId() + "fileInfoPacket: " + packet.body);
+
         if (filePayload != null && packet != null) {
             completedFilePayloads.remove(payloadId);
             fileInfoPackets.remove(payloadId);
@@ -285,16 +288,8 @@ public class BrzRouter extends EventEmitter {
         // and it is for the host node
         else if (packet.to.equals(this.hostNode.id)) {
 
-            if (packet.type == BrzPacket.BrzPacketType.FILE_INFO) {
-                BrzFileInfo fileInfoPacket = packet.fileInfoPacket();
-
-                if (this.hostNode.id == fileInfoPacket.destinationId) {
-                    // handle case
-                }
-            }
-
             // Decrypt the packet unless it's not an encryptable type
-            if (packet.type != BrzPacket.BrzPacketType.GRAPH_QUERY) {
+            if (packet.type != BrzPacket.BrzPacketType.GRAPH_QUERY && packet.type != BrzPacket.BrzPacketType.FILE_INFO) {
                 BreezeAPI api = BreezeAPI.getInstance();
                 api.encryption.decryptPacket(packet);
             }
@@ -332,24 +327,26 @@ public class BrzRouter extends EventEmitter {
         public void onPayloadTransferUpdate(@NonNull String endpointId, @NonNull PayloadTransferUpdate update) {
             if (update.getStatus() != PayloadTransferUpdate.Status.SUCCESS)
                 return;
+
             Long payloadId = update.getPayloadId();
 
+            // If payload is a file payload
+            if (pendingFilePayloads.get(payloadId) != null) {
+                Log.i("ENDPOINT", "Received a file payload");
+                Payload filePayload = pendingFilePayloads.remove(payloadId);
+                if (filePayload != null) {
+                    completedFilePayloads.put(payloadId, filePayload);
+                    handleFilePayload(payloadId);
+                }
+            }
             // Incomming packet was a success!
-            if (payloadBuffer.isIncomming(payloadId)) {
+            else if (payloadBuffer.isIncomming(payloadId)) {
                 Log.i("ENDPOINT", "Received a payload");
                 Payload payload = payloadBuffer.popIncoming(payloadId);
 
                 BrzPacket packet = new BrzPacket(payloadBuffer.getStreamString(payload));
                 handlePacket(packet, endpointId);
-            } else if (pendingFilePayloads.containsKey(payloadId)) { // If it's a File Payload
-                Payload payload = pendingFilePayloads.get(payloadId);
-                if (payload != null) {
-                    pendingFilePayloads.remove(payloadId);
-                    completedFilePayloads.put(payloadId, payload);
-                    handleFilePayload(payloadId);
-                }
             }
-
             // Outgoing packet was a success!
             else {
                 payloadBuffer.removeOutgoing(payloadId);
