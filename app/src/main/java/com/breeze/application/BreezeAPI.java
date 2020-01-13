@@ -140,7 +140,7 @@ public class BreezeAPI extends Service {
 
         // Initialize preferences
         if (this.preferences == null)
-            this.preferences = this.getSharedPreferences("Breeze", Context.MODE_PRIVATE);
+            this.preferences = ctx.getSharedPreferences("Breeze", Context.MODE_PRIVATE);
     }
 
     //
