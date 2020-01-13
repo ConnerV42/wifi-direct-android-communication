@@ -173,8 +173,6 @@ public class BrzRouter extends EventEmitter {
         Payload filePayload = completedFilePayloads.get(payloadId);
         BrzPacket packet = fileInfoPackets.get(payloadId);
 
-        Log.i("Location: BrzRouter -> handleFilePayload", "filePayload: " + filePayload.getId() + "fileInfoPacket: " + packet.body);
-
         if (filePayload != null && packet != null) {
             completedFilePayloads.remove(payloadId);
             fileInfoPackets.remove(payloadId);
