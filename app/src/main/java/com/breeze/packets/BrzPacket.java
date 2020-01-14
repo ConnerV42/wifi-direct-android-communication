@@ -19,13 +19,11 @@ import java.util.UUID;
 public class BrzPacket implements BrzSerializable {
 
     public enum BrzPacketType {
-        MESSAGE, FILE_INFO, ACK,
+        MESSAGE, MESSAGE_RECEIPT,
 
         GRAPH_QUERY, GRAPH_EVENT,
 
         CHAT_HANDSHAKE, CHAT_RESPONSE,
-
-        MESSAGE_RECEIPT
     }
 
     public String id = UUID.randomUUID().toString();
@@ -33,6 +31,8 @@ public class BrzPacket implements BrzSerializable {
     public String to = "BROADCAST";
     public boolean broadcast = true;
     public String body = "";
+
+    public BrzFileInfo stream;
 
     public BrzPacket() {
     }
@@ -52,12 +52,16 @@ public class BrzPacket implements BrzSerializable {
         this.fromJSON(json);
     }
 
-    public BrzMessage message() {
-        return new BrzMessage(this.body);
+    // Methods
+
+    public void addStream(BrzFileInfo stream) {
+        this.stream = stream;
     }
 
-    public BrzFileInfo fileInfoPacket() {
-        return new BrzFileInfo(this.body);
+    // Body access
+
+    public BrzMessage message() {
+        return new BrzMessage(this.body);
     }
 
     public BrzGraphQuery graphQuery() {
@@ -78,6 +82,11 @@ public class BrzPacket implements BrzSerializable {
 
     public BrzMessageReceipt messageReceipt() {
         return new BrzMessageReceipt(this.body);
+    }
+
+
+    public boolean hasStream() {
+        return this.stream != null;
     }
 
     @Override

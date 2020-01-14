@@ -15,11 +15,11 @@ import java.util.function.Consumer;
 public class BrzPayloadBuffer {
 
 
-    public Payload getStreamPayload(String str) {
+    public static Payload getStreamPayload(String str) {
         return Payload.fromStream(new ByteArrayInputStream(str.getBytes()));
     }
 
-    public String getStreamString(Payload p) {
+    public static String getStreamString(Payload p) {
         InputStream stream = p.asStream().asInputStream();
         Scanner sc = new Scanner(stream);
         StringBuilder sb = new StringBuilder();

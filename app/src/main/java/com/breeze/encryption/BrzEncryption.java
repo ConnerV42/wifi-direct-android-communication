@@ -1,6 +1,10 @@
 package com.breeze.encryption;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -17,6 +21,8 @@ import android.util.Log;
 import java.security.KeyStore;
 
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
@@ -213,6 +219,28 @@ public final class BrzEncryption {
             e.printStackTrace();
         }
 
+        return null;
+    }
+
+    public InputStream encryptStream(final SecretKey secretKey, final InputStream inputStream) {
+        try {
+            Cipher cipher = Cipher.getInstance(SYM_CIPHER);
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            byte[] initialVector = cipher.getIV();
+            return new CipherInputStream(inputStream, cipher);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public InputStream decryptStream(final SecretKey secretKey, final byte[] initialVector, final InputStream inputStream) {
+        try {
+            Cipher cipher = Cipher.getInstance(SYM_CIPHER);
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, new GCMParameterSpec(128, initialVector));
+            return new CipherInputStream(inputStream, cipher);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
