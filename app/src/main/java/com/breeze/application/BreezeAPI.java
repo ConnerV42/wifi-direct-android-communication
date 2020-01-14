@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.IBinder;
+import android.webkit.MimeTypeMap;
+
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
@@ -340,7 +342,10 @@ public class BreezeAPI extends Service {
     public void sendFileMessage(BrzMessage message, Uri fileUri) {
         ContentResolver res = getContentResolver();
         BrzFileInfo info = new BrzFileInfo();
-        info.fileName = "test.jpg";
+        info.fileName = fileUri.getLastPathSegment();
+
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        String type = mime.getExtensionFromMimeType(res.getType(fileUri));
 
         try {
             BrzMessage clone = new BrzMessage(message.toJSON());
