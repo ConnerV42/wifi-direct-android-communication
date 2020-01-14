@@ -12,6 +12,8 @@ public class BrzFileInfo implements BrzSerializable {
     public String fileName = "";
     public String initialVector = "";
 
+    public BrzFileInfo() { }
+
     public BrzFileInfo(long filePayloadId, String fileName, String initialVector) {
         this.filePayloadId = filePayloadId;
         this.fileName = fileName;

@@ -6,10 +6,8 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.IBinder;
-import android.util.Log;
-import android.widget.Toast;
-
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
@@ -23,14 +21,16 @@ import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.graph.BrzGraph;
 import com.breeze.packets.BrzPacket;
-import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.packets.ChatEvents.BrzChatHandshake;
 import com.breeze.packets.ChatEvents.BrzChatResponse;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
 import com.breeze.views.ProfileActivity;
-import com.google.android.gms.nearby.connection.Payload;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 public class BreezeAPI extends Service {
 
@@ -104,7 +104,6 @@ public class BreezeAPI extends Service {
             router.stop();
         }
 
-//        Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
         return START_NOT_STICKY;
     }
 
@@ -117,7 +116,6 @@ public class BreezeAPI extends Service {
     @Override
     public void onDestroy() {
         router.stop();
-//        Toast.makeText(this, "service destroyed", Toast.LENGTH_SHORT).show();
         super.onDestroy();
     }
 
@@ -338,40 +336,40 @@ public class BreezeAPI extends Service {
         this.addMessage(message);
     }
 
-    public void sendFileMessage(BrzFileInfo fileInfoPacket, Payload filePayload) {
+    public void sendFileMessage(BrzMessage message, Uri fileUri) {
+        File f = new File(fileUri.getPath());
+        BrzFileInfo info = new BrzFileInfo();
+        info.fileName = f.getName();
 
-        BrzChat chat = this.state.getChat(fileInfoPacket.chatId);
+        try {
+            BrzMessage clone = new BrzMessage(message.toJSON());
 
-        // Send message to each recipient
-        for (String nodeId : chat.nodes) {
-            if (nodeId.equals(hostNode.id))
-                continue;
+            // Encrypt the message
+            this.encryption.encryptMessage(clone);
 
-            // Set destinationId and nextId
-            fileInfoPacket.destinationId = nodeId;
-            fileInfoPacket.nextId = this.router.graph.nextHop(hostNode.id, nodeId);
+            // Build a packet
+            BrzPacket p = new BrzPacket(clone, BrzPacket.BrzPacketType.MESSAGE, "", false);
+            p.addStream(info);
 
-            if (fileInfoPacket.nextId == null) {
-                Log.i("ENDPOINT_ERROR", "Failed to find path to " + fileInfoPacket.destinationId);
-            } else {
-                // Build a packet
-                BrzPacket p = new BrzPacket(fileInfoPacket, BrzPacket.BrzPacketType.FILE_INFO, fileInfoPacket.nextId, false);
-
-                this.router.send(p);
-                this.router.sendFilePayload(filePayload, fileInfoPacket);
+            // Send message to each recipient
+            BrzChat chat = this.state.getChat(clone.chatId);
+            for (String nodeId : chat.nodes) {
+                if (nodeId.equals(hostNode.id))
+                    continue;
+                p.to = nodeId;
+                InputStream stream = new FileInputStream(f);
+                this.router.sendStream(p, stream);
             }
+
+//            this.addMessage(message);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        this.addFileMessage(fileInfoPacket, filePayload);
     }
 
     public void addMessage(BrzMessage message) {
         this.state.addMessage(message);
         this.db.addMessage(message);
-    }
-
-    public void addFileMessage(BrzFileInfo fileInfoPacket, Payload filePayload) {
-        // TODO: Add file message to persistent database storage
-        // TODO: Render file message in the view
     }
 
 }

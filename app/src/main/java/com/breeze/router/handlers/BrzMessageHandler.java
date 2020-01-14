@@ -5,7 +5,9 @@ import com.breeze.datatypes.BrzMessage;
 import com.breeze.packets.BrzPacket;
 import com.breeze.router.BrzRouter;
 
-public class BrzMessageHandler implements BrzRouterHandler {
+import java.io.InputStream;
+
+public class BrzMessageHandler implements BrzRouterStreamHandler {
 
     private BrzRouter router;
 
@@ -32,6 +34,13 @@ public class BrzMessageHandler implements BrzRouterHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void handleStream(BrzPacket packet, InputStream stream) {
+        BreezeAPI api = BreezeAPI.getInstance();
+        api.storage.saveFileMessage(packet, stream);
+        this.handle(packet, "");
     }
 
     public boolean handles(BrzPacket.BrzPacketType type) {

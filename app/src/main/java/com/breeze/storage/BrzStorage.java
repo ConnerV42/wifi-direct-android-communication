@@ -6,16 +6,21 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.os.Environment;
 
 import androidx.core.content.ContextCompat;
 
 import com.breeze.R;
+import com.breeze.datatypes.BrzMessage;
+import com.breeze.packets.BrzPacket;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class BrzStorage {
     private ContextWrapper cw;
@@ -81,6 +86,43 @@ public class BrzStorage {
             b = bitmapFromVector(ctx, R.drawable.ic_person_black_24dp);
         return b;
     }
+
+    /*
+
+        Stream message test
+
+     */
+
+    public void saveFileMessage(BrzPacket packet, InputStream stream) {
+        File downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File messageFile = new File(downloads.getPath(), packet.stream.fileName);
+
+        try {
+            OutputStream out = new FileOutputStream(messageFile);
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = stream.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            out.flush();
+            out.close();
+            stream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     /*
