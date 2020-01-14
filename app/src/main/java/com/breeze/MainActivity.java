@@ -1,13 +1,10 @@
 package com.breeze;
 
-import android.widget.*;
-import android.view.*;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -19,7 +16,6 @@ import androidx.core.content.ContextCompat;
 
 import com.breeze.application.BreezeAPI;
 import com.breeze.views.MainSettingsActivity;
-import com.breeze.views.Messages.PublicMessagesView;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -121,8 +117,9 @@ public class MainActivity extends AppCompatActivity {
         }
         else if (id == R.id.action_public_thread)
         {
-            setContentView(R.layout.public_activity_messages_view);
-            //startActivity(new Intent(MainActivity.this, PublicMessagesView.class));
+            setContentView(R.layout.activity_public_messages_view);
+            //Intent i = new Intent(MainActivity.this, PublicMessagesView.class);
+            //startActivity(i);
         }
         else if ( id == R.id.action_settings){
             Intent i = new Intent(MainActivity.this, MainSettingsActivity.class);

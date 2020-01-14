@@ -1,20 +1,14 @@
 package com.breeze.views.Messages;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.ParcelFileDescriptor;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,6 +19,7 @@ import android.widget.Toast;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.breeze.MainActivity;
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
@@ -32,9 +27,8 @@ import com.breeze.datatypes.BrzMessage;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;
-import com.breeze.state.BrzStateStore;
-import com.google.android.gms.nearby.connection.Payload;
-import com.breeze.views.ChatSettingsActivity;
+import com.breeze.views.MainSettingsActivity;
+import com.breeze.views.ProfileActivity;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -57,7 +51,7 @@ public class PublicMessagesView extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.public_activity_messages_view);
+        setContentView(R.layout.activity_public_messages_view);
         BreezeAPI api = BreezeAPI.getInstance();
 
         // Get the chat from the argument
@@ -100,13 +94,12 @@ public class PublicMessagesView extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         BreezeAPI api = BreezeAPI.getInstance();
-
         ActionBar ab = getSupportActionBar();
         if (ab == null) return;
         ab.setDisplayHomeAsUpEnabled(true);
         ab.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
 
-        if(this.chat != null) ab.setTitle(this.chat.name);
+        if(this.chat != null) ab.setTitle("Public Feed");
 
         RecyclerView msgView = findViewById(R.id.publicMessageList);
         this.messageListener = messages -> {
@@ -139,7 +132,7 @@ public class PublicMessagesView extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (this.chat.isGroup) getMenuInflater().inflate(R.menu.menu_messages_view, menu);
+        if (this.chat.isGroup) getMenuInflater().inflate(R.menu.public_thread_menu, menu);
         return true;
     }
 
@@ -147,12 +140,25 @@ public class PublicMessagesView extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (item.getItemId() == android.R.id.home) {
+        if (id == android.R.id.home) {
             finish();
-        } else if (id == R.id.action_settings) {
-            Log.i("STATE", "Settings selected");
-            startActivity(ChatSettingsActivity.getIntent(this, this.chat.id));
-            return true;
+        }
+        else if(id == R.id.profile_option)
+        {
+            Intent i = new Intent(PublicMessagesView.this, ProfileActivity.class);
+            startActivity(i);
+        }
+        else if(id == R.id.private_chat_option)
+        {
+            Intent i = new Intent(PublicMessagesView.this, MainActivity.class);
+            startActivity(i);
+        }
+        else if(id == R.id.activate_feed_switch) {
+           // pause/start feed
+        }
+        else if (id == R.id.action_settings) {
+            Intent i = new Intent(PublicMessagesView.this, MainSettingsActivity.class);
+            startActivity(i);
         }
 
         return super.onOptionsItemSelected(item);
