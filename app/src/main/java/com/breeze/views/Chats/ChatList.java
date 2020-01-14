@@ -69,7 +69,8 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
 
             // Unread
             TextView numberUnread = this.v.findViewById(R.id.number_unread_messages);
-            int unread = BreezeAPI.getInstance().db.getUnreadCount(chat.id);
+            BreezeAPI api = BreezeAPI.getInstance();
+            int unread = api.db.getUnreadCount(chat.id, api.hostNode.id);
             Log.i("STATE", "Unread " + unread);
             if (unread == 0) {
                 numberUnread.setVisibility(View.GONE);

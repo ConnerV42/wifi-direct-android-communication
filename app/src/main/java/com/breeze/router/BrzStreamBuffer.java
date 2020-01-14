@@ -15,20 +15,17 @@ import java.util.function.Consumer;
 
 public class BrzStreamBuffer {
 
-    private HashMap<Long, Payload> packetPayloads = new HashMap<>();
+    private HashMap<Long, BrzPacket> packetPayloads = new HashMap<>();
     private HashMap<Long, Payload> streamPayloads = new HashMap<>();
 
-    public void addPacketPayload(Payload payload) {
-        String packetJSON = BrzPayloadBuffer.getStreamString(payload);
-        BrzPacket packet = new BrzPacket(packetJSON);
-
+    public void addPacketPayload(BrzPacket packet) {
         if (!packet.hasStream()) throw new RuntimeException("Packet does not have stream info");
 
         long payloadId = packet.stream.filePayloadId;
-        packetPayloads.put(payloadId, payload);
+        packetPayloads.put(payloadId, packet);
     }
 
-    public Payload getPacketPayload(long payloadId) {
+    public BrzPacket getPacketPayload(long payloadId) {
         return this.packetPayloads.get(payloadId);
     }
 

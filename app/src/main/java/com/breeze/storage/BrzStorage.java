@@ -11,6 +11,7 @@ import android.os.Environment;
 import androidx.core.content.ContextCompat;
 
 import com.breeze.R;
+import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.packets.BrzPacket;
 
@@ -93,13 +94,21 @@ public class BrzStorage {
 
      */
 
-    public void saveFileMessage(BrzPacket packet, InputStream stream) {
-        File downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        File messageFile = new File(downloads.getPath(), packet.stream.fileName);
+    private final String FILE_MESSAGES_DIR = "BreezeMedia";
+
+    public void saveMessageFile(BrzMessage message, InputStream stream) {
+        BreezeAPI api = BreezeAPI.getInstance();
+        File messagesDir = api.getExternalFilesDir(FILE_MESSAGES_DIR);
+        File chatDir = new File(messagesDir, message.chatId);
+        File messageFile = new File(chatDir, message.id);
 
         try {
+            messageFile.mkdirs();
+            if (messageFile.exists()) messageFile.delete();
+            messageFile.createNewFile();
+
             OutputStream out = new FileOutputStream(messageFile);
-            byte[] buf = new byte[1024];
+            byte[] buf = new byte[80000];
             int len;
             while ((len = stream.read(buf)) > 0) {
                 out.write(buf, 0, len);
@@ -110,6 +119,22 @@ public class BrzStorage {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean hasMessageFile(BrzMessage message) {
+        BreezeAPI api = BreezeAPI.getInstance();
+        File messagesDir = api.getExternalFilesDir(FILE_MESSAGES_DIR);
+        File chatDir = new File(messagesDir, message.chatId);
+        File messageFile = new File(chatDir, message.id);
+        return messageFile.exists();
+    }
+
+    public Bitmap getMessageFileAsBitmap(BrzMessage message) {
+        BreezeAPI api = BreezeAPI.getInstance();
+        File messagesDir = api.getExternalFilesDir(FILE_MESSAGES_DIR);
+        File chatDir = new File(messagesDir, message.chatId);
+        File messageFile = new File(chatDir, message.id);
+        return getImage(messageFile);
     }
 
 
@@ -158,6 +183,31 @@ public class BrzStorage {
             return BitmapFactory.decodeStream(new FileInputStream(image));
         } catch (FileNotFoundException e) {
             //e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private Bitmap getImage(File imageFile) {
+        try {
+            Bitmap image = BitmapFactory.decodeStream(new FileInputStream(imageFile));
+            final int maxSize = 1000;
+
+            int width = image.getWidth();
+            int height = image.getHeight();
+
+            float bitmapRatio = (float) width / (float) height;
+            if (bitmapRatio > 0) {
+                width = maxSize;
+                height = (int) (width / bitmapRatio);
+            } else {
+                height = maxSize;
+                width = (int) (height * bitmapRatio);
+            }
+            return Bitmap.createScaledBitmap(image, width, height, true);
+        } catch (
+                FileNotFoundException e) {
+            e.printStackTrace();
         }
 
         return null;

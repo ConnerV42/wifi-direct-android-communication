@@ -68,7 +68,7 @@ public class MessagesView extends AppCompatActivity {
         this.chat = api.state.getChat(chatId);
         Log.i("STATE", this.chat.toJSON());
 
-        if(chat == null) return;
+        if (chat == null) return;
 
         api.state.setCurrentChat(chatId);
 
@@ -94,7 +94,7 @@ public class MessagesView extends AppCompatActivity {
             BrzPacket p = BrzPacketBuilder.message(router.hostNode.id, "", messageBoxText, chat.id, false);
             try {
                 BreezeAPI.getInstance().sendMessage(p.message());
-            }catch(Exception e){
+            } catch (Exception e) {
                 Log.i("MESSAGE_SEND_ERROR", "Cannot send message to " + p.to);
                 Toast.makeText(this.getApplicationContext(), "Cannot send message to " + p.to + "; verify they're in the graph", Toast.LENGTH_SHORT).show();
             }
@@ -127,39 +127,14 @@ public class MessagesView extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.i("Preparing file to send", "Attachment data: " + data.getDataString());
-
         if (requestCode == PHOTO_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
-            String filePayloadId = "";
-            String fileName = "";
-            Payload filePayload = null;
-            ParcelFileDescriptor fileParcel = null;
+            Uri imageUri = data.getData();
+            if(imageUri == null) return;
 
-            try {
-                Uri imageUri = data.getData();
-
-                // Create File Payload
-                fileParcel = this.getContentResolver().openFileDescriptor(imageUri, "r");
-                filePayload = Payload.fromFile(fileParcel);
-
-                // Create FileInfoPacket
-                filePayloadId = "" + filePayload.getId();
-                fileName = imageUri.getLastPathSegment();
-            } catch (Exception e) {
-                Log.e("FILE_ACCESS", "Failure ", e);
-            }
-
-            final BrzRouter router = BrzRouter.getInstance();
-            BrzPacket p = BrzPacketBuilder.fileInfoPacket(router.hostNode.id, "", chat.id, "", filePayloadId, fileName);
-
-            try {
-                BreezeAPI.getInstance().sendFileMessage(p.fileInfoPacket(), filePayload);
-            } catch (Exception e) {
-                Log.i("MESSAGE_SEND_ERROR", "Cannot send message to " + p.to);
-                Toast.makeText(this.getApplicationContext(), "Cannot send message to " + p.to + "; verify they're in the graph", Toast.LENGTH_SHORT).show();
-            }
-        }
-        else if (requestCode == VIDEO_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            BreezeAPI api = BreezeAPI.getInstance();
+            BrzPacket p = BrzPacketBuilder.message(api.hostNode.id, "", "Image", chat.id, false);
+            api.sendFileMessage(p.message(), imageUri);
+        } else if (requestCode == VIDEO_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             // TODO: Send mp4
 
         } else if (requestCode == AUDIO_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
@@ -177,7 +152,7 @@ public class MessagesView extends AppCompatActivity {
         ab.setDisplayHomeAsUpEnabled(true);
         ab.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
 
-        if(this.chat != null) ab.setTitle(this.chat.name);
+        if (this.chat != null) ab.setTitle(this.chat.name);
 
         RecyclerView msgView = findViewById(R.id.messageList);
         this.messageListener = messages -> {
@@ -193,9 +168,9 @@ public class MessagesView extends AppCompatActivity {
         LinearLayout messageEditor = findViewById(R.id.messages_editor);
         TextView messageNotAccepted = findViewById(R.id.messages_not_accepted);
         this.onChatUpdate = chat -> {
-            if(chat == null) return;
+            if (chat == null) return;
             this.chat = chat;
-            if(this.chat.acceptedByRecipient) {
+            if (this.chat.acceptedByRecipient) {
                 messageEditor.setVisibility(View.VISIBLE);
                 messageNotAccepted.setVisibility(View.GONE);
             } else {
@@ -232,7 +207,7 @@ public class MessagesView extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        BreezeAPI api =  BreezeAPI.getInstance();
+        BreezeAPI api = BreezeAPI.getInstance();
         api.state.setCurrentChat("");
         api.state.off("messages" + chat.id, this.messageListener);
         api.state.off("chat" + this.chat.id, this.onChatUpdate);

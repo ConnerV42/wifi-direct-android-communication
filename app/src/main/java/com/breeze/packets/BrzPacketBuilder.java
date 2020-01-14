@@ -19,20 +19,6 @@ public class BrzPacketBuilder {
         return new BrzPacket(body, BrzPacket.BrzPacketType.MESSAGE, msgTo, false);
     }
 
-    public static BrzPacket fileInfoPacket(String fromId, String nextId, String chatId, String destinationId, String filePayloadId, String fileName) {
-        BrzFileInfo body = new BrzFileInfo();
-
-        body.fromId = fromId;
-        body.nextId = nextId;
-        body.chatId = chatId;
-        body.destinationId = destinationId;
-        body.filePayloadId = filePayloadId;
-        body.fileName = fileName;
-        body.datestamp = System.currentTimeMillis();
-
-        return new BrzPacket(body, BrzPacket.BrzPacketType.FILE_INFO, nextId, false);
-    }
-
     public static BrzPacket graphQuery(String to, String from) {
         BrzGraphQuery body = new BrzGraphQuery(true, from);
         return new BrzPacket(body, BrzPacket.BrzPacketType.GRAPH_QUERY, to, false);

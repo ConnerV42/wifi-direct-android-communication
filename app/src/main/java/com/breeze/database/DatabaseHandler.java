@@ -331,13 +331,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
     }
 
-    public int getUnreadCount(@NonNull String chatId) {
+    public int getUnreadCount(@NonNull String chatId, @NonNull String hostId) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String[] args = {chatId};
+        String[] args = {chatId, hostId};
         Cursor c = db.rawQuery(
                 "SELECT COUNT(*) as count FROM BrzMessage " +
                     "natural join ( select * from BrzMessageReceipt where read == 0 ) " +
-                    "where chatId = ?;"
+                    "where chatId = ? and [from] != ?;"
                 , args);
 
         if (c == null) {

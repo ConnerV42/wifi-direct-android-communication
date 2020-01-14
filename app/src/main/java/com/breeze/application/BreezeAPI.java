@@ -3,6 +3,7 @@ package com.breeze.application;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -337,9 +338,9 @@ public class BreezeAPI extends Service {
     }
 
     public void sendFileMessage(BrzMessage message, Uri fileUri) {
-        File f = new File(fileUri.getPath());
+        ContentResolver res = getContentResolver();
         BrzFileInfo info = new BrzFileInfo();
-        info.fileName = f.getName();
+        info.fileName = "test.jpg";
 
         try {
             BrzMessage clone = new BrzMessage(message.toJSON());
@@ -357,11 +358,11 @@ public class BreezeAPI extends Service {
                 if (nodeId.equals(hostNode.id))
                     continue;
                 p.to = nodeId;
-                InputStream stream = new FileInputStream(f);
+                InputStream stream = res.openInputStream(fileUri);
                 this.router.sendStream(p, stream);
             }
 
-//            this.addMessage(message);
+            this.addMessage(message);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -39,7 +39,7 @@ public class BrzMessageHandler implements BrzRouterStreamHandler {
     @Override
     public void handleStream(BrzPacket packet, InputStream stream) {
         BreezeAPI api = BreezeAPI.getInstance();
-        api.storage.saveFileMessage(packet, stream);
+        api.storage.saveMessageFile(packet.message(), stream);
         this.handle(packet, "");
     }
 

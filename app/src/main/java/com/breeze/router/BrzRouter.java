@@ -113,6 +113,7 @@ public class BrzRouter extends EventEmitter {
         // Encrypt the packet first
         BreezeAPI api = BreezeAPI.getInstance();
         try {
+            api.encryption.encryptPacket(packet);
             forwardPacket(packet, true);
         } catch (Exception e) {
             Log.i("ENDPOINT", "Failed to encrypt and send packet");
@@ -126,27 +127,23 @@ public class BrzRouter extends EventEmitter {
         Payload streamPayload = Payload.fromStream(stream);
         packet.stream.filePayloadId = streamPayload.getId();
 
-        Payload packetPayload = BrzPayloadBuffer.getStreamPayload(packet.toJSON());
-
-        this.streamBuffer.addPacketPayload(packetPayload);
+        this.streamBuffer.addPacketPayload(packet);
         this.streamBuffer.addStreamPayload(streamPayload);
 
         this.sendStream(streamPayload.getId());
     }
 
     private void sendStream(long payloadId) {
-        Payload packetPayload = this.streamBuffer.getPacketPayload(payloadId);
+        BrzPacket packet = this.streamBuffer.getPacketPayload(payloadId);
         Payload streamPayload = this.streamBuffer.getStreamPayload(payloadId);
 
-        if (packetPayload == null || streamPayload == null)
+        if (packet == null || streamPayload == null)
             throw new RuntimeException("The buffer does not have this stream");
-
-        BrzPacket packet = new BrzPacket(BrzPayloadBuffer.getStreamString(packetPayload));
 
         // If the host is connected directly with the destination, shortcut it
         String endpointID = endpointIDs.get(packet.to);
         if (endpointID != null) {
-            connectionsClient.sendPayload(endpointID, packetPayload);
+            connectionsClient.sendPayload(endpointID, BrzPayloadBuffer.getStreamPayload(packet.toJSON()));
             connectionsClient.sendPayload(endpointID, streamPayload);
             this.streamBuffer.removeStream(payloadId);
             return;
@@ -162,7 +159,7 @@ public class BrzRouter extends EventEmitter {
 
         if (nextHopNode != null && !nextHopNode.endpointId.equals("")
                 && endpointIDs.values().contains(nextHopNode.endpointId)) {
-            connectionsClient.sendPayload(nextHopNode.endpointId, packetPayload);
+            connectionsClient.sendPayload(nextHopNode.endpointId, BrzPayloadBuffer.getStreamPayload(packet.toJSON()));
             connectionsClient.sendPayload(nextHopNode.endpointId, streamPayload);
             this.streamBuffer.removeStream(payloadId);
         }
@@ -200,13 +197,11 @@ public class BrzRouter extends EventEmitter {
     }
 
     public void handleFilePayload(long payloadId) {
-        Payload packetPayload = this.streamBuffer.getPacketPayload(payloadId);
+        BrzPacket packet = this.streamBuffer.getPacketPayload(payloadId);
         Payload streamPayload = this.streamBuffer.getStreamPayload(payloadId);
 
-        if (packetPayload == null || streamPayload == null)
+        if (packet == null || streamPayload == null)
             throw new RuntimeException("The buffer does not have this stream");
-
-        BrzPacket packet = new BrzPacket(BrzPayloadBuffer.getStreamString(packetPayload));
 
         // Packet is for the host
         if (packet.to.equals(hostNode.id)) {
@@ -304,7 +299,7 @@ public class BrzRouter extends EventEmitter {
         else if (packet.to.equals(this.hostNode.id)) {
 
             // Decrypt the packet unless it's not an encryptable type
-            if (packet.type != BrzPacket.BrzPacketType.GRAPH_QUERY && packet.type != BrzPacket.BrzPacketType.FILE_INFO) {
+            if (packet.type != BrzPacket.BrzPacketType.GRAPH_QUERY) {
                 BreezeAPI api = BreezeAPI.getInstance();
                 api.encryption.decryptPacket(packet);
             }
@@ -332,7 +327,23 @@ public class BrzRouter extends EventEmitter {
 
         @Override
         public void onPayloadReceived(@NonNull String endpointId, @NonNull Payload payload) {
-            payloadBuffer.addIncoming(payload);
+            Log.i("ENDPOINT", "Received a payload");
+
+            // This is a raw stream, not a packet
+            if (streamBuffer.isStreamPayload(payload.getId())) {
+                streamBuffer.addStreamPayload(payload);
+                handleFilePayload(payload.getId());
+                return;
+            }
+
+            // Otherwise it's a normal packet
+            BrzPacket packet = new BrzPacket(BrzPayloadBuffer.getStreamString(payload));
+
+            // This is a packet with a stream attached
+            if (packet.hasStream())
+                streamBuffer.addPacketPayload(packet);
+                // Or just a normal packet
+            else handlePacket(packet, endpointId);
         }
 
         @Override
@@ -341,34 +352,38 @@ public class BrzRouter extends EventEmitter {
                 return;
 
             Long payloadId = update.getPayloadId();
-
-            // Incomming packet was a success!
-            if (payloadBuffer.isIncomming(payloadId)) {
-                Log.i("ENDPOINT", "Received a payload");
-                Payload payload = payloadBuffer.popIncoming(payloadId);
-
-                // This is a raw stream, not a packet
-                if (streamBuffer.isStreamPayload(payloadId)) {
-                    streamBuffer.addStreamPayload(payload);
-                    handleFilePayload(payloadId);
-                    return;
-                }
-
-                // Otherwise it's a normal packet
-                BrzPacket packet = new BrzPacket(BrzPayloadBuffer.getStreamString(payload));
-
-                // This is a packet with a stream attached
-                if (packet.hasStream()) {
-                    streamBuffer.addPacketPayload(payload);
-                }
-
-                // Or just a normal packet
-                else handlePacket(packet, endpointId);
-            }
-            // Outgoing packet was a success!
-            else {
+            if (payloadBuffer.getOutgoing(payloadId) != null)
                 payloadBuffer.removeOutgoing(payloadId);
-            }
+//
+//            Long payloadId = update.getPayloadId();
+
+//            // Incomming packet was a success!
+//            if (payloadBuffer.isIncomming(payloadId)) {
+//                Log.i("ENDPOINT", "Received a payload");
+//                Payload payload = payloadBuffer.popIncoming(payloadId);
+//
+//                // This is a raw stream, not a packet
+//                if (streamBuffer.isStreamPayload(payloadId)) {
+//                    streamBuffer.addStreamPayload(payload);
+//                    handleFilePayload(payloadId);
+//                    return;
+//                }
+//
+//                // Otherwise it's a normal packet
+//                BrzPacket packet = new BrzPacket(BrzPayloadBuffer.getStreamString(payload));
+//
+//                // This is a packet with a stream attached
+//                if (packet.hasStream()) {
+//                    streamBuffer.addPacketPayload(packet);
+//                }
+//
+//                // Or just a normal packet
+//                else handlePacket(packet, endpointId);
+//            }
+//            // Outgoing packet was a success!
+//            else {
+//                payloadBuffer.removeOutgoing(payloadId);
+//            }
         }
     };
 

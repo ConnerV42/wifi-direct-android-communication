@@ -12,16 +12,17 @@ public class BrzFileInfoPktHandler implements BrzRouterHandler {
 
     @Override
     public void handle(BrzPacket packet, String fromEndpointId) {
-        if (!this.handles(packet.type))
-            throw new RuntimeException("This handler does not handle packets of type " + packet.type);
-
-        BrzFileInfo fileInfoPacket = packet.fileInfoPacket();
-        long id = Long.parseLong(fileInfoPacket.filePayloadId);
-        router.fileInfoPackets.put(id, packet);
-        router.handleFilePayload(id);
+//        if (!this.handles(packet.type))
+//            throw new RuntimeException("This handler does not handle packets of type " + packet.type);
+//
+//        BrzFileInfo fileInfoPacket = packet.fileInfoPacket();
+//        long id = Long.parseLong(fileInfoPacket.filePayloadId);
+//        router.fileInfoPackets.put(id, packet);
+//        router.handleFilePayload(id);
     }
 
     public boolean handles(BrzPacket.BrzPacketType type) {
-        return type == BrzPacket.BrzPacketType.FILE_INFO;
+//        return type == BrzPacket.BrzPacketType.FILE_INFO;
+        return false;
     }
 }

@@ -100,6 +100,9 @@ public class BrzPacket implements BrzSerializable {
             json.put("to", this.to);
             json.put("broadcast", this.broadcast);
             json.put("body", this.body);
+
+            if(this.hasStream())
+            json.put("stream", this.stream.toJSON());
         } catch (Exception e) {
             Log.i("SERIALIZATION ERROR", e.toString());
         }
@@ -117,6 +120,10 @@ public class BrzPacket implements BrzSerializable {
             this.to = jObj.getString("to");
             this.broadcast = jObj.getBoolean("broadcast");
             this.body = jObj.getString("body");
+
+            if(jObj.has("stream")) {
+                this.stream = new BrzFileInfo(jObj.getString("stream"));
+            }
         } catch (Exception e) {
             Log.i("DESERIALIZATION ERROR", e.toString());
         }
