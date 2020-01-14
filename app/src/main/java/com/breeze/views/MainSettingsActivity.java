@@ -3,7 +3,9 @@ package com.breeze.views;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.Service;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -28,13 +30,17 @@ public class MainSettingsActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        setupClickListeners();
+    }
+
+    private void setupClickListeners(){
         Button bWipeDB = findViewById(R.id.wipeDatabase);
         Button bRestartService = findViewById(R.id.restartService);
         bWipeDB.setOnClickListener((View v) -> {
             this.showWipeDatabaseDialog();
         });
         bRestartService.setOnClickListener((View v) -> {
-            Toast.makeText(BreezeAPI.getInstance().getApplicationContext(), "Not implemented yet", Toast.LENGTH_SHORT).show();
+           this.showRestartServiceDialog();
         });
     }
 
@@ -56,7 +62,7 @@ public class MainSettingsActivity extends AppCompatActivity {
     private void showWipeDatabaseDialog(){
         new AlertDialog.Builder(this)
                 .setTitle("Wipe the Database")
-                .setMessage("Are you sure you wipe the database?")
+                .setMessage("Are you sure you would like to wipe the database?")
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         BreezeAPI api = BreezeAPI.getInstance();
@@ -65,7 +71,19 @@ public class MainSettingsActivity extends AppCompatActivity {
                     }
                 })
                 .setNegativeButton(android.R.string.no, null)
-                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+    }
+
+    private void showRestartServiceDialog(){
+        new AlertDialog.Builder(this)
+                .setTitle("Restart Background Service")
+                .setMessage("Are you sure you'd like to restart the background service?")
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(BreezeAPI.getInstance().getApplicationContext(), "TODO", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton(android.R.string.no, null)
                 .show();
     }
 }
