@@ -2,12 +2,15 @@ package com.breeze.views.Messages;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.widget.FrameLayout;
+import android.widget.MediaController;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -76,6 +79,21 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
                 status.setImageBitmap(stor.bitmapFromVector(ctx, statusIcon));
             }
 
+
+            if (viewType == 4) {
+                TextView name = this.v.findViewById(R.id.messageName);
+                ImageView image = this.v.findViewById(R.id.li_message_image);
+
+                BrzNode n = BrzGraph.getInstance().getVertex(msg.from);
+                if (n == null) {
+                    name.setText("");
+                    image.setImageBitmap(BrzStorage.getInstance().getProfileImage("", ctx));
+                } else {
+                    name.setText(n.name);
+                    image.setImageBitmap(BrzStorage.getInstance().getProfileImage(n.id, ctx));
+                }
+            }
+
             if (viewType == 5) {
                 ImageView messageImage = this.v.findViewById(R.id.messageImage);
                 BreezeAPI api = BreezeAPI.getInstance();
@@ -94,20 +112,27 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
                 }
             }
 
-            if (viewType == 4) {
-                TextView name = this.v.findViewById(R.id.messageName);
-                ImageView image = this.v.findViewById(R.id.li_message_image);
+            if (viewType == 6) {
+                // get FrameLayout
+                FrameLayout videoFrame = this.v.findViewById(R.id.videoFrameLayout);
 
-                BrzNode n = BrzGraph.getInstance().getVertex(msg.from);
-                if (n == null) {
-                    name.setText("");
-                    image.setImageBitmap(BrzStorage.getInstance().getProfileImage("", ctx));
-                } else {
-                    name.setText(n.name);
-                    image.setImageBitmap(BrzStorage.getInstance().getProfileImage(n.id, ctx));
-                }
+                // inflate VideoView
+                BreezeAPI api = BreezeAPI.getInstance();
+                LayoutInflater inflater = (LayoutInflater) api.getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                VideoView videoView = (VideoView) inflater.inflate(R.layout.li_message_video, null);
+
+                // add MediaController to VideoView
+                MediaController mediaController = new MediaController(api.getBaseContext());
+                mediaController.setAnchorView(videoView);
+                videoView.setMediaController(mediaController);
+
+                // Set video path to VideoView
+                videoView.setVideoPath(BrzStorage.getInstance().getMessageFileLocation(msg));
+
+                // Add VideoVideo to FrameLayout
+                videoFrame.addView(videoView);
+                videoView.start();
             }
-
 
             this.position = position;
         }
@@ -118,6 +143,7 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
     private final int TYPE_INCOMMING = 2;
     private final int TYPE_GROUP = 4;
     private final int TYPE_IMAGE = 5;
+    private final int TYPE_VIDEO = 6;
 
     private List<BrzMessage> messages = new ArrayList<>();
     private Context ctx;
@@ -177,7 +203,8 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
         if (m == null) return super.getItemViewType(position);
 
         if (m.isStatus) return TYPE_STATUS;
-        else if (api.storage.hasMessageFile(m)) return TYPE_IMAGE;
+        else if (api.storage.hasMessageFile(m) && m.body.equals("Image")) return TYPE_IMAGE;
+        else if (api.storage.hasMessageFile(m) && m.body.equals("Video")) return TYPE_VIDEO;
         else if (m.from.equals(BrzStateStore.getStore().getHostNode().id)) return TYPE_OUTGOING;
         else if (this.chat.isGroup) return TYPE_GROUP;
         return TYPE_INCOMMING;
@@ -197,6 +224,8 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
             messageView = inflater.inflate(R.layout.li_message_status, parent, false);
         else if (viewType == TYPE_IMAGE)
             messageView = inflater.inflate(R.layout.li_message_image, parent, false);
+        else if (viewType == TYPE_VIDEO)
+            messageView = inflater.inflate(R.layout.li_message_video, parent, false);
         else if (viewType == TYPE_OUTGOING)
             messageView = inflater.inflate(R.layout.li_message_outgoing, parent, false);
         else if (viewType == TYPE_GROUP)

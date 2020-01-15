@@ -135,8 +135,12 @@ public class MessagesView extends AppCompatActivity {
             BrzPacket p = BrzPacketBuilder.message(api.hostNode.id, "", "Image", chat.id, false);
             api.sendFileMessage(p.message(), imageUri);
         } else if (requestCode == VIDEO_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
-            // TODO: Send mp4
+            Uri videoUri = data.getData();
+            if(videoUri == null) return;
 
+            BreezeAPI api = BreezeAPI.getInstance();
+            BrzPacket p = BrzPacketBuilder.message(api.hostNode.id, "", "Video", chat.id, false);
+            api.sendFileMessage(p.message(), videoUri);
         } else if (requestCode == AUDIO_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             // TODO: send mp3
         }
