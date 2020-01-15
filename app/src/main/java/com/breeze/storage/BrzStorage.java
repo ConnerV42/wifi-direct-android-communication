@@ -129,7 +129,7 @@ public class BrzStorage {
         return messageFile.exists();
     }
 
-    public String getFilePath(BrzMessage message) {
+    public String getMessageFileLocation(BrzMessage message) {
         if(hasMessageFile(message)) {
             BreezeAPI api = BreezeAPI.getInstance();
             File messagesDir = api.getExternalFilesDir(FILE_MESSAGES_DIR);
