@@ -87,6 +87,17 @@ public class BreezeMetastateModule extends BreezeModule {
 //        BrzGraph.getInstance().addVertex(new BrzNode("13", "", "", "Conner", "@JJ"));
 //        BrzGraph.getInstance().addVertex(new BrzNode("14", "", "", "Conner", "@JJ"));
 
+
+        BrzChat pThread = api.db.getChat("PUBLIC_THREAD");
+        if(pThread == null){
+            BrzChat publicThread = new BrzChat();
+            publicThread.isGroup = true;
+            publicThread.name = "PUBLIC_THREAD";
+            publicThread.acceptedByHost = true;
+            publicThread.acceptedByRecipient = true;
+            publicThread.id = "PUBLIC_THREAD";
+            api.db.setChat(publicThread);
+        }
     }
 
     public boolean getCachedHostNode() {
