@@ -25,11 +25,12 @@ public class BrzPacket implements BrzSerializable {
 
         CHAT_HANDSHAKE, CHAT_RESPONSE,
 
-        MESSAGE_RECEIPT
+        MESSAGE_RECEIPT, PUBLIC_MESSAGE
     }
 
     public String id = UUID.randomUUID().toString();
     public BrzPacketType type = BrzPacketType.MESSAGE;
+    //public BrzPacketType publicType = BrzPacketType.PUBLIC_MESSAGE;
     public String to = "BROADCAST";
     public boolean broadcast = true;
     public String body = "";
@@ -53,6 +54,10 @@ public class BrzPacket implements BrzSerializable {
     }
 
     public BrzMessage message() {
+        return new BrzMessage(this.body);
+    }
+
+    public BrzMessage publicMessage() {
         return new BrzMessage(this.body);
     }
 

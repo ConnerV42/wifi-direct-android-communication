@@ -81,9 +81,9 @@ public class PublicMessagesView extends AppCompatActivity {
             // Reset message box
             messageBox.setText("");
 
-            BrzPacket p = BrzPacketBuilder.message(router.hostNode.id, "", messageBoxText, chat.id, false);
+            BrzPacket p = BrzPacketBuilder.publicMessage(router.hostNode.id, "", messageBoxText, chat.id, false);
             try {
-                BreezeAPI.getInstance().sendMessage(p.message());
+                BreezeAPI.getInstance().sendPublicMessage(p.message());
             } catch (Exception e) {
                 Log.i("MESSAGE_SEND_ERROR", "Cannot send message to " + p.to);
                 Toast.makeText(this.getApplicationContext(), "Cannot send message to " + p.to + "; verify they're in the graph", Toast.LENGTH_SHORT).show();
@@ -117,13 +117,10 @@ public class PublicMessagesView extends AppCompatActivity {
         this.onChatUpdate = chat -> {
             if(chat == null) return;
             this.chat = chat;
-            if(this.chat.acceptedByRecipient) {
-                messageEditor.setVisibility(View.VISIBLE);
-                messageNotAccepted.setVisibility(View.GONE);
-            } else {
-                messageEditor.setVisibility(View.GONE);
-                messageNotAccepted.setVisibility(View.VISIBLE);
-            }
+
+            messageEditor.setVisibility(View.VISIBLE);
+            messageNotAccepted.setVisibility(View.GONE);
+
         };
 
         api.state.on("chat" + this.chat.id, this.onChatUpdate);

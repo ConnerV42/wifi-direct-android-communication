@@ -345,6 +345,27 @@ public class BreezeAPI extends Service {
         this.addMessage(message);
     }
 
+    public void sendPublicMessage(BrzMessage message) {
+        BrzMessage clone = new BrzMessage(message.toJSON());
+
+        // Encrypt the message
+        //this.encryption.encryptMessage(clone);
+
+        // Build a packet
+        BrzPacket p = new BrzPacket(clone, BrzPacket.BrzPacketType.PUBLIC_MESSAGE, "", false);
+
+        // Send message to each recipient
+        BrzChat chat = this.state.getChat(clone.chatId);
+        for (String nodeId : chat.nodes) {
+            if (nodeId.equals(hostNode.id))
+                continue;
+            p.to = nodeId;
+            this.router.send(p);
+        }
+
+        this.addMessage(message);
+    }
+
     public void sendFileMessage(BrzFileInfo fileInfoPacket, Payload filePayload) {
         BrzFileInfo clone = new BrzFileInfo(fileInfoPacket.toJSON());
 
