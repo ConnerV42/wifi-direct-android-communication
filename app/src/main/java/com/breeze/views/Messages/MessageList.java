@@ -2,6 +2,7 @@ package com.breeze.views.Messages;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.net.Uri;
 import android.widget.FrameLayout;
 import android.widget.MediaController;
 import android.util.Log;
@@ -24,6 +25,7 @@ import com.breeze.graph.BrzGraph;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -113,25 +115,33 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
             }
 
             if (viewType == 6) {
-                // get FrameLayout
-                FrameLayout videoFrame = this.v.findViewById(R.id.videoFrameLayout);
-
                 // inflate VideoView
+                TextView name = this.v.findViewById(R.id.messageName);
+                VideoView video = this.v.findViewById(R.id.messageVideo);
                 BreezeAPI api = BreezeAPI.getInstance();
-                LayoutInflater inflater = (LayoutInflater) api.getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                VideoView videoView = (VideoView) inflater.inflate(R.layout.li_message_video, null);
+
+                BrzNode n = BrzGraph.getInstance().getVertex(msg.from);
+                if (n == null)
+                    name.setText("");
+                else
+                    name.setText(n.name);
+
+                Uri uri = Uri.fromFile(new File(BrzStorage.getInstance().getMessageFileLocation(msg)));
+                video.setVideoURI(uri);
 
                 // add MediaController to VideoView
                 MediaController mediaController = new MediaController(api.getBaseContext());
-                mediaController.setAnchorView(videoView);
-                videoView.setMediaController(mediaController);
+                mediaController.setAnchorView(video);
+                video.setMediaController(mediaController);
 
-                // Set video path to VideoView
-                videoView.setVideoPath(BrzStorage.getInstance().getMessageFileLocation(msg));
+                // Set video thumbnail to 1 millisecond into video
+                try {
+                    video.seekTo(1);
+                }
+                catch (Exception e) {
+                    Log.i("Video", "Unable to access video content to set seekTo");
+                }
 
-                // Add VideoVideo to FrameLayout
-                videoFrame.addView(videoView);
-                videoView.start();
             }
 
             this.position = position;
