@@ -18,7 +18,11 @@ public class BrzPublicMessageHandler implements BrzRouterHandler{
         if (!this.handles(packet.type))
             throw new RuntimeException("This handler does not handle packets of type " + packet.type);
 
+
         BrzMessage m = packet.publicMessage();
+        if(m.chatId != "PUBLIC_THREAD"){
+            return;
+        }
         BreezeAPI api = BreezeAPI.getInstance();
         try {
             api.meta.showNotification(m);

@@ -352,17 +352,17 @@ public class BreezeAPI extends Service {
         //this.encryption.encryptMessage(clone);
 
         // Build a packet
-        BrzPacket p = new BrzPacket(clone, BrzPacket.BrzPacketType.PUBLIC_MESSAGE, "", false);
+        BrzPacket p = new BrzPacket(clone, BrzPacket.BrzPacketType.PUBLIC_MESSAGE, "BROADCAST", true);
 
         // Send message to each recipient
-        BrzChat chat = this.state.getChat(clone.chatId);
-        for (String nodeId : chat.nodes) {
-            if (nodeId.equals(hostNode.id))
-                continue;
-            p.to = nodeId;
-            this.router.send(p);
-        }
-
+        BrzChat chat = this.state.getChat("PUBLIC_THREAD");
+//        for (String nodeId : chat.nodes) {
+//            if (nodeId.equals(hostNode.id))
+//                continue;
+//            p.to = nodeId;
+//            this.router.send(p);
+//        }
+        this.router.broadcast(p);
         this.addMessage(message);
     }
 

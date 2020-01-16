@@ -30,7 +30,6 @@ public class BrzPacket implements BrzSerializable {
 
     public String id = UUID.randomUUID().toString();
     public BrzPacketType type = BrzPacketType.MESSAGE;
-    //public BrzPacketType publicType = BrzPacketType.PUBLIC_MESSAGE;
     public String to = "BROADCAST";
     public boolean broadcast = true;
     public String body = "";

@@ -56,7 +56,7 @@ public class PublicMessagesView extends AppCompatActivity {
 
         // Get the chat from the argument
         Intent i = getIntent();
-        String chatId = i.getStringExtra("ARG_CHAT_ID");
+        String chatId = "PUBLIC_THREAD";
         this.chat = api.state.getChat(chatId);
         Log.i("STATE", this.chat.toJSON());
 
@@ -80,8 +80,10 @@ public class PublicMessagesView extends AppCompatActivity {
 
             // Reset message box
             messageBox.setText("");
+            Toast.makeText(this.getApplicationContext(), "button clicked", Toast.LENGTH_SHORT).show();
 
-            BrzPacket p = BrzPacketBuilder.publicMessage(router.hostNode.id, "", messageBoxText, chat.id, false);
+            BrzPacket p = BrzPacketBuilder.publicMessage(router.hostNode.id, "", messageBoxText, false);
+
             try {
                 BreezeAPI.getInstance().sendPublicMessage(p.message());
             } catch (Exception e) {
@@ -93,38 +95,38 @@ public class PublicMessagesView extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        BreezeAPI api = BreezeAPI.getInstance();
-        ActionBar ab = getSupportActionBar();
-        if (ab == null) return;
-        ab.setDisplayHomeAsUpEnabled(true);
-        ab.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
-
-        if(this.chat != null) ab.setTitle("Public Feed");
-
-        RecyclerView msgView = findViewById(R.id.publicMessageList);
-        this.messageListener = messages -> {
-            if (messages != null) {
-                msgView.scrollToPosition(messages.size() - 1);
-                Log.i("BLAH", "Scrolling list");
-            }
-        };
-        api.state.on("messages" + this.chat.id, messageListener);
-
-        //-------------------------------------------------------------------------------//
-
-        LinearLayout messageEditor = findViewById(R.id.public_messages_editor);
-        TextView messageNotAccepted = findViewById(R.id.public_messages_not_accepted);
-        this.onChatUpdate = chat -> {
-            if(chat == null) return;
-            this.chat = chat;
-
-            messageEditor.setVisibility(View.VISIBLE);
-            messageNotAccepted.setVisibility(View.GONE);
-
-        };
-
-        api.state.on("chat" + this.chat.id, this.onChatUpdate);
-        this.onChatUpdate.accept(chat);
+//        BreezeAPI api = BreezeAPI.getInstance();
+//        ActionBar ab = getSupportActionBar();
+//        if (ab == null) return;
+//        ab.setDisplayHomeAsUpEnabled(true);
+//        ab.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
+//
+//        if(this.chat != null) ab.setTitle("Public Feed");
+//
+//        RecyclerView msgView = findViewById(R.id.publicMessageList);
+//        this.messageListener = messages -> {
+//            if (messages != null) {
+//                msgView.scrollToPosition(messages.size() - 1);
+//                Log.i("BLAH", "Scrolling list");
+//            }
+//        };
+//        api.state.on("messages" + this.chat.id, messageListener);
+//
+//        //-------------------------------------------------------------------------------//
+//
+//        LinearLayout messageEditor = findViewById(R.id.public_messages_editor);
+//        TextView messageNotAccepted = findViewById(R.id.public_messages_not_accepted);
+//        this.onChatUpdate = chat -> {
+//            if(chat == null) return;
+//            this.chat = chat;
+//
+//            messageEditor.setVisibility(View.VISIBLE);
+//            messageNotAccepted.setVisibility(View.GONE);
+//
+//        };
+//
+//        api.state.on("chat" + this.chat.id, this.onChatUpdate);
+//        this.onChatUpdate.accept(chat);
     }
 
     @Override

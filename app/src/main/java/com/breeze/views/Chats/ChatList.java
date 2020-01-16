@@ -48,6 +48,9 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
 
         public void bind(BrzChat chat, int position, Context ctx) {
 
+            if(chat.id == "PUBLIC_THREAD"){
+                return;
+            }
             TextView chatName = this.v.findViewById(R.id.chat_name);
             chatName.setText(chat.name);
 

@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat;
 
 import com.breeze.application.BreezeAPI;
 import com.breeze.views.MainSettingsActivity;
+import com.breeze.views.Messages.PublicMessagesView;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -74,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
 
         this.toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+
     }
 
     @Override
@@ -117,9 +120,8 @@ public class MainActivity extends AppCompatActivity {
         }
         else if (id == R.id.action_public_thread)
         {
-            setContentView(R.layout.activity_public_messages_view);
-            //Intent i = new Intent(MainActivity.this, PublicMessagesView.class);
-            //startActivity(i);
+            Intent i = new Intent(MainActivity.this, PublicMessagesView.class);
+            startActivity(i);
         }
         else if ( id == R.id.action_settings){
             Intent i = new Intent(MainActivity.this, MainSettingsActivity.class);

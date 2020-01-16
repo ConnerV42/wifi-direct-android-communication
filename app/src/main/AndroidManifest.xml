@@ -30,6 +30,7 @@
         <activity android:name=".views.ProfileActivity" />
         <activity android:name=".views.ChatSettingsActivity" />
         <activity android:name=".views.Chats.ChatHandshakeView" />
+        <activity android:name=".views.Messages.PublicMessagesView" />
         <activity
             android:name=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />

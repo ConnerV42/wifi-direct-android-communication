@@ -18,8 +18,8 @@ public class BrzPacketBuilder {
         BrzMessage body = new BrzMessage(fromId, chatId, msgBody, System.currentTimeMillis(), isStatus);
         return new BrzPacket(body, BrzPacket.BrzPacketType.MESSAGE, msgTo, false);
     }
-     public static BrzPacket publicMessage(String fromId, String msgTo, String msgBody, String chatId, Boolean isStatus){
-        BrzMessage body = new BrzMessage(fromId, chatId, msgBody, System.currentTimeMillis(), isStatus);
+     public static BrzPacket publicMessage(String fromId, String msgTo, String msgBody, Boolean isStatus){
+        BrzMessage body = new BrzMessage(fromId, "PUBLIC_THREAD", msgBody, System.currentTimeMillis(), isStatus);
         return new BrzPacket(body, BrzPacket.BrzPacketType.PUBLIC_MESSAGE, msgTo, false);
      }
     public static BrzPacket fileInfoPacket(String fromId, String nextId, String chatId, String destinationId, String filePayloadId, String fileName) {
@@ -63,4 +63,8 @@ public class BrzPacketBuilder {
 
         return new BrzPacket(mr, BrzPacket.BrzPacketType.MESSAGE_RECEIPT, to, false);
     }
+
+//    public static BrzPacket publicMessage(String body){
+//        BrzPacket p = new BrzPacket();
+//    }
 }
