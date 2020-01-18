@@ -83,7 +83,7 @@ public class BreezeAPI extends Service {
         Notification notification = new NotificationCompat.Builder(this, App.SERVICE_CHANNEL_ID)
                 .setContentTitle("Breeze Service")
                 .setContentText("Breeze is running in the background")
-                .setSmallIcon(R.drawable.ic_launcher)
+                .setSmallIcon(R.drawable.ic_stat_name)
                 .setContentIntent(pending)
                 .addAction(R.drawable.ic_launcher, "Stop", pStopSelf)
                 .build();
