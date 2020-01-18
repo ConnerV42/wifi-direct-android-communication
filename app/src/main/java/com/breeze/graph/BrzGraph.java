@@ -88,6 +88,10 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
         return vertexList.get(id);
     }
 
+    public Collection<BrzNode> getNodeCollection() {
+        return this.vertexList.values();
+    }
+
     public void addVertex(BrzNode node) {
         vertexList.putIfAbsent(node.id, node);
         adjList.putIfAbsent(node.id, new HashSet<>());
@@ -125,7 +129,7 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
         return new ArrayList<>(adjList.get(id));
     }
 
-    public void mergeGraph(String graphJSON) {
+    public BrzGraph mergeGraph(String graphJSON) {
         BrzGraph otherGraph = new BrzGraph();
         otherGraph.fromJSON(graphJSON);
 
@@ -169,6 +173,8 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
         }
 
         this.emit("graphMerge");
+
+        return otherGraph;
     }
 
     @NonNull

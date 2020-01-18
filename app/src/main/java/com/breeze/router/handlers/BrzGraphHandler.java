@@ -2,6 +2,7 @@ package com.breeze.router.handlers;
 
 import android.util.Log;
 
+import com.breeze.application.BreezeAPI;
 import com.breeze.graph.BrzGraph;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
@@ -50,7 +51,10 @@ public class BrzGraphHandler implements BrzRouterHandler {
                 this.router.broadcast(BrzPacketBuilder.graphEvent(true, router.hostNode, hostNode));
 
                 // Merge their graph into ours
-                this.graph.mergeGraph(query.graph);
+                BrzGraph otherGraph = this.graph.mergeGraph(query.graph);
+
+                // Send a BrzProfileRequest packet to all newly merged nodes
+                BreezeAPI.getInstance().requestProfileImages(otherGraph);
             }
         }
 

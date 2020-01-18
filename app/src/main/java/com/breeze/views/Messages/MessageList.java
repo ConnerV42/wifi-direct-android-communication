@@ -126,12 +126,12 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
                 else
                     name.setText(n.name);
 
-                // Uri uri = Uri.fromFile(new File(BrzStorage.getInstance().getMessageFileLocation(msg)));
-                Uri uri = Uri.parse(BrzStorage.getInstance().getMessageFileLocation(msg));
+                Uri uri = Uri.fromFile(new File(BrzStorage.getInstance().getMessageFileLocation(msg)));
+                // Uri uri = Uri.parse(BrzStorage.getInstance().getMessageFileLocation(msg));
                 video.setVideoURI(uri);
 
                 // add MediaController to VideoView
-                MediaController mediaController = new MediaController(api.getBaseContext());
+                MediaController mediaController = new MediaController(ctx);
                 mediaController.setAnchorView(video);
                 video.setMediaController(mediaController);
 

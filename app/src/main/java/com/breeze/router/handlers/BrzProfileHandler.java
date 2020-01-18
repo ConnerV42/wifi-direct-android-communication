@@ -1,5 +1,6 @@
 package com.breeze.router.handlers;
 
+import com.breeze.application.BreezeAPI;
 import com.breeze.packets.BrzPacket;
 import com.breeze.router.BrzRouter;
 
@@ -14,9 +15,16 @@ public class BrzProfileHandler implements BrzRouterStreamHandler {
 
     @Override
     public void handle(BrzPacket packet, String fromEndpointId) {
-        // TODO: If it's a BrzProfileResponse, send to handleStream
+        if (!this.handles(packet.type))
+            throw new RuntimeException("This handler doesn't support packets of type " + packet.type);
 
-        // TODO: If it's a BrzProfileRequest, send a pic if you set one!
+        if (packet.type == BrzPacket.BrzPacketType.PROFILE_REQUEST) {
+            BreezeAPI api = BreezeAPI.getInstance();
+            api.storage.getProfileImage(router.hostNode.id, api);
+        } else {
+
+        }
+        // TODO: If it's a BrzProfileResponse, send to handleStream
     }
 
     public void handleStream(BrzPacket packet, InputStream stream) {

@@ -26,6 +26,7 @@ import com.breeze.graph.BrzGraph;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.ChatEvents.BrzChatHandshake;
 import com.breeze.packets.ChatEvents.BrzChatResponse;
+import com.breeze.packets.ProfileEvents.BrzProfileRequest;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
@@ -376,6 +377,33 @@ public class BreezeAPI extends Service {
     public void addMessage(BrzMessage message) {
         this.state.addMessage(message);
         this.db.addMessage(message);
+    }
+
+    //
+    //
+    // Profile Image
+    //
+    //
+
+    public void requestProfileImages() {
+        BrzProfileRequest profileRequest = new BrzProfileRequest(this.hostNode.id, false);
+        BrzPacket p = new BrzPacket(profileRequest, BrzPacket.BrzPacketType.PROFILE_REQUEST, "BROADCAST", true);
+
+        router.send(p);
+    }
+
+    public void requestProfileImages(BrzGraph newNodes) {
+        if(newNodes == null)
+            return;
+
+        BrzProfileRequest profileRequest = new BrzProfileRequest(this.hostNode.id, false);
+
+        // send to newly merged nodes only
+        for (BrzNode node : newNodes.getNodeCollection()) {
+            BrzPacket p = new BrzPacket(profileRequest, BrzPacket.BrzPacketType.PROFILE_REQUEST, node.id, false);
+
+            router.send(p);
+        }
     }
 
 }
