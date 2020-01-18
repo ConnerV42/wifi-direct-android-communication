@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.IBinder;
+import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import androidx.annotation.Nullable;
@@ -349,6 +350,7 @@ public class BreezeAPI extends Service {
         String type = mime.getExtensionFromMimeType(res.getType(fileUri));
 
         try {
+            storage.saveMessageFile(message, res.openInputStream(fileUri));
             BrzMessage clone = new BrzMessage(message.toJSON());
 
             // Encrypt the message

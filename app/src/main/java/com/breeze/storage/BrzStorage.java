@@ -129,15 +129,20 @@ public class BrzStorage {
         return messageFile.exists();
     }
 
-    public String getMessageFileLocation(BrzMessage message) {
+    public File getMessageFile(BrzMessage message) {
         if(hasMessageFile(message)) {
             BreezeAPI api = BreezeAPI.getInstance();
             File messagesDir = api.getExternalFilesDir(FILE_MESSAGES_DIR);
             File chatDir = new File(messagesDir, message.chatId);
-            File messageFile = new File(chatDir, message.id);
-            return messageFile.getAbsolutePath();
+            return new File(chatDir, message.id);
         }
         return null;
+    }
+
+    public String getMessageFileLocation(BrzMessage message) {
+        File messageFile = getMessageFile(message);
+        if(messageFile == null) return null;
+        return messageFile.getAbsolutePath();
     }
 
     public Bitmap getMessageFileAsBitmap(BrzMessage message) {
@@ -202,7 +207,7 @@ public class BrzStorage {
     private Bitmap getImage(File imageFile) {
         try {
             Bitmap image = BitmapFactory.decodeStream(new FileInputStream(imageFile));
-            final int maxSize = 1000;
+            final int maxSize = 750;
 
             int width = image.getWidth();
             int height = image.getHeight();
