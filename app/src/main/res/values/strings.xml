@@ -21,4 +21,7 @@
     <string name="name">name</string>
     <string name="restart_service">Restart Service</string>
     <string name="wipe_database">Wipe Database</string>
+    <string name="close_all_streams">Close All Streams</string>
+    <string name="start_mic_stream">Start Mic Stream</string>
+    <string name="stop_mic_stream">Stop Mic Stream</string>
 </resources>

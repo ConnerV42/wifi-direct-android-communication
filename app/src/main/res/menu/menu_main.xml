@@ -28,4 +28,7 @@
           android:title="@string/action_settings"
           android:orderInCategory="5"
           app:showAsAction="never"/>
+    <item
+        android:id="@+id/streams_testing_activity"
+        android:title="Test Mic Streams" />
 </menu>

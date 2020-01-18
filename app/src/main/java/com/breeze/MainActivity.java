@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat;
 import com.breeze.application.BreezeAPI;
 import com.breeze.views.MainSettingsActivity;
 import com.breeze.views.Messages.PublicMessagesView;
+import com.breeze.views.StreamsTestingActivity;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -35,7 +36,9 @@ public class MainActivity extends AppCompatActivity {
                     Manifest.permission.CHANGE_WIFI_STATE,
                     Manifest.permission.ACCESS_COARSE_LOCATION,
                     Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.INTERNET
             };
 
     @Override
@@ -125,6 +128,11 @@ public class MainActivity extends AppCompatActivity {
         }
         else if ( id == R.id.action_settings){
             Intent i = new Intent(MainActivity.this, MainSettingsActivity.class);
+            startActivity(i);
+        }
+
+        else if( id == R.id.streams_testing_activity){
+            Intent i = new Intent(MainActivity.this, StreamsTestingActivity.class);
             startActivity(i);
         }
         return super.onOptionsItemSelected(item);
