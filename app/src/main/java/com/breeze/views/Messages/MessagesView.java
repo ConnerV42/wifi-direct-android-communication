@@ -101,7 +101,6 @@ public class MessagesView extends AppCompatActivity {
         });
 
         // Bring up the option to select media to send from external storage
-
         ImageButton sendPhoto = findViewById(R.id.sendPhoto);
         sendPhoto.setOnClickListener(view1 -> {
             Intent intent = new Intent(Intent.ACTION_PICK,
@@ -111,8 +110,7 @@ public class MessagesView extends AppCompatActivity {
 
         ImageButton sendVideo = findViewById(R.id.sendVideo);
         sendVideo.setOnClickListener(view1 -> {
-            Intent intent = new Intent(Intent.ACTION_PICK,
-                    android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+            Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(intent, VIDEO_REQUEST_CODE);
         });
 
@@ -127,22 +125,20 @@ public class MessagesView extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PHOTO_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
-            Uri imageUri = data.getData();
-            if(imageUri == null) return;
+
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            Uri fileUri = data.getData();
+            if (fileUri == null) return;
 
             BreezeAPI api = BreezeAPI.getInstance();
-            BrzPacket p = BrzPacketBuilder.message(api.hostNode.id, "", "Image", chat.id, false);
-            api.sendFileMessage(p.message(), imageUri);
-        } else if (requestCode == VIDEO_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
-            Uri videoUri = data.getData();
-            if(videoUri == null) return;
+            String bodyFortype = "";
+            if (requestCode == PHOTO_REQUEST_CODE) bodyFortype = "Image";
+            else if (requestCode == VIDEO_REQUEST_CODE) bodyFortype = "Video";
+            else if (requestCode == AUDIO_REQUEST_CODE) bodyFortype = "Audio";
+            else return;
 
-            BreezeAPI api = BreezeAPI.getInstance();
-            BrzPacket p = BrzPacketBuilder.message(api.hostNode.id, "", "Video", chat.id, false);
-            api.sendFileMessage(p.message(), videoUri);
-        } else if (requestCode == AUDIO_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
-            // TODO: send mp3
+            BrzPacket p = BrzPacketBuilder.message(api.hostNode.id, "", bodyFortype, chat.id, false);
+            api.sendFileMessage(p.message(), fileUri);
         }
     }
 

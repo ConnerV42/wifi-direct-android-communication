@@ -135,7 +135,7 @@ public class BreezeMetastateModule extends BreezeModule {
         PendingIntent pending = PendingIntent.getActivity(this.api, 0, chatIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Notification notification = new NotificationCompat.Builder(this.api, App.MESSAGE_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher)
+                .setSmallIcon(R.drawable.ic_stat_name)
                 .setContentTitle(c.name)
                 .setContentText(message.body)
                 .setAutoCancel(true)
@@ -156,7 +156,7 @@ public class BreezeMetastateModule extends BreezeModule {
         PendingIntent pending = PendingIntent.getActivity(this.api, 0, chatIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Notification notification = new NotificationCompat.Builder(this.api, App.MESSAGE_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher)
+                .setSmallIcon(R.drawable.ic_stat_name)
                 .setContentTitle(c.name)
                 .setContentText("You've been invited to join this chat!")
                 .setAutoCancel(true)

@@ -3,7 +3,9 @@ package com.breeze.views.Messages;
 import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
+import android.view.Gravity;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.function.Consumer;
 
@@ -38,7 +41,10 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
     static class MessageHolder extends RecyclerView.ViewHolder {
         View v;
         int position = 0;
-        int viewType = 0;
+        int viewType;
+
+        AudioMessage audioController;
+        VideoMessage videoController;
 
         MessageHolder(View v, int viewType) {
             super(v);
@@ -46,103 +52,118 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
             this.viewType = viewType;
         }
 
-        void bind(BrzMessage msg, Context ctx, int position) {
+        void bind(BrzMessage msg, Context ctx, boolean outgoing, boolean group, MessageType type, int position) {
+            BreezeAPI api = BreezeAPI.getInstance();
 
-            TextView body = this.v.findViewById(R.id.messageBody);
-            if(body != null){
-                body.setText(msg.body);
+            if (msg.isStatus) {
+                TextView messageBody = this.v.findViewById(R.id.messageBody);
+                messageBody.setText(msg.body);
+                this.position = position;
+                return;
             }
 
+            if (audioController != null) {
+                audioController.destroy();
+                audioController = null;
+            }
+            if (videoController != null) {
+                videoController.destroy();
+                videoController = null;
+            }
 
-            /* date formatter in local timezone */
-            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm aa");
+            // Set the sender's name and image
+            TextView messageSenderName = this.v.findViewById(R.id.messageSenderName);
+            ImageView messageSenderImage = this.v.findViewById(R.id.messageSenderImage);
+
+            if (messageSenderName != null && messageSenderImage != null) {
+                BrzNode n = BrzGraph.getInstance().getVertex(msg.from);
+                if (group && !outgoing && n != null) {
+                    messageSenderImage.setImageBitmap(BrzStorage.getInstance().getProfileImage("", api));
+                    messageSenderImage.setVisibility(View.VISIBLE);
+                    messageSenderName.setText(n.name);
+                    messageSenderName.setVisibility(View.VISIBLE);
+                } else {
+                    messageSenderImage.setVisibility(View.GONE);
+                    messageSenderName.setVisibility(View.GONE);
+                }
+            }
+
+            TextView messageDatestamp = this.v.findViewById(R.id.messageDatestamp);
+            ImageView messageStatus = this.v.findViewById(R.id.messageStatus);
+
+            // Set timestamp
+            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm aa", Locale.US);
             sdf.setTimeZone(TimeZone.getDefault());
             String time = sdf.format(new Date(msg.datestamp));
+            if (messageDatestamp != null) messageDatestamp.setText(time);
 
-            TextView datestamp = this.v.findViewById(R.id.messageDatestamp);
-            if(datestamp != null) {
-                datestamp.setText(time);
-            }
-            if (viewType == 1) {
-                ImageView status = this.v.findViewById(R.id.messageStatus);
-
-                BrzStorage stor = BrzStorage.getInstance();
-                BreezeAPI api = BreezeAPI.getInstance();
+            // Set read reciept status
+            if (outgoing && messageStatus != null) {
+                messageStatus.setVisibility(View.VISIBLE);
                 int statusIcon = R.drawable.ic_alarm_black_24dp;
-                status.setColorFilter(Color.parseColor("#555555"));
-
-                if (api.db.isRead(msg.id)) {
+                if (api.db.isRead(msg.id))
                     statusIcon = R.drawable.ic_done_all_black_24dp;
-                    status.setColorFilter(R.color.colorAccent);
-                } else if (api.db.isDelivered(msg.id)) {
+                else if (api.db.isDelivered(msg.id))
                     statusIcon = R.drawable.ic_done_black_24dp;
-                }
-
-                status.setImageBitmap(stor.bitmapFromVector(ctx, statusIcon));
+                messageStatus.setImageBitmap(api.storage.bitmapFromVector(api, statusIcon));
+            } else if (messageStatus != null) {
+                messageStatus.setVisibility(View.GONE);
             }
 
+            // Set the message's body
+            TextView messageBody = this.v.findViewById(R.id.messageBody);
+            ImageView messageImage = this.v.findViewById(R.id.messageImage);
+            View messageMediaControls = this.v.findViewById(R.id.messageMediaControls);
+            VideoView messageVideo = this.v.findViewById(R.id.messageVideo);
+            messageBody.setVisibility(View.GONE);
+            messageImage.setVisibility(View.GONE);
+            messageMediaControls.setVisibility(View.GONE);
+            messageVideo.setVisibility(View.GONE);
 
-            if (viewType == 4) {
-                TextView name = this.v.findViewById(R.id.messageName);
-                ImageView image = this.v.findViewById(R.id.li_message_image);
-
-                BrzNode n = BrzGraph.getInstance().getVertex(msg.from);
-                if (n == null) {
-                    name.setText("");
-                    image.setImageBitmap(BrzStorage.getInstance().getProfileImage("", ctx));
-                } else {
-                    name.setText(n.name);
-                    image.setImageBitmap(BrzStorage.getInstance().getProfileImage(n.id, ctx));
-                }
-            }
-
-            if (viewType == 5) {
-                ImageView messageImage = this.v.findViewById(R.id.messageImage);
-                BreezeAPI api = BreezeAPI.getInstance();
+            if (type == MessageType.IMAGE) {
+                messageImage.setVisibility(View.VISIBLE);
                 messageImage.setImageBitmap(api.storage.getMessageFileAsBitmap(msg));
+            } else if (type == MessageType.AUDIO) {
+                messageMediaControls.setVisibility(View.VISIBLE);
+                Uri audioFile = Uri.fromFile(api.storage.getMessageFile(msg));
+                audioController = new AudioMessage(
+                        messageMediaControls,
+                        ctx,
+                        audioFile,
+                        outgoing ? R.drawable.status_bubble : R.drawable.message_bubble
+                );
+            } else if (type == MessageType.VIDEO) {
+                LinearLayout messageVideoContainer = v.findViewById(R.id.messageVideoContainer);
+                messageVideoContainer.setVisibility(View.VISIBLE);
 
-                TextView name = this.v.findViewById(R.id.messageName);
-                ImageView image = this.v.findViewById(R.id.li_message_image);
+                messageVideo.setVisibility(View.VISIBLE);
+                messageMediaControls.setVisibility(View.VISIBLE);
 
-                BrzNode n = BrzGraph.getInstance().getVertex(msg.from);
-                if (n == null) {
-                    name.setText("");
-                    image.setImageBitmap(BrzStorage.getInstance().getProfileImage("", ctx));
-                } else {
-                    name.setText(n.name);
-                    image.setImageBitmap(BrzStorage.getInstance().getProfileImage(n.id, ctx));
-                }
+                Uri uri = Uri.fromFile(api.storage.getMessageFile(msg));
+                messageVideo.setVideoURI(uri);
+
+                videoController = new VideoMessage(messageMediaControls, messageVideo,
+                        outgoing ? R.drawable.message_media_controls_outgoing : R.drawable.message_media_controls
+                );
+            } else {
+                messageBody.setVisibility(View.VISIBLE);
+                messageBody.setText(msg.body);
+
+                if (outgoing) messageBody.setBackgroundResource(R.drawable.status_bubble);
+                else messageBody.setBackgroundResource(R.drawable.message_bubble);
             }
 
-            if (viewType == 6) {
-                // inflate VideoView
-                TextView name = this.v.findViewById(R.id.messageName);
-                VideoView video = this.v.findViewById(R.id.messageVideo);
-                BreezeAPI api = BreezeAPI.getInstance();
-
-                BrzNode n = BrzGraph.getInstance().getVertex(msg.from);
-                if (n == null)
-                    name.setText("");
-                else
-                    name.setText(n.name);
-
-                Uri uri = Uri.fromFile(new File(BrzStorage.getInstance().getMessageFileLocation(msg)));
-                // Uri uri = Uri.parse(BrzStorage.getInstance().getMessageFileLocation(msg));
-                video.setVideoURI(uri);
-
-                // add MediaController to VideoView
-                MediaController mediaController = new MediaController(ctx);
-                mediaController.setAnchorView(video);
-                video.setMediaController(mediaController);
-
-                // Set video thumbnail to 1 millisecond into video
-                try {
-                    video.seekTo(1);
-                }
-                catch (Exception e) {
-                    Log.i("Video", "Unable to access video content to set seekTo");
-                }
-
+            // Set the alignment
+            LinearLayout messageLayout = this.v.findViewById(R.id.messageLinearLayout);
+            LinearLayout messageInnerLayout = this.v.findViewById(R.id.messageInnerLayout);
+            if (outgoing) {
+                messageLayout.setGravity(Gravity.END);
+                messageInnerLayout.setGravity(Gravity.END);
+                messageInnerLayout.setPadding(100, 0, 0, 0);
+            } else {
+                messageLayout.setGravity(Gravity.START);
+                messageInnerLayout.setGravity(Gravity.START);
+                messageInnerLayout.setPadding(0, 0, 100, 0);
             }
 
             this.position = position;
@@ -150,11 +171,11 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
     }
 
     private final int TYPE_STATUS = 0;
-    private final int TYPE_OUTGOING = 1;
-    private final int TYPE_INCOMMING = 2;
-    private final int TYPE_GROUP = 4;
-    private final int TYPE_IMAGE = 5;
-    private final int TYPE_VIDEO = 6;
+    private final int TYPE_NORMAL = 1;
+
+    public static enum MessageType {
+        STRING, IMAGE, VIDEO, AUDIO, FILE
+    }
 
     private List<BrzMessage> messages = new ArrayList<>();
     private Context ctx;
@@ -176,10 +197,9 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
                 for (BrzMessage m : this.messages) {
                     // Message has not been read by the user yet, send receipt
                     if (!m.from.equals(api.hostNode.id) && !api.db.isRead(m.id)) {
-                        Log.i("STATE", "Message " + m.body + " from " + m.from + " wasn't read yet!");
                         try {
                             api.meta.sendReadReceipt(m);
-                        }catch(Exception e){
+                        } catch (Exception e) {
                             Log.i("STATE", "Cannot send read receipt to " + m.from);
                         }
                     }
@@ -192,7 +212,6 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
 
         this.receiptListener = msgId -> {
             notifyDataSetChanged();
-            Log.i("BLAH", "A receipt changed!");
         };
 
         api.meta.on("delivered", receiptListener);
@@ -209,16 +228,11 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
 
     @Override
     public int getItemViewType(int position) {
-        BreezeAPI api = BreezeAPI.getInstance();
         BrzMessage m = this.messages.get(position);
         if (m == null) return super.getItemViewType(position);
 
         if (m.isStatus) return TYPE_STATUS;
-        else if (api.storage.hasMessageFile(m) && m.body.equals("Image")) return TYPE_IMAGE;
-        else if (api.storage.hasMessageFile(m) && m.body.equals("Video")) return TYPE_VIDEO;
-        else if (m.from.equals(BrzStateStore.getStore().getHostNode().id)) return TYPE_OUTGOING;
-        else if (this.chat.isGroup) return TYPE_GROUP;
-        return TYPE_INCOMMING;
+        return TYPE_NORMAL;
     }
 
     @NonNull
@@ -229,20 +243,10 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
         // Inflate a new message component
-        View messageView = null;
-
+        View messageView;
         if (viewType == TYPE_STATUS)
             messageView = inflater.inflate(R.layout.li_message_status, parent, false);
-        else if (viewType == TYPE_IMAGE)
-            messageView = inflater.inflate(R.layout.li_message_image, parent, false);
-        else if (viewType == TYPE_VIDEO)
-            messageView = inflater.inflate(R.layout.li_message_video, parent, false);
-        else if (viewType == TYPE_OUTGOING)
-            messageView = inflater.inflate(R.layout.li_message_outgoing, parent, false);
-        else if (viewType == TYPE_GROUP)
-            messageView = inflater.inflate(R.layout.li_message_group, parent, false);
-        else if (viewType == TYPE_INCOMMING)
-            messageView = inflater.inflate(R.layout.li_message, parent, false);
+        else messageView = inflater.inflate(R.layout.message_component, parent, false);
 
         // Make our holder
         return new MessageHolder(messageView, viewType);
@@ -250,7 +254,21 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
 
     @Override
     public void onBindViewHolder(@NonNull MessageHolder holder, int position) {
-        holder.bind(this.messages.get(position), this.ctx, position);
+        BreezeAPI api = BreezeAPI.getInstance();
+        BrzMessage m = this.messages.get(position);
+        BrzChat c = api.state.getChat(m.chatId);
+        boolean outgoing = m.from.equals(api.hostNode.id);
+        MessageType type = MessageType.STRING;
+        if (api.storage.hasMessageFile(m) && m.body.equals("Image"))
+            type = MessageType.IMAGE;
+        else if (api.storage.hasMessageFile(m) && m.body.equals("Video"))
+            type = MessageType.VIDEO;
+        else if (api.storage.hasMessageFile(m) && m.body.equals("Audio"))
+            type = MessageType.AUDIO;
+        else if (api.storage.hasMessageFile(m))
+            type = MessageType.FILE;
+
+        holder.bind(m, this.ctx, outgoing, c.isGroup, type, position);
     }
 
     @Override
