@@ -27,13 +27,12 @@ import com.breeze.packets.BrzPacket;
 import com.breeze.packets.ChatEvents.BrzChatHandshake;
 import com.breeze.packets.ChatEvents.BrzChatResponse;
 import com.breeze.packets.ProfileEvents.BrzProfileRequest;
+import com.breeze.packets.ProfileEvents.BrzProfileResponse;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
 import com.breeze.views.ProfileActivity;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 
 public class BreezeAPI extends Service {
@@ -366,6 +365,9 @@ public class BreezeAPI extends Service {
                 p.to = nodeId;
                 InputStream stream = res.openInputStream(fileUri);
                 this.router.sendStream(p, stream);
+
+                // Save outgoing file message
+                storage.saveMessageFile(p.message(), stream);
             }
 
             this.addMessage(message);
@@ -381,7 +383,7 @@ public class BreezeAPI extends Service {
 
     //
     //
-    // Profile Image
+    // Profile Images
     //
     //
 
@@ -404,6 +406,18 @@ public class BreezeAPI extends Service {
 
             router.send(p);
         }
+    }
+
+    public void incomingProfileResponse(BrzPacket packet, InputStream stream) {
+        BrzFileInfo fileInfo = packet.stream;
+
+        BrzProfileResponse response = packet.profileResponse();
+
+        BrzNode node = this.router.graph.getVertex(response.from);
+        if (node == null || fileInfo == null)
+            return;
+
+        // TODO: Save the input stream in profile_images directory
     }
 
 }

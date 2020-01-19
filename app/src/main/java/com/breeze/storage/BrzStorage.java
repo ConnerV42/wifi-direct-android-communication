@@ -14,6 +14,7 @@ import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.packets.BrzPacket;
+import com.breeze.packets.ProfileEvents.BrzProfileResponse;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,6 +64,13 @@ public class BrzStorage {
         if (b == null)
             b = bitmapFromVector(ctx, R.drawable.ic_person_black_24dp);
         return b;
+    }
+
+    public boolean hasProfileImage(String fileName) {
+        Bitmap b = getImage(fileName, PROFILE_IMAGE_DIR);
+        if (b == null)
+            return false;
+        return true;
     }
 
     /*
