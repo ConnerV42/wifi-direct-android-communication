@@ -7,6 +7,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.IBinder;
 import android.util.Log;
@@ -408,6 +409,14 @@ public class BreezeAPI extends Service {
 
             router.send(p);
         }
+    }
+
+    public void sendProfileResponse(BrzPacket packet, Bitmap bm) {
+        BrzProfileResponse response = new BrzProfileResponse(router.hostNode.id, false);
+
+        // TODO: Convert bitmap to InputStream
+
+        // router.sendStream(packet.profileResponse(), bm);
     }
 
     public void incomingProfileResponse(BrzPacket packet, InputStream stream) {

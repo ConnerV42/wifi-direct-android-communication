@@ -1,6 +1,7 @@
 package com.breeze.router.handlers;
 
 import android.graphics.Bitmap;
+import android.telephony.mbms.FileInfo;
 
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzFileInfo;
@@ -34,25 +35,22 @@ public class BrzProfileHandler implements BrzRouterStreamHandler {
                 BrzProfileResponse response = new BrzProfileResponse(router.hostNode.id, false);
                 BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.PROFILE_RESPONSE, request.from, false);
 
-                // TODO: Add FileInfo
-                p.stream = new BrzFileInfo();
+                BrzFileInfo fileInfo = new BrzFileInfo();
+                fileInfo.fileName = router.hostNode.id;
+                p.addStream(fileInfo);
 
-                // TODO: Add bitmap as an InputStream to the packet
-                //p.addStream(bm);
-
-                router.send(p);
+                // Send bitmap to the requester
+                api.sendProfileResponse(p, bm);
             }
-
         } else {
-
+            // handle packet from incoming BrzProfileResponse
         }
-        // TODO: If it's a BrzProfileResponse, send to handleStream
     }
 
     public void handleStream(BrzPacket packet, InputStream stream) {
         BreezeAPI api = BreezeAPI.getInstance();
 
-        api.incomingProfileResponse(packet.profileResponse(), stream);
+        api.incomingProfileResponse(packet, stream);
         this.handle(packet, "");
     }
 

@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat;
 
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
+import com.breeze.datatypes.BrzFileInfo;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.ProfileEvents.BrzProfileResponse;
@@ -50,6 +51,31 @@ public class BrzStorage {
      */
 
     private final String PROFILE_IMAGE_DIR = "profile_images";
+
+    public void saveProfileImage(BrzPacket p, InputStream stream) {
+        BrzProfileResponse response = p.profileResponse();
+        BreezeAPI api = BreezeAPI.getInstance();
+        File profileImageDirectory = api.getExternalFilesDir(PROFILE_IMAGE_DIR);
+        File profileImage = new File(profileImageDirectory, response.from);
+
+        try {
+            profileImage.mkdirs();
+            if (profileImage.exists()) profileImage.delete();
+            profileImage.createNewFile();
+
+            OutputStream out = new FileOutputStream(profileImage);
+            byte[] buf = new byte[80000];
+            int len;
+            while ((len = stream.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            out.flush();
+            out.close();
+            stream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public void saveProfileImage(Bitmap bm, String fileName) {
         this.saveImage(bm, fileName, PROFILE_IMAGE_DIR);
@@ -145,12 +171,6 @@ public class BrzStorage {
             return new File(chatDir, message.id);
         }
         return null;
-    }
-
-    public String getMessageFileLocation(BrzMessage message) {
-        File messageFile = getMessageFile(message);
-        if(messageFile == null) return null;
-        return messageFile.getAbsolutePath();
     }
 
     public Bitmap getMessageFileAsBitmap(BrzMessage message) {
