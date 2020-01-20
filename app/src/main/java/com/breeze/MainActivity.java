@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 
 import com.breeze.application.BreezeAPI;
 import com.breeze.views.MainSettingsActivity;
@@ -50,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         if (!hasPermissions(this, REQUIRED_PERMISSIONS)) {
             requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_REQUIRED_PERMISSIONS);
         }
-    }
+}
 
     private void startApplicationService() {
         Intent brzService = new Intent(this, BreezeAPI.class);
@@ -78,6 +79,8 @@ public class MainActivity extends AppCompatActivity {
 
         this.toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+
 
 
     }
