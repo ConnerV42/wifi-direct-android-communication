@@ -44,6 +44,10 @@ public class BreezeMetastateModule extends BreezeModule {
         try {
             if (chats != null) {
                 for (BrzChat c : chats) {
+                    if(c.id.equals("PUBLIC_THREAD")){
+                        chats.remove(chats.indexOf(c));
+                        continue;
+                    }
                     List<BrzMessage> messages = api.db.getChatMessages(c.id);
                     if (messages != null) {
                         Log.i("STATE", "Found " + messages.size() + " messages in chat " + c.id);

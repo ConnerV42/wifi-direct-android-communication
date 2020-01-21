@@ -124,6 +124,11 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
         this.chatListener = brzChats -> {
             if (brzChats != null) {
                 this.chats = brzChats;
+                for(BrzChat c : brzChats){
+                    if(c.id.equals("PUBLIC_THREAD")){
+                        this.chats.remove(this.chats.indexOf(c));
+                    }
+                }
                 notifyDataSetChanged();
             }
         };
