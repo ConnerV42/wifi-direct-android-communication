@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:orderInCategory="3"
-        android:title="Feed On/Off"
-        app:showAsAction="always" />
+
     <item
         android:id="@+id/profile_option"
         android:orderInCategory="1"
@@ -15,12 +12,6 @@
         android:orderInCategory="2"
         android:title="Private Chat"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/activate_feed_switch"
-        android:title="Activate Feed"
-        app:actionLayout="@layout/switch_item"
-        android:orderInCategory="4"
-        app:showAsAction="always" />
 
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"

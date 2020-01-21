@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
+import android.widget.Switch;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +19,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.CompoundButton;
 
 import com.breeze.MainActivity;
 import com.breeze.R;
@@ -30,6 +32,7 @@ import com.breeze.router.BrzRouter;
 import com.breeze.views.MainSettingsActivity;
 import com.breeze.views.ProfileActivity;
 
+import com.breeze.R.layout.*;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -50,83 +53,96 @@ public class PublicMessagesView extends AppCompatActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_public_messages_view);
-        BreezeAPI api = BreezeAPI.getInstance();
+        Switch publicSwitch = findViewById(R.id.PublicSwitch);
+        publicSwitch.setChecked(true);
+        // check current state of a Switch (true or false).
+        //Boolean switchState = publicSwitch.isChecked();
 
-        // Get the chat from the argument
-        Intent i = getIntent();
-        String chatId = "PUBLIC_THREAD";
-        this.chat = api.state.getChat(chatId);
-        Log.i("STATE", this.chat.toJSON());
 
-        if (chat == null) return;
+            BreezeAPI api = BreezeAPI.getInstance();
 
-        // Set up content
-        final BrzRouter router = BrzRouter.getInstance();
+            // Get the chat from the argument
+            Intent i = getIntent();
+            String chatId = "PUBLIC_THREAD";
+            this.chat = api.state.getChat(chatId);
+            Log.i("STATE", this.chat.toJSON());
 
-        this.list = new MessageList(this, this.chat);
-        RecyclerView msgView = findViewById(R.id.publicMessageList);
-        msgView.setAdapter(this.list);
-        LinearLayoutManager msgLayout = new LinearLayoutManager(this);
-        msgLayout.setStackFromEnd(true);
-        msgView.setLayoutManager(msgLayout);
+            if (chat == null) return;
 
-        ImageButton sendMessage = findViewById(R.id.publicSendMessage);
-        sendMessage.setOnClickListener(view1 -> { // send message
+            // Set up content
+            final BrzRouter router = BrzRouter.getInstance();
 
-            EditText messageBox = findViewById(R.id.publicEditText);
-            String messageBoxText = messageBox.getText().toString();
+            this.list = new MessageList(this, this.chat);
+            RecyclerView msgView = findViewById(R.id.publicMessageList);
+            msgView.setAdapter(this.list);
+            LinearLayoutManager msgLayout = new LinearLayoutManager(this);
+            msgLayout.setStackFromEnd(true);
+            msgView.setLayoutManager(msgLayout);
 
-            // Reset message box
-            messageBox.setText("");
-            Toast.makeText(this.getApplicationContext(), "button clicked", Toast.LENGTH_SHORT).show();
+            ImageButton sendMessage = findViewById(R.id.publicSendMessage);
+            sendMessage.setOnClickListener(view1 -> { // send message
 
-            BrzPacket p = BrzPacketBuilder.publicMessage(router.hostNode.id, "", messageBoxText, false);
+                EditText messageBox = findViewById(R.id.publicEditText);
+                String messageBoxText = messageBox.getText().toString();
 
-            try {
-                BreezeAPI.getInstance().sendPublicMessage(p.message());
-            } catch (Exception e) {
-                Log.i("MESSAGE_SEND_ERROR", "Cannot send message to " + p.to);
-                Toast.makeText(this.getApplicationContext(), "Cannot send message to " + p.to + "; verify they're in the graph", Toast.LENGTH_SHORT).show();
-            }
-        });
+                // Reset message box
+                messageBox.setText("");
+                //Toast.makeText(this.getApplicationContext(), "button clicked", Toast.LENGTH_SHORT).show();
+
+                BrzPacket p = BrzPacketBuilder.publicMessage(router.hostNode.id, "", messageBoxText, false);
+
+                try {
+                    BreezeAPI.getInstance().sendPublicMessage(p.message());
+                } catch (Exception e) {
+                    Log.i("MESSAGE_SEND_ERROR", "Cannot send message to " + p.to);
+                    Toast.makeText(this.getApplicationContext(), "Cannot send message to " + p.to + "; verify they're in the graph", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+
     }
+
     @Override
     public void onStart() {
         super.onStart();
-//        BreezeAPI api = BreezeAPI.getInstance();
-//        ActionBar ab = getSupportActionBar();
-//        if (ab == null) return;
-//        ab.setDisplayHomeAsUpEnabled(true);
-//        ab.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
-//
-//        if(this.chat != null) ab.setTitle("Public Feed");
-//
-//        RecyclerView msgView = findViewById(R.id.publicMessageList);
-//        this.messageListener = messages -> {
-//            if (messages != null) {
-//                msgView.scrollToPosition(messages.size() - 1);
-//                Log.i("BLAH", "Scrolling list");
-//            }
-//        };
-//        api.state.on("messages" + this.chat.id, messageListener);
-//
-//        //-------------------------------------------------------------------------------//
-//
-//        LinearLayout messageEditor = findViewById(R.id.public_messages_editor);
-//        TextView messageNotAccepted = findViewById(R.id.public_messages_not_accepted);
-//        this.onChatUpdate = chat -> {
-//            if(chat == null) return;
-//            this.chat = chat;
-//
-//            messageEditor.setVisibility(View.VISIBLE);
-//            messageNotAccepted.setVisibility(View.GONE);
-//
-//        };
-//
-//        api.state.on("chat" + this.chat.id, this.onChatUpdate);
-//        this.onChatUpdate.accept(chat);
+        BreezeAPI api = BreezeAPI.getInstance();
+        ActionBar ab = getSupportActionBar();
+        if (ab == null) return;
+        ab.setDisplayHomeAsUpEnabled(true);
+        ab.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
+
+        if(this.chat != null){
+            ab.setTitle("Public Feed");
+
+        }
+
+        RecyclerView msgView = findViewById(R.id.publicMessageList);
+        this.messageListener = messages -> {
+            if (messages != null) {
+                msgView.scrollToPosition(messages.size() - 1);
+                Log.i("BLAH", "Scrolling list");
+            }
+        };
+        api.state.on("messages" + this.chat.id, messageListener);
+
+        //-------------------------------------------------------------------------------//
+
+        LinearLayout messageEditor = findViewById(R.id.public_messages_editor);
+        TextView messageNotAccepted = findViewById(R.id.public_messages_not_accepted);
+        this.onChatUpdate = chat -> {
+            if(chat == null) return;
+            this.chat = chat;
+
+            messageEditor.setVisibility(View.VISIBLE);
+            messageNotAccepted.setVisibility(View.GONE);
+
+        };
+
+        api.state.on("chat" + this.chat.id, this.onChatUpdate);
+        this.onChatUpdate.accept(chat);
     }
 
     @Override
@@ -152,9 +168,9 @@ public class PublicMessagesView extends AppCompatActivity {
             Intent i = new Intent(PublicMessagesView.this, MainActivity.class);
             startActivity(i);
         }
-        else if(id == R.id.activate_feed_switch) {
-           // pause/start feed
-        }
+//        else if(id == R.id.activate_feed_switch) {
+//           // pause/start feed
+//        }
         else if (id == R.id.action_settings) {
             Intent i = new Intent(PublicMessagesView.this, MainSettingsActivity.class);
             startActivity(i);

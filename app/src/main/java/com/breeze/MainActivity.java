@@ -15,6 +15,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import com.breeze.application.BreezeAPI;
+import com.breeze.datatypes.BrzChat;
 import com.breeze.views.MainSettingsActivity;
 import com.breeze.views.Messages.PublicMessagesView;
 import com.breeze.views.StreamsTestingActivity;
