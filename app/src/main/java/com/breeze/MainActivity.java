@@ -4,9 +4,15 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.ui.AppBarConfiguration;
 
 import com.breeze.application.BreezeAPI;
 import com.breeze.views.MainSettingsActivity;
@@ -79,10 +86,85 @@ public class MainActivity extends AppCompatActivity {
 
         this.toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        setupNavListeners();
+    }
 
-
-
-
+    private void setupNavListeners(){
+        Button publicThread = findViewById(R.id.nav_public_thread_menu_button);
+        Button myProfile = findViewById(R.id.nav_my_profile_button);
+        Button settings = findViewById(R.id.nav_settings_menu_button);
+        Button micStream = findViewById(R.id.nav_mic_streams_button);
+        publicThread.setOnTouchListener((View v, MotionEvent event) -> {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        v.getBackground().setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
+                        v.invalidate();
+                        break;
+                    }
+                    case MotionEvent.ACTION_UP: {
+                        v.getBackground().clearColorFilter();
+                        v.invalidate();
+                        Intent i = new Intent(MainActivity.this, PublicMessagesView.class);
+                        startActivity(i);
+                        break;
+                    }
+                }
+                return false;
+            }
+        );
+        myProfile.setOnTouchListener((View v, MotionEvent event) -> {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN: {
+                            v.getBackground().setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
+                            v.invalidate();
+                            break;
+                        }
+                        case MotionEvent.ACTION_UP: {
+                            v.getBackground().clearColorFilter();
+                            v.invalidate();
+                            Toast.makeText(this, "My profile option not yet implemented", Toast.LENGTH_SHORT).show();
+                            break;
+                        }
+                    }
+                    return false;
+                }
+        );
+        settings.setOnTouchListener((View v, MotionEvent event) -> {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN: {
+                            v.getBackground().setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
+                            v.invalidate();
+                            break;
+                        }
+                        case MotionEvent.ACTION_UP: {
+                            v.getBackground().clearColorFilter();
+                            v.invalidate();
+                            Intent i = new Intent(MainActivity.this, MainSettingsActivity.class);
+                            startActivity(i);
+                            break;
+                        }
+                    }
+                    return false;
+                }
+        );
+        micStream.setOnTouchListener((View v, MotionEvent event) -> {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN: {
+                            v.getBackground().setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
+                            v.invalidate();
+                            break;
+                        }
+                        case MotionEvent.ACTION_UP: {
+                            v.getBackground().clearColorFilter();
+                            v.invalidate();
+                            Intent i = new Intent(MainActivity.this, StreamsTestingActivity.class);
+                            startActivity(i);
+                            break;
+                        }
+                    }
+                    return false;
+                }
+        );
     }
 
     @Override
