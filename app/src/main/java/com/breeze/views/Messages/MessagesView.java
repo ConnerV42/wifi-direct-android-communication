@@ -15,7 +15,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,6 +46,7 @@ public class MessagesView extends AppCompatActivity {
     private static final int PHOTO_REQUEST_CODE = 69;
     private static final int VIDEO_REQUEST_CODE = 70;
     private static final int AUDIO_REQUEST_CODE = 71;
+    private static final int FILE_REQUEST_CODE = 72;
     private BrzChat chat;
     private MessageList list;
     private Consumer<BrzChat> onChatUpdate;
@@ -73,52 +77,66 @@ public class MessagesView extends AppCompatActivity {
         api.state.setCurrentChat(chatId);
 
         // Set up content
-        final BrzRouter router = BrzRouter.getInstance();
-
         this.list = new MessageList(this, this.chat);
+
         RecyclerView msgView = findViewById(R.id.messageList);
-        msgView.setAdapter(this.list);
         LinearLayoutManager msgLayout = new LinearLayoutManager(this);
+
+        ImageButton sendPhoto = findViewById(R.id.sendPhoto);
+        ImageButton sendVideo = findViewById(R.id.sendVideo);
+        ImageButton sendAudio = findViewById(R.id.sendAudio);
+        ImageButton sendFile = findViewById(R.id.sendFile);
+
+        EditText messageBox = findViewById(R.id.editText);
+        ImageButton sendMessage = findViewById(R.id.sendMessage);
+
+        // Set up message list's layout
+        msgView.setAdapter(this.list);
         msgLayout.setStackFromEnd(true);
         msgView.setLayoutManager(msgLayout);
 
-        ImageButton sendMessage = findViewById(R.id.sendMessage);
-        sendMessage.setOnClickListener(view1 -> { // send message
+        // Set up a listener that shows and hides items depending on user's input
+        messageBox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
-            EditText messageBox = findViewById(R.id.editText);
-            String messageBoxText = messageBox.getText().toString();
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                typingAction(messageBox);
+            }
 
-            // Reset message box
-            messageBox.setText("");
-
-            BrzPacket p = BrzPacketBuilder.message(router.hostNode.id, "", messageBoxText, chat.id, false);
-            try {
-                BreezeAPI.getInstance().sendMessage(p.message());
-            } catch (Exception e) {
-                Log.i("MESSAGE_SEND_ERROR", "Cannot send message to " + p.to);
-                Toast.makeText(this.getApplicationContext(), "Cannot send message to " + p.to + "; verify they're in the graph", Toast.LENGTH_SHORT).show();
+            @Override
+            public void afterTextChanged(Editable s) {
             }
         });
+        this.typingAction(messageBox);
+
+        // Set up message sending listener
+        sendMessage.setOnClickListener(this::sendStringMessage);
 
         // Bring up the option to select media to send from external storage
-        ImageButton sendPhoto = findViewById(R.id.sendPhoto);
         sendPhoto.setOnClickListener(view1 -> {
             Intent intent = new Intent(Intent.ACTION_PICK,
                     android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(intent, PHOTO_REQUEST_CODE);
         });
 
-        ImageButton sendVideo = findViewById(R.id.sendVideo);
         sendVideo.setOnClickListener(view1 -> {
             Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(intent, VIDEO_REQUEST_CODE);
         });
 
-        ImageButton sendAudio = findViewById(R.id.sendAudio);
         sendAudio.setOnClickListener(view1 -> {
             Intent intent = new Intent(Intent.ACTION_PICK,
                     android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(intent, AUDIO_REQUEST_CODE);
+        });
+
+        sendFile.setOnClickListener(view1 -> {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("*/*");
+            startActivityForResult(intent, FILE_REQUEST_CODE);
         });
     }
 
@@ -135,6 +153,7 @@ public class MessagesView extends AppCompatActivity {
             if (requestCode == PHOTO_REQUEST_CODE) bodyFortype = "Image";
             else if (requestCode == VIDEO_REQUEST_CODE) bodyFortype = "Video";
             else if (requestCode == AUDIO_REQUEST_CODE) bodyFortype = "Audio";
+            else if (requestCode == FILE_REQUEST_CODE) bodyFortype = "File";
             else return;
 
             BrzPacket p = BrzPacketBuilder.message(api.hostNode.id, "", bodyFortype, chat.id, false);
@@ -212,5 +231,51 @@ public class MessagesView extends AppCompatActivity {
         api.state.off("messages" + chat.id, this.messageListener);
         api.state.off("chat" + this.chat.id, this.onChatUpdate);
         this.list.cleanup();
+    }
+
+    // Helpers
+    private void typingAction(View v) {
+        if (!(v instanceof EditText)) return;
+        EditText messageBox = (EditText) v;
+
+        ImageButton sendPhoto = findViewById(R.id.sendPhoto);
+        ImageButton sendVideo = findViewById(R.id.sendVideo);
+        ImageButton sendAudio = findViewById(R.id.sendAudio);
+        ImageButton sendFile = findViewById(R.id.sendFile);
+        ImageButton sendMessage = findViewById(R.id.sendMessage);
+
+        if (!messageBox.getText().toString().isEmpty()) {
+            sendPhoto.setVisibility(View.GONE);
+            sendVideo.setVisibility(View.GONE);
+            sendAudio.setVisibility(View.GONE);
+            sendFile.setVisibility(View.GONE);
+
+            sendMessage.setVisibility(View.VISIBLE);
+        } else {
+            sendPhoto.setVisibility(View.VISIBLE);
+            sendVideo.setVisibility(View.VISIBLE);
+            sendAudio.setVisibility(View.VISIBLE);
+            sendFile.setVisibility(View.VISIBLE);
+
+            sendMessage.setVisibility(View.GONE);
+        }
+    }
+
+    private void sendStringMessage(View v) {
+        BreezeAPI api = BreezeAPI.getInstance();
+        EditText messageBox = findViewById(R.id.editText);
+        String messageBoxText = messageBox.getText().toString();
+
+        // Reset message box
+        messageBox.setText("");
+
+        BrzPacket p = BrzPacketBuilder.message(api.hostNode.id, "", messageBoxText, chat.id, false);
+        try {
+            BreezeAPI.getInstance().sendMessage(p.message());
+        } catch (Exception e) {
+            Log.i("MESSAGE_SEND_ERROR", "Cannot send message to " + p.to);
+            Toast.makeText(this.getApplicationContext(), "Cannot send message to " + p.to + "; verify they're in the graph", Toast.LENGTH_SHORT).show();
+        }
+
     }
 }

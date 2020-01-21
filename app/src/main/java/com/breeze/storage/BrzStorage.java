@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Environment;
 
 import androidx.core.content.ContextCompat;
@@ -136,6 +137,11 @@ public class BrzStorage {
         File chatDir = new File(messagesDir, message.chatId);
         File messageFile = new File(chatDir, message.id);
 
+        this.saveMessageFile(messageFile, stream);
+
+    }
+
+    public void saveMessageFile(File messageFile, InputStream stream) {
         try {
             messageFile.mkdirs();
             if (messageFile.exists()) messageFile.delete();
@@ -155,6 +161,7 @@ public class BrzStorage {
         }
     }
 
+
     public boolean hasMessageFile(BrzMessage message) {
         BreezeAPI api = BreezeAPI.getInstance();
         File messagesDir = api.getExternalFilesDir(FILE_MESSAGES_DIR);
@@ -164,7 +171,7 @@ public class BrzStorage {
     }
 
     public File getMessageFile(BrzMessage message) {
-        if(hasMessageFile(message)) {
+        if (hasMessageFile(message)) {
             BreezeAPI api = BreezeAPI.getInstance();
             File messagesDir = api.getExternalFilesDir(FILE_MESSAGES_DIR);
             File chatDir = new File(messagesDir, message.chatId);

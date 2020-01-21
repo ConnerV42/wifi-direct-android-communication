@@ -43,6 +43,39 @@
             android:text="message body"
             android:textColor="#000000" />
 
+        <ImageView
+            android:id="@+id/messageImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:background="@drawable/message_bubble"
+            android:scaleType="centerInside" />
+
+        <LinearLayout
+            android:id="@+id/messageFileContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/message_bubble"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <ImageButton
+                android:id="@+id/messageFile"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/ic_description_black_24dp" />
+
+            <TextView
+                android:id="@+id/messageFileName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TextView"
+                android:textAlignment="center" />
+        </LinearLayout>
+
         <LinearLayout
             android:id="@+id/messageVideoContainer"
             android:layout_width="match_parent"
@@ -92,15 +125,6 @@
                 android:layout_weight="1" />
 
         </LinearLayout>
-
-        <ImageView
-            android:id="@+id/messageImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:background="@drawable/message_bubble"
-            android:scaleType="centerInside" />
-
 
 
         <LinearLayout

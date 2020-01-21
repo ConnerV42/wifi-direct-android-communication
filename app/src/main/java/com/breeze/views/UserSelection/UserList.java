@@ -44,6 +44,7 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
             user_name.setText(node.name);
 
             TextView user_alias = v.findViewById(R.id.user_alias);
+            user_alias.setVisibility(View.VISIBLE);
             user_alias.setText(node.alias);
 
             ImageView user_image = v.findViewById(R.id.user_image);
@@ -65,7 +66,7 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
             user_name.setText("Connecting...");
 
             TextView user_alias = v.findViewById(R.id.user_alias);
-            user_alias.setText("");
+            user_alias.setVisibility(View.GONE);
 
             ImageView user_image = v.findViewById(R.id.user_image);
             user_name.setTextColor(ctx.getColor(android.R.color.black));

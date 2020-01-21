@@ -1,12 +1,13 @@
 package com.breeze.views.Messages;
 
 import android.content.Context;
-import android.graphics.Color;
+import android.content.Intent;
 import android.net.Uri;
 import android.view.Gravity;
-import android.widget.FrameLayout;
+import android.webkit.MimeTypeMap;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,10 +25,8 @@ import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.graph.BrzGraph;
-import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -115,10 +114,13 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
             ImageView messageImage = this.v.findViewById(R.id.messageImage);
             View messageMediaControls = this.v.findViewById(R.id.messageMediaControls);
             VideoView messageVideo = this.v.findViewById(R.id.messageVideo);
+            LinearLayout messageFileContainer = this.v.findViewById(R.id.messageFileContainer);
+
             messageBody.setVisibility(View.GONE);
             messageImage.setVisibility(View.GONE);
             messageMediaControls.setVisibility(View.GONE);
             messageVideo.setVisibility(View.GONE);
+            messageFileContainer.setVisibility(View.GONE);
 
             if (type == MessageType.IMAGE) {
                 messageImage.setVisibility(View.VISIBLE);
@@ -145,6 +147,18 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
                 videoController = new VideoMessage(messageMediaControls, messageVideo,
                         outgoing ? R.drawable.message_media_controls_outgoing : R.drawable.message_media_controls
                 );
+            } else if (type == MessageType.FILE) {
+                messageFileContainer.setVisibility(View.VISIBLE);
+                TextView messageFileName = v.findViewById(R.id.messageFileName);
+                messageFileName.setText(msg.body);
+
+                ImageButton messageFile = v.findViewById(R.id.messageFile);
+                messageFile.setOnClickListener((e) -> {
+                    api.openFile(api.storage.getMessageFile(msg), msg.body.replace("File: ", ""));
+                });
+
+                if (outgoing) messageFileContainer.setBackgroundResource(R.drawable.status_bubble);
+                else messageFileContainer.setBackgroundResource(R.drawable.message_bubble);
             } else {
                 messageBody.setVisibility(View.VISIBLE);
                 messageBody.setText(msg.body);

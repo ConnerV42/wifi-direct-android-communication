@@ -22,6 +22,7 @@ import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzNode;
+import com.breeze.graph.BrzGraph;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
 import com.breeze.views.Messages.MessagesView;
@@ -46,9 +47,22 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
         }
 
         public void bind(BrzChat chat, int position, Context ctx) {
+            BrzGraph graph = BrzGraph.getInstance();
 
             TextView chatName = this.v.findViewById(R.id.chat_name);
             chatName.setText(chat.name);
+
+            TextView onlineIndicator = v.findViewById(R.id.online_indicator);
+            TextView offlineIndicator = v.findViewById(R.id.offline_indicator);
+            onlineIndicator.setVisibility(View.GONE);
+            offlineIndicator.setVisibility(View.GONE);
+
+            if (!chat.isGroup && graph.getVertex(chat.otherPersonId()) != null) {
+                onlineIndicator.setVisibility(View.VISIBLE);
+            } else if (!chat.isGroup) {
+                offlineIndicator.setVisibility(View.VISIBLE);
+            }
+
 
             // Chat awaiting acceptance
             TextView chatSubText = this.v.findViewById(R.id.chat_sub_text);
@@ -104,10 +118,12 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
 
     private Consumer<List<BrzChat>> chatListener;
     private Consumer<Object> messageListener;
+    private Consumer<Object> graphListener;
 
     public ChatList(Context ctx) {
         this.ctx = ctx;
         BreezeAPI api = BreezeAPI.getInstance();
+        BrzGraph graph = BrzGraph.getInstance();
         this.chatListener = brzChats -> {
             if (brzChats != null) {
                 this.chats = brzChats;
@@ -122,6 +138,16 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
         this.chatListener.accept(api.state.getAllChats());
         api.state.on("allChats", this.chatListener);
         api.state.on("messages", this.messageListener);
+
+        this.graphListener = newNode -> {
+            notifyDataSetChanged();
+        };
+
+        // Set up event listeners
+        this.graphListener.accept(null);
+        graph.on("addVertex", this.graphListener);
+        graph.on("deleteVertex", this.graphListener);
+        graph.on("setVertex", this.graphListener);
     }
 
     public void cleanup() {

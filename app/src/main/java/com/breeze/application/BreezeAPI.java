@@ -3,18 +3,22 @@ package com.breeze.application;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.FileProvider;
 
 import com.breeze.App;
 import com.breeze.MainActivity;
@@ -35,6 +39,7 @@ import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
 import com.breeze.views.ProfileActivity;
 
+import java.io.File;
 import java.io.InputStream;
 
 public class BreezeAPI extends Service {
@@ -341,13 +346,46 @@ public class BreezeAPI extends Service {
         this.addMessage(message);
     }
 
+    public void openFile(File privateFile, String name) {
+        ContentResolver res = getContentResolver();
+        File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File publicFile = new File(downloadsDir, name);
+        Log.i("API", publicFile.getAbsolutePath());
+
+        Uri publicFileUri = FileProvider.getUriForFile(this, "com.breeze.fileprovider", publicFile);
+
+        try {
+            this.storage.saveMessageFile(publicFile, res.openInputStream(Uri.fromFile(privateFile)));
+        } catch (Exception e) {
+            Log.e("API", "Error saving public access file", e);
+        }
+
+        grantUriPermission(getPackageName(), publicFileUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        Intent newIntent = new Intent(Intent.ACTION_VIEW);
+        newIntent.setDataAndType(publicFileUri, res.getType(publicFileUri));
+        newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        newIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        Log.i("API", "" + publicFileUri.toString() + " " + res.getType(publicFileUri));
+
+        try {
+            startActivity(newIntent);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, "No handler for this type of file.", Toast.LENGTH_LONG).show();
+        }
+    }
+
     public void sendFileMessage(BrzMessage message, Uri fileUri) {
         ContentResolver res = getContentResolver();
         BrzFileInfo info = new BrzFileInfo();
-        info.fileName = fileUri.getLastPathSegment();
+        info.fileName = new File(fileUri.getPath()).getName();
 
         MimeTypeMap mime = MimeTypeMap.getSingleton();
         String type = mime.getExtensionFromMimeType(res.getType(fileUri));
+
+        if (message.body.startsWith("File")) {
+            message.body = "File: " + info.fileName;
+        }
 
         try {
             storage.saveMessageFile(message, res.openInputStream(fileUri));
@@ -398,7 +436,7 @@ public class BreezeAPI extends Service {
     }
 
     public void requestProfileImages(BrzGraph newNodes) {
-        if(newNodes == null)
+        if (newNodes == null)
             return;
 
         BrzProfileRequest profileRequest = new BrzProfileRequest(this.hostNode.id, false);
