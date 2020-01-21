@@ -362,7 +362,7 @@ public class BreezeAPI extends Service {
 //            p.to = nodeId;
 //            this.router.send(p);
 //        }
-        this.router.broadcast(p);
+        this .router.broadcast(p);
         this.addMessage(message);
     }
 

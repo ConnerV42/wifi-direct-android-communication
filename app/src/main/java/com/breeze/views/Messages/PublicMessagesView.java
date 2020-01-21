@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
+import android.view.MotionEvent;
 import android.widget.Switch;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -56,8 +57,7 @@ public class PublicMessagesView extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_public_messages_view);
-        Switch publicSwitch = findViewById(R.id.PublicSwitch);
-        publicSwitch.setChecked(true);
+
         // check current state of a Switch (true or false).
         //Boolean switchState = publicSwitch.isChecked();
 
@@ -78,9 +78,31 @@ public class PublicMessagesView extends AppCompatActivity {
             this.list = new MessageList(this, this.chat);
             RecyclerView msgView = findViewById(R.id.publicMessageList);
             msgView.setAdapter(this.list);
+            Switch publicSwitch = findViewById(R.id.PublicSwitch);
+            publicSwitch.setChecked(true);
+
+            publicSwitch.setOnTouchListener((View v, MotionEvent e) -> {
+                switch(e.getAction()){
+                    case MotionEvent.ACTION_UP:
+                        if(publicSwitch.isChecked()){
+                            publicSwitch.setChecked(false);
+                            msgView.setAdapter(null);
+                            return true;
+                        }
+                        else {
+                            publicSwitch.setChecked(true);
+                            RecyclerView r = findViewById(R.id.publicMessageList);
+                            msgView.setAdapter(this.list);
+                            return true;
+                        }
+                }
+                return false;
+            });
+
             LinearLayoutManager msgLayout = new LinearLayoutManager(this);
             msgLayout.setStackFromEnd(true);
             msgView.setLayoutManager(msgLayout);
+
 
             ImageButton sendMessage = findViewById(R.id.publicSendMessage);
             sendMessage.setOnClickListener(view1 -> { // send message
