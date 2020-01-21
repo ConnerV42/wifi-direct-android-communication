@@ -20,12 +20,12 @@ public class BrzPublicMessageHandler implements BrzRouterHandler{
 
 
         BrzMessage m = packet.publicMessage();
-        if(m.chatId != "PUBLIC_THREAD"){
+        if(!m.chatId.equals("PUBLIC_THREAD")){
             return;
         }
         BreezeAPI api = BreezeAPI.getInstance();
         try {
-            api.meta.showNotification(m);
+           // api.meta.showNotification(m);
             api.addMessage(m);
 
             // Send delivery acknowledgement
