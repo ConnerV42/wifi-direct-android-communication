@@ -15,9 +15,12 @@ import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzFileInfo;
 import com.breeze.datatypes.BrzMessage;
+import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.ProfileEvents.BrzProfileResponse;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -53,9 +56,14 @@ public class BrzStorage {
 
     private final String PROFILE_IMAGE_DIR = "profile_images";
 
-    public void saveProfileImage(BrzPacket p, InputStream stream) {
+    public void saveProfileImageFile(BrzPacket p, InputStream stream) {
         BrzProfileResponse response = p.profileResponse();
         BreezeAPI api = BreezeAPI.getInstance();
+
+        BrzNode node = api.router.graph.getVertex(response.from);
+        if (node == null)
+            return;
+
         File profileImageDirectory = api.getExternalFilesDir(PROFILE_IMAGE_DIR);
         File profileImage = new File(profileImageDirectory, response.from);
 
@@ -161,7 +169,6 @@ public class BrzStorage {
         }
     }
 
-
     public boolean hasMessageFile(BrzMessage message) {
         BreezeAPI api = BreezeAPI.getInstance();
         File messagesDir = api.getExternalFilesDir(FILE_MESSAGES_DIR);
@@ -187,19 +194,6 @@ public class BrzStorage {
         File messageFile = new File(chatDir, message.id);
         return getImage(messageFile);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     /*
      *
@@ -279,4 +273,10 @@ public class BrzStorage {
         return bitmap;
     }
 
+    public static InputStream bitmapToInputStream(Bitmap bm, int quality) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.PNG, quality, baos);
+        InputStream is = new ByteArrayInputStream(baos.toByteArray());
+        return is;
+    }
 }

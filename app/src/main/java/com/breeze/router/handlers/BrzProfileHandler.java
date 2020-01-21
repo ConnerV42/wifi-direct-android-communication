@@ -39,19 +39,16 @@ public class BrzProfileHandler implements BrzRouterStreamHandler {
                 fileInfo.fileName = router.hostNode.id;
                 p.addStream(fileInfo);
 
-                // Send bitmap to the requester
                 api.sendProfileResponse(p, bm);
             }
-        } else {
-            // handle packet from incoming BrzProfileResponse
         }
     }
 
     public void handleStream(BrzPacket packet, InputStream stream) {
+        if (!this.handles(packet.type))
+            throw new RuntimeException("This handler does not handle packets of type " + packet.type);
         BreezeAPI api = BreezeAPI.getInstance();
-
-        api.incomingProfileResponse(packet, stream);
-        this.handle(packet, "");
+        api.storage.saveProfileImageFile(packet, stream);
     }
 
     @Override

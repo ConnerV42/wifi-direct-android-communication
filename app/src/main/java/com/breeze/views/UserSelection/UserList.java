@@ -48,10 +48,17 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
             user_alias.setText(node.alias);
 
             ImageView user_image = v.findViewById(R.id.user_image);
+
             if (nodes.contains(node.id)) {
                 user_name.setTextColor(ctx.getColor(R.color.colorAccent));
                 user_alias.setTextColor(ctx.getColor(R.color.colorAccent));
                 user_image.setColorFilter(ctx.getColor(R.color.colorAccent));
+                BreezeAPI api = BreezeAPI.getInstance();
+
+                // Set bitmap if it exists in BrzStorage
+                Bitmap bm = api.storage.getProfileImage(node.id, v.getContext());
+                if (bm != null)
+                    user_image.setImageBitmap(bm);
             } else {
                 user_name.setTextColor(ctx.getColor(android.R.color.black));
                 user_alias.setTextColor(ctx.getColor(android.R.color.black));
@@ -94,6 +101,8 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
         this.nodes = nodes;
         BrzGraph graph = BrzGraph.getInstance();
         BrzRouter router = BreezeAPI.getInstance().router;
+        BreezeAPI api = BreezeAPI.getInstance();
+        api.requestProfileImages(nodes);
 
         this.graphListener = newNode -> {
             this.allNodes = new ArrayList<>();

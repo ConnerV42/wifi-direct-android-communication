@@ -39,8 +39,11 @@ import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
 import com.breeze.views.ProfileActivity;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.util.List;
 
 public class BreezeAPI extends Service {
 
@@ -428,11 +431,18 @@ public class BreezeAPI extends Service {
     //
     //
 
-    public void requestProfileImages() {
+    public void requestProfileImages(List<String> ids) {
         BrzProfileRequest profileRequest = new BrzProfileRequest(this.hostNode.id, false);
-        BrzPacket p = new BrzPacket(profileRequest, BrzPacket.BrzPacketType.PROFILE_REQUEST, "BROADCAST", true);
+        BrzPacket p = new BrzPacket(profileRequest, BrzPacket.BrzPacketType.PROFILE_REQUEST, "", true);
 
-        router.send(p);
+        for(String id : ids) {
+            BrzNode node = router.graph.getVertex(id);
+            if (node == null || !storage.hasProfileImage(node.id))
+                continue;
+
+            p.to = node.id;
+            router.send(p);
+        }
     }
 
     public void requestProfileImages(BrzGraph newNodes) {
@@ -452,21 +462,9 @@ public class BreezeAPI extends Service {
     public void sendProfileResponse(BrzPacket packet, Bitmap bm) {
         BrzProfileResponse response = new BrzProfileResponse(router.hostNode.id, false);
 
-        // TODO: Convert bitmap to InputStream
+        // Fuck the quality :)
+        InputStream stream = BrzStorage.bitmapToInputStream(bm, 45);
 
-        // router.sendStream(packet.profileResponse(), bm);
+        router.sendStream(packet, stream);
     }
-
-    public void incomingProfileResponse(BrzPacket packet, InputStream stream) {
-        BrzFileInfo fileInfo = packet.stream;
-
-        BrzProfileResponse response = packet.profileResponse();
-
-        BrzNode node = this.router.graph.getVertex(response.from);
-        if (node == null || fileInfo == null)
-            return;
-
-        // TODO: Save the input stream in profile_images directory
-    }
-
 }
