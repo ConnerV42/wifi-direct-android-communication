@@ -18,6 +18,8 @@ import android.security.keystore.KeyProtection;
 import android.util.Base64;
 import android.util.Log;
 
+import com.breeze.datatypes.BrzFileInfo;
+
 import java.security.KeyStore;
 
 import javax.crypto.Cipher;
@@ -222,21 +224,37 @@ public final class BrzEncryption {
         return null;
     }
 
-    public InputStream encryptStream(final SecretKey secretKey, final InputStream inputStream) {
+    public InputStream encryptStream(final String alias, final BrzFileInfo fileInfo, final InputStream inputStream) {
+        if (aliasInvalid(alias))
+            throw new IllegalArgumentException("Bad alias parameter for the keystore");
+
         try {
+            SecretKey secretKey = (SecretKey) ks.getKey(alias, null);
+
             Cipher cipher = Cipher.getInstance(SYM_CIPHER);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+
             byte[] initialVector = cipher.getIV();
+            fileInfo.initialVector = Base64.encodeToString(initialVector, Base64.DEFAULT);
+
             return new CipherInputStream(inputStream, cipher);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
-    public InputStream decryptStream(final SecretKey secretKey, final byte[] initialVector, final InputStream inputStream) {
+
+    public InputStream decryptStream(final String alias, final BrzFileInfo fileInfo, final InputStream inputStream) {
+        if (aliasInvalid(alias))
+            throw new IllegalArgumentException("Bad alias parameter for the keystore");
+
         try {
+            SecretKey secretKey = (SecretKey) ks.getKey(alias, null);
+            byte[] initialVector = Base64.decode(fileInfo.initialVector, Base64.DEFAULT);
+
             Cipher cipher = Cipher.getInstance(SYM_CIPHER);
             cipher.init(Cipher.DECRYPT_MODE, secretKey, new GCMParameterSpec(128, initialVector));
+
             return new CipherInputStream(inputStream, cipher);
         } catch (Exception e) {
             e.printStackTrace();

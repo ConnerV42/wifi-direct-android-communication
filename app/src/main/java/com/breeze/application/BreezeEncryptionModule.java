@@ -1,6 +1,7 @@
 package com.breeze.application;
 
 import com.breeze.datatypes.BrzChat;
+import com.breeze.datatypes.BrzFileInfo;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.encryption.BrzEncryption;
@@ -11,6 +12,7 @@ import com.breeze.packets.ChatEvents.BrzChatHandshake;
 import android.util.Base64;
 import android.util.Log;
 
+import java.io.InputStream;
 import java.security.PublicKey;
 
 import javax.crypto.SecretKey;
@@ -87,5 +89,14 @@ public class BreezeEncryptionModule extends BreezeModule {
         String body = encryption.asymmetricDecrypt(api.hostNode.id, p.body);
         if (body == null) throw new RuntimeException("Could not decrypt packet");
         p.body = body;
+    }
+
+    // Stream stuff
+    public InputStream encryptStream(String chatId, BrzFileInfo fileInfo, InputStream stream) {
+        return encryption.encryptStream(chatId, fileInfo, stream);
+    }
+
+    public InputStream decryptStream(String chatId, BrzFileInfo fileInfo, InputStream stream) {
+        return encryption.decryptStream(chatId, fileInfo, stream);
     }
 }

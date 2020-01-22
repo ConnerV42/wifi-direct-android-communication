@@ -391,10 +391,11 @@ public class BreezeAPI extends Service {
         }
 
         try {
+            // Save the file to a local dir
             storage.saveMessageFile(message, res.openInputStream(fileUri));
-            BrzMessage clone = new BrzMessage(message.toJSON());
 
             // Encrypt the message
+            BrzMessage clone = new BrzMessage(message.toJSON());
             this.encryption.encryptMessage(clone);
 
             // Build a packet
@@ -407,11 +408,11 @@ public class BreezeAPI extends Service {
                 if (nodeId.equals(hostNode.id))
                     continue;
                 p.to = nodeId;
-                InputStream stream = res.openInputStream(fileUri);
-                this.router.sendStream(p, stream);
 
-                // Save outgoing file message
-                storage.saveMessageFile(p.message(), stream);
+                // Open and encrypt the file stream
+                InputStream fileStream = res.openInputStream(fileUri);
+                InputStream encryptedStream = this.encryption.encryptStream(chat.id, p.stream, fileStream);
+                this.router.sendStream(p, encryptedStream);
             }
 
             this.addMessage(message);

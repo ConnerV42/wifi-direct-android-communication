@@ -39,7 +39,9 @@ public class BrzMessageHandler implements BrzRouterStreamHandler {
     @Override
     public void handleStream(BrzPacket packet, InputStream stream) {
         BreezeAPI api = BreezeAPI.getInstance();
-        api.storage.saveMessageFile(packet.message(), stream);
+        BrzMessage m = packet.message();
+        InputStream decryptedStream = api.encryption.decryptStream(m.chatId, packet.stream, stream);
+        api.storage.saveMessageFile(packet.message(), decryptedStream);
         this.handle(packet, "");
     }
 
