@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -25,6 +27,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class UserSelection extends AppCompatActivity {
     List<String> nodes = new LinkedList<>();
@@ -128,11 +132,44 @@ public class UserSelection extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        list.cleanup();
+        int id = item.getItemId();
+        BreezeAPI api = BreezeAPI.getInstance();
 
-        finish();
+        if (id == R.id.action_settings) {
+            Log.i("STATE", "Settings selected");
+            return true;
+        } else if (id == R.id.action_toggle_discovery) {
+            if (api.router.isDiscovering) {
+                item.setChecked(false);
+                api.router.stopDiscovery();
+            } else {
+                item.setChecked(true);
+                api.router.startDiscovery();
+            }
+        } else if (id == R.id.action_discovery_scan) {
+            api.router.startDiscovery();
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    api.router.stopDiscovery();
+                }
+            }, 5 * 1000);
+        } else {
+            list.cleanup();
+            finish();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
 
     @Override
     public void onStop() {

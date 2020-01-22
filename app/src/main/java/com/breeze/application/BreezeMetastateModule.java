@@ -108,13 +108,13 @@ public class BreezeMetastateModule extends BreezeModule {
         api.router.send(p);
 
         // Tracking delivery isn't really necessary
-        // this.api.db.setDelivered(m.id);
+        // this.setDelivered(m.id);
     }
 
     public void sendReadReceipt(BrzMessage m) {
         BrzPacket p = BrzPacketBuilder.messageReceipt(m.from, m.chatId, m.id, false);
         api.router.send(p);
-        this.api.db.setRead(m.id);
+        this.setRead(m.id);
     }
 
     public void setDelivered(String messageId) {
@@ -129,7 +129,7 @@ public class BreezeMetastateModule extends BreezeModule {
 
     public void showMessageNotification(BrzMessage message) {
         BrzChat c = this.api.state.getChat(message.chatId);
-        if(api.state.getCurrentChat().equals(message.chatId)) return;
+        if (api.state.getCurrentChat().equals(message.chatId)) return;
 
         Intent chatIntent = MessagesView.getIntent(this.api, message.chatId);
         PendingIntent pending = PendingIntent.getActivity(this.api, 0, chatIntent, PendingIntent.FLAG_UPDATE_CURRENT);

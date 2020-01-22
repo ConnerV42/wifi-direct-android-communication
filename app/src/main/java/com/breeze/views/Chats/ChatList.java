@@ -148,12 +148,22 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
         graph.on("addVertex", this.graphListener);
         graph.on("deleteVertex", this.graphListener);
         graph.on("setVertex", this.graphListener);
+
+        api.meta.on("delivered", graphListener);
+        api.meta.on("read", graphListener);
     }
 
     public void cleanup() {
         BreezeAPI api = BreezeAPI.getInstance();
         api.state.off("allChats", this.chatListener);
         api.state.off("messages", this.messageListener);
+        api.meta.off("delivered", graphListener);
+        api.meta.off("read", graphListener);
+
+        BrzGraph graph = BrzGraph.getInstance();
+        graph.off("addVertex", this.graphListener);
+        graph.off("deleteVertex", this.graphListener);
+        graph.off("setVertex", this.graphListener);
     }
 
     @NonNull
