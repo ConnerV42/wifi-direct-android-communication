@@ -47,22 +47,20 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
             user_alias.setVisibility(View.VISIBLE);
             user_alias.setText(node.alias);
 
+            // Set bitmap if it exists in BrzStorage
             ImageView user_image = v.findViewById(R.id.user_image);
+            BreezeAPI api = BreezeAPI.getInstance();
+            Bitmap bm = api.storage.getProfileImage(node.id, v.getContext());
+            if (bm != null)
+                user_image.setImageBitmap(bm);
+
 
             if (nodes.contains(node.id)) {
                 user_name.setTextColor(ctx.getColor(R.color.colorAccent));
                 user_alias.setTextColor(ctx.getColor(R.color.colorAccent));
-                user_image.setColorFilter(ctx.getColor(R.color.colorAccent));
-                BreezeAPI api = BreezeAPI.getInstance();
-
-                // Set bitmap if it exists in BrzStorage
-                Bitmap bm = api.storage.getProfileImage(node.id, v.getContext());
-                if (bm != null)
-                    user_image.setImageBitmap(bm);
             } else {
                 user_name.setTextColor(ctx.getColor(android.R.color.black));
                 user_alias.setTextColor(ctx.getColor(android.R.color.black));
-                user_image.setColorFilter(ctx.getColor(android.R.color.black));
             }
 
             this.position = position;
@@ -75,10 +73,8 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
             TextView user_alias = v.findViewById(R.id.user_alias);
             user_alias.setVisibility(View.GONE);
 
-            ImageView user_image = v.findViewById(R.id.user_image);
             user_name.setTextColor(ctx.getColor(android.R.color.black));
             user_alias.setTextColor(ctx.getColor(android.R.color.black));
-            user_image.setColorFilter(ctx.getColor(android.R.color.black));
 
             this.position = -1;
         }
@@ -92,6 +88,7 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
     private Context ctx;
     private List<String> nodes;
 
+    private Consumer<String> profileImageListener;
     private Consumer<Object> graphListener;
     private Consumer<String> placeholderListener;
     private Consumer<String> removePlaceholderListener;
@@ -100,9 +97,8 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
         this.ctx = ctx;
         this.nodes = nodes;
         BrzGraph graph = BrzGraph.getInstance();
-        BrzRouter router = BreezeAPI.getInstance().router;
         BreezeAPI api = BreezeAPI.getInstance();
-        api.requestProfileImages(nodes);
+        BrzRouter router = api.router;
 
         this.graphListener = newNode -> {
             this.allNodes = new ArrayList<>();
@@ -133,6 +129,12 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
         router.on("endpointFound", this.placeholderListener);
         router.on("endpointConnected", this.removePlaceholderListener);
         router.on("endpointDisconnected", this.removePlaceholderListener);
+
+        this.profileImageListener = nodeId -> {
+            this.notifyDataSetChanged();
+        };
+
+        api.storage.on("profileImage", this.profileImageListener);
     }
 
 
@@ -180,10 +182,15 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
             protected FilterResults performFiltering(CharSequence searchSequence) {
                 String searchStr = searchSequence.toString().toLowerCase();
                 if (searchStr.isEmpty()) searchStr = "@";
+                BreezeAPI api = BreezeAPI.getInstance();
 
                 List<BrzNode> filteredList = new ArrayList<>();
                 for (BrzNode brzNode : allNodes) {
-                    if (!brzNode.id.equals(BreezeAPI.getInstance().hostNode.id) && (brzNode.alias.toLowerCase().contains(searchStr) || brzNode.name.toLowerCase().contains(searchStr)))
+                    String id = brzNode.id;
+                    String alias = brzNode.alias.toLowerCase();
+                    String name = brzNode.name.toLowerCase();
+
+                    if (!id.equals(api.hostNode.id) && (alias.contains(searchStr) || name.contains(searchStr)))
                         filteredList.add(brzNode);
                 }
 
@@ -208,15 +215,17 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
 
     public void cleanup() {
         BrzGraph graph = BrzGraph.getInstance();
-        BrzRouter router = BreezeAPI.getInstance().router;
+        BreezeAPI api = BreezeAPI.getInstance();
 
         graph.off("addVertex", this.graphListener);
         graph.off("deleteVertex", this.graphListener);
         graph.off("setVertex", this.graphListener);
 
-        router.off("endpointFound", this.placeholderListener);
-        router.off("endpointConnected", this.removePlaceholderListener);
-        router.off("endpointDisconnected", this.removePlaceholderListener);
+        api.router.off("endpointFound", this.placeholderListener);
+        api.router.off("endpointConnected", this.removePlaceholderListener);
+        api.router.off("endpointDisconnected", this.removePlaceholderListener);
+
+        api.storage.off("profileImage", this.profileImageListener);
     }
 
 }

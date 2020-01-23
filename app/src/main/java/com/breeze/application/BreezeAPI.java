@@ -32,15 +32,12 @@ import com.breeze.graph.BrzGraph;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.ChatEvents.BrzChatHandshake;
 import com.breeze.packets.ChatEvents.BrzChatResponse;
-import com.breeze.packets.ProfileEvents.BrzProfileRequest;
-import com.breeze.packets.ProfileEvents.BrzProfileResponse;
+import com.breeze.packets.ProfileEvents.BrzProfileImageEvent;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
 import com.breeze.views.ProfileActivity;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
@@ -432,40 +429,32 @@ public class BreezeAPI extends Service {
     //
     //
 
-    public void requestProfileImages(List<String> ids) {
-        BrzProfileRequest profileRequest = new BrzProfileRequest(this.hostNode.id, false);
-        BrzPacket p = new BrzPacket(profileRequest, BrzPacket.BrzPacketType.PROFILE_REQUEST, "", true);
-
-        for(String id : ids) {
-            BrzNode node = router.graph.getVertex(id);
-            if (node == null || !storage.hasProfileImage(node.id))
-                continue;
-
-            p.to = node.id;
-            router.send(p);
+    public void requestProfileImages(List<String> nodeIds) {
+        for (String id : nodeIds) {
+            this.requestProfileImage(id);
         }
     }
 
-    public void requestProfileImages(BrzGraph newNodes) {
-        if (newNodes == null)
-            return;
-
-        BrzProfileRequest profileRequest = new BrzProfileRequest(this.hostNode.id, false);
-
-        // send to newly merged nodes only
-        for (BrzNode node : newNodes.getNodeCollection()) {
-            BrzPacket p = new BrzPacket(profileRequest, BrzPacket.BrzPacketType.PROFILE_REQUEST, node.id, false);
-
-            router.send(p);
+    public void requestProfileImages(BrzGraph graph) {
+        for (BrzNode n : graph.getNodeCollection()) {
+            this.requestProfileImage(n.id);
         }
+    }
+
+    public void requestProfileImage(String nodeId) {
+        BrzNode node = router.graph.getVertex(nodeId);
+        if (node == null || storage.hasProfileImage(node.id)) return;
+
+        BrzProfileImageEvent profileRequest = new BrzProfileImageEvent(this.hostNode.id, nodeId, true);
+        BrzPacket p = new BrzPacket(profileRequest, BrzPacket.BrzPacketType.PROFILE_REQUEST, "", true);
+
+        p.to = node.id;
+        router.broadcast(p);
     }
 
     public void sendProfileResponse(BrzPacket packet, Bitmap bm) {
-        BrzProfileResponse response = new BrzProfileResponse(router.hostNode.id, false);
-
         // Fuck the quality :)
         InputStream stream = BrzStorage.bitmapToInputStream(bm, 45);
-
         router.sendStream(packet, stream);
     }
 }

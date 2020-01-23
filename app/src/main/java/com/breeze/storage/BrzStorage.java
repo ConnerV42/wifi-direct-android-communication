@@ -6,18 +6,17 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.Environment;
+import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
+import com.breeze.EventEmitter;
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
-import com.breeze.datatypes.BrzFileInfo;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
-import com.breeze.packets.ProfileEvents.BrzProfileResponse;
+import com.breeze.packets.ProfileEvents.BrzProfileImageEvent;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -29,7 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class BrzStorage {
+public class BrzStorage extends EventEmitter {
     private ContextWrapper cw;
 
     private BrzStorage(Context c) {
@@ -57,15 +56,11 @@ public class BrzStorage {
     private final String PROFILE_IMAGE_DIR = "profile_images";
 
     public void saveProfileImageFile(BrzPacket p, InputStream stream) {
-        BrzProfileResponse response = p.profileResponse();
+        BrzProfileImageEvent event = p.profileImageEvent();
         BreezeAPI api = BreezeAPI.getInstance();
 
-        BrzNode node = api.router.graph.getVertex(response.from);
-        if (node == null)
-            return;
-
         File profileImageDirectory = api.getExternalFilesDir(PROFILE_IMAGE_DIR);
-        File profileImage = new File(profileImageDirectory, response.from);
+        File profileImage = new File(profileImageDirectory, event.nodeId);
 
         try {
             profileImage.mkdirs();
@@ -81,13 +76,16 @@ public class BrzStorage {
             out.flush();
             out.close();
             stream.close();
+
+            emit("profileImage", event.nodeId);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void saveProfileImage(Bitmap bm, String fileName) {
-        this.saveImage(bm, fileName, PROFILE_IMAGE_DIR);
+        this.saveImage(bm, fileName, cw.getExternalFilesDir(PROFILE_IMAGE_DIR));
     }
 
     public void deleteProfileImage(String fileName) {
@@ -95,14 +93,14 @@ public class BrzStorage {
     }
 
     public Bitmap getProfileImage(String fileName, Context ctx) {
-        Bitmap b = getImage(fileName, PROFILE_IMAGE_DIR);
+        Bitmap b = getImage(fileName, cw.getExternalFilesDir(PROFILE_IMAGE_DIR));
         if (b == null)
             b = bitmapFromVector(ctx, R.drawable.ic_person_black_24dp);
         return b;
     }
 
     public boolean hasProfileImage(String fileName) {
-        Bitmap b = getImage(fileName, PROFILE_IMAGE_DIR);
+        Bitmap b = getImage(fileName, cw.getExternalFilesDir(PROFILE_IMAGE_DIR));
         if (b == null)
             return false;
         return true;
@@ -117,7 +115,7 @@ public class BrzStorage {
     private final String CHAT_IMAGE_DIR = "chat_images";
 
     public void saveChatImage(Bitmap bm, String fileName) {
-        this.saveImage(bm, fileName, CHAT_IMAGE_DIR);
+        this.saveImage(bm, fileName, cw.getExternalFilesDir(CHAT_IMAGE_DIR));
     }
 
     public void deleteChatImage(String fileName) {
@@ -125,7 +123,7 @@ public class BrzStorage {
     }
 
     public Bitmap getChatImage(String fileName, Context ctx) {
-        Bitmap b = getImage(fileName, CHAT_IMAGE_DIR);
+        Bitmap b = getImage(fileName, cw.getExternalFilesDir(CHAT_IMAGE_DIR));
         if (b == null)
             b = bitmapFromVector(ctx, R.drawable.ic_person_black_24dp);
         return b;
@@ -201,33 +199,29 @@ public class BrzStorage {
      *
      */
 
-    private void saveImage(Bitmap bm, String name, String dir) {
-        File imageDirectory = cw.getDir(dir, Context.MODE_PRIVATE);
-        File imagePath = new File(imageDirectory, name);
-
-        FileOutputStream stream = null;
+    private void saveImage(Bitmap bm, String name, File imageDir) {
+        File imagePath = new File(imageDir, name);
         try {
-            stream = new FileOutputStream(imagePath);
+            imageDir.mkdir();
+            imagePath.createNewFile();
+            FileOutputStream stream = new FileOutputStream(imagePath);
             bm.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+            stream.close();
         } catch (Exception e) {
-            //e.printStackTrace();
-        } finally {
-            try {
-                if (stream != null) stream.close();
-            } catch (IOException e) {
-                //  e.printStackTrace();
-            }
+            Log.i("STORAGE", "Profile image failed to save", e);
         }
     }
 
-    private Bitmap getImage(String name, String dir) {
-        File imageDirectory = cw.getDir(dir, Context.MODE_PRIVATE);
-
+    private Bitmap getImage(String name, File imageDir) {
         try {
-            File image = new File(imageDirectory, name);
-            return BitmapFactory.decodeStream(new FileInputStream(image));
-        } catch (FileNotFoundException e) {
-            //e.printStackTrace();
+            File image = new File(imageDir, name);
+            Log.i("STORAGE", image.getAbsolutePath());
+            InputStream imageInputStream = new FileInputStream(image);
+            Bitmap b = BitmapFactory.decodeStream(imageInputStream);
+            imageInputStream.close();
+            return b;
+        } catch (Exception e) {
+            Log.i("STORAGE", "Failed to retrieve profile image", e);
         }
 
         return null;
@@ -235,7 +229,10 @@ public class BrzStorage {
 
     private Bitmap getImage(File imageFile) {
         try {
-            Bitmap image = BitmapFactory.decodeStream(new FileInputStream(imageFile));
+            InputStream imageInputStream = new FileInputStream(imageFile);
+            Bitmap image = BitmapFactory.decodeStream(imageInputStream);
+            imageInputStream.close();
+
             final int maxSize = 750;
 
             int width = image.getWidth();
@@ -250,8 +247,7 @@ public class BrzStorage {
                 width = (int) (height * bitmapRatio);
             }
             return Bitmap.createScaledBitmap(image, width, height, true);
-        } catch (
-                FileNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

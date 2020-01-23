@@ -7,6 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -29,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.function.Consumer;
 
 public class UserSelection extends AppCompatActivity {
     List<String> nodes = new LinkedList<>();
@@ -45,11 +47,11 @@ public class UserSelection extends AppCompatActivity {
         ActionBar ab = getSupportActionBar();
         if (ab == null) return;
 
-        // Set up the activity as not "backoutable"
         ab.setDisplayHomeAsUpEnabled(true);
         ab.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
 
         ab.setTitle("New chat");
+        userToolbar.getOverflowIcon().setTint(getColor(android.R.color.white));
 
         // Set the done
         FloatingActionButton fab = findViewById(R.id.user_selection_fab);
@@ -170,10 +172,28 @@ public class UserSelection extends AppCompatActivity {
         return true;
     }
 
+    private Consumer<Object> graphListener;
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        BreezeAPI api = BreezeAPI.getInstance();
+        BrzGraph graph = BrzGraph.getInstance();
+        this.graphListener = newNode -> {
+            api.requestProfileImages(graph);
+        };
+
+        // Set up event listeners
+        this.graphListener.accept(null);
+        graph.on("addVertex", this.graphListener);
+    }
 
     @Override
     public void onStop() {
         super.onStop();
         list.cleanup();
+
+        BrzGraph graph = BrzGraph.getInstance();
+        graph.off("addVertex", this.graphListener);
     }
 }

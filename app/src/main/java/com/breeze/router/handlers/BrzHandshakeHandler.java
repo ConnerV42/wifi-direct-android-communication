@@ -13,7 +13,7 @@ public class BrzHandshakeHandler implements BrzRouterHandler {
     }
 
     @Override
-    public void handle(BrzPacket packet, String fromEndpointId) {
+    public boolean handle(BrzPacket packet, String fromEndpointId) {
         BreezeAPI api = BreezeAPI.getInstance();
 
         // TODO CHECK if user name from is in store already or database (check with the
@@ -32,6 +32,7 @@ public class BrzHandshakeHandler implements BrzRouterHandler {
         } else if (packet.type == BrzPacket.BrzPacketType.CHAT_RESPONSE) {
             api.incomingChatResponse(packet.chatResponse());
         }
+        return true;
     }
 
     @Override

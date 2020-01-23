@@ -11,8 +11,7 @@ import com.breeze.packets.ChatEvents.BrzChatResponse;
 import com.breeze.packets.GraphEvents.BrzGraphEvent;
 import com.breeze.packets.GraphEvents.BrzGraphQuery;
 import com.breeze.packets.MessageEvents.BrzMessageReceipt;
-import com.breeze.packets.ProfileEvents.BrzProfileRequest;
-import com.breeze.packets.ProfileEvents.BrzProfileResponse;
+import com.breeze.packets.ProfileEvents.BrzProfileImageEvent;
 
 import org.json.JSONObject;
 
@@ -88,9 +87,7 @@ public class BrzPacket implements BrzSerializable {
         return new BrzMessageReceipt(this.body);
     }
 
-    public BrzProfileRequest profileRequest() { return new BrzProfileRequest(this.body, false); }
-
-    public BrzProfileResponse profileResponse() { return new BrzProfileResponse(this.body, false); }
+    public BrzProfileImageEvent profileImageEvent() { return new BrzProfileImageEvent(this.body); }
 
     public boolean hasStream() {
         return this.stream != null;

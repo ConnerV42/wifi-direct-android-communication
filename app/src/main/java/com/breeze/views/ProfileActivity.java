@@ -79,7 +79,7 @@ public class ProfileActivity extends AppCompatActivity {
                 profileImage.setImageBitmap(bitmap);
 
                 // Set user profileImage
-                BrzStorage.getInstance().saveProfileImage(bitmap, this.node.id);
+                BreezeAPI.getInstance().storage.saveProfileImage(bitmap, this.node.id);
 
             } catch (Exception e) {
                 Log.e("FILE_ACCESS", "Failure ", e);

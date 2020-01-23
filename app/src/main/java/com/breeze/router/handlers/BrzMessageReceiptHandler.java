@@ -15,7 +15,7 @@ public class BrzMessageReceiptHandler implements BrzRouterHandler {
     }
 
     @Override
-    public void handle(BrzPacket packet, String fromEndpointId) {
+    public boolean handle(BrzPacket packet, String fromEndpointId) {
         BrzMessageReceipt mr = packet.messageReceipt();
         Log.i("STATE", "Message " + mr.messageId + " was " + mr.type);
 
@@ -32,7 +32,7 @@ public class BrzMessageReceiptHandler implements BrzRouterHandler {
         } catch (Exception e) {
             Log.e("RECEIPT", "Failed to set message's receipt state");
         }
-
+        return true;
     }
 
     @Override

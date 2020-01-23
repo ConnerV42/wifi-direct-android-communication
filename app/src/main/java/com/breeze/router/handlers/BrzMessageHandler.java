@@ -16,7 +16,7 @@ public class BrzMessageHandler implements BrzRouterStreamHandler {
     }
 
     @Override
-    public void handle(BrzPacket packet, String fromEndpointId) {
+    public boolean handle(BrzPacket packet, String fromEndpointId) {
         if (!this.handles(packet.type))
             throw new RuntimeException("This handler does not handle packets of type " + packet.type);
 
@@ -34,6 +34,7 @@ public class BrzMessageHandler implements BrzRouterStreamHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return true;
     }
 
     @Override

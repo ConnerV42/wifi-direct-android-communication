@@ -21,7 +21,7 @@ public class BrzGraphHandler implements BrzRouterHandler {
     }
 
     @Override
-    public void handle(BrzPacket packet, String fromEndpointId) {
+    public boolean handle(BrzPacket packet, String fromEndpointId) {
         if (!this.handles(packet.type))
             throw new RuntimeException("This handler does not handle packets of type " + packet.type);
 
@@ -53,7 +53,7 @@ public class BrzGraphHandler implements BrzRouterHandler {
                 // Merge their graph into ours
                 BrzGraph otherGraph = this.graph.mergeGraph(query.graph);
 
-                // Send a BrzProfileRequest packet to all newly merged nodes
+                // Send a BrzProfileImageEvent packet to all newly merged nodes
                 BreezeAPI.getInstance().requestProfileImages(otherGraph);
             }
         }
@@ -65,7 +65,7 @@ public class BrzGraphHandler implements BrzRouterHandler {
 
             // Don't accept events involving yourself
             if (ge.node1.id.equals(router.hostNode.id) || ge.node2.id.equals(router.hostNode.id))
-                return;
+                return true;
 
             // If it's a new connection
             if (ge.type == BrzGraphEvent.BrzGEType.CONNECT) {
@@ -79,6 +79,7 @@ public class BrzGraphHandler implements BrzRouterHandler {
             }
 
         }
+        return true;
     }
 
     public boolean handles(BrzPacket.BrzPacketType type) {

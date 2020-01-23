@@ -286,14 +286,18 @@ public class BrzRouter extends EventEmitter {
 
         // Continue the broadcast if the packet has not been seen before
         if (packet.broadcast && !this.payloadBuffer.broadcastSeen(packet.id)) {
-
-            this.payloadBuffer.addBroadcast(packet.id);
-            broadcast(packet, fromEndpointId);
+            boolean handled = false;
 
             for (BrzRouterHandler handler : this.handlers)
-                if (handler.handles(packet.type))
-                    handler.handle(packet, fromEndpointId);
+                if (handler.handles(packet.type)) {
+                    boolean handlerDidHandle = handler.handle(packet, fromEndpointId);
+                    handled = handlerDidHandle || handled;
+                }
 
+            if (!handled) {
+                this.payloadBuffer.addBroadcast(packet.id);
+                broadcast(packet, fromEndpointId);
+            }
         }
 
         // If the packet is not a valid broadcast
