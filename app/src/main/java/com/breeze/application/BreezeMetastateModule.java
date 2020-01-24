@@ -13,12 +13,16 @@ import androidx.core.app.NotificationManagerCompat;
 import com.breeze.App;
 import com.breeze.R;
 import com.breeze.datatypes.BrzChat;
+import com.breeze.streams.BrzLiveAudioConsumer;
+import com.breeze.streams.BrzLiveAudioProducer;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
+import com.breeze.packets.LiveConnectionEvents.BrzLiveConnectionEvent;
 import com.breeze.views.Messages.MessagesView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BreezeMetastateModule extends BreezeModule {
@@ -35,19 +39,8 @@ public class BreezeMetastateModule extends BreezeModule {
             } else {
                 Log.i("STATE", "No stored chats found!");
             }
-
-        } catch (RuntimeException e) {
-            Log.e("BREEZE_API", "Trying to load chats", e);
-        }
-
-        // Get stored messages
-        try {
             if (chats != null) {
                 for (BrzChat c : chats) {
-                    if(c.id.equals("PUBLIC_THREAD")){
-                        chats.remove(chats.indexOf(c));
-                        continue;
-                    }
                     List<BrzMessage> messages = api.db.getChatMessages(c.id);
                     if (messages != null) {
                         Log.i("STATE", "Found " + messages.size() + " messages in chat " + c.id);

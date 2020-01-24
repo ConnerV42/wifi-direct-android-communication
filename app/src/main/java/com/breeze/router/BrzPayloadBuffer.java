@@ -1,6 +1,5 @@
 package com.breeze.router;
 
-import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -9,9 +8,7 @@ import android.media.audiofx.NoiseSuppressor;
 
 import com.google.android.gms.nearby.connection.Payload;
 
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
-import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,6 +40,11 @@ public class BrzPayloadBuffer {
 
         }
         return null;
+    }
+
+    public InputStream streamForConsumer(Payload p){
+        //Consume this stream/pipe to speakers
+        return p.asStream().asInputStream();
     }
 
     public Payload getStreamPayload(String str) {
@@ -91,6 +93,10 @@ public class BrzPayloadBuffer {
         Payload p = this.incoming.get(payloadId);
         this.removeIncoming(payloadId);
         return p;
+    }
+
+    public void incomingAudioStream(Payload payload){
+
     }
 
     public void addIncoming(Payload payload) {

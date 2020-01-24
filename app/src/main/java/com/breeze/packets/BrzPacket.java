@@ -10,6 +10,8 @@ import com.breeze.packets.ChatEvents.BrzChatHandshake;
 import com.breeze.packets.ChatEvents.BrzChatResponse;
 import com.breeze.packets.GraphEvents.BrzGraphEvent;
 import com.breeze.packets.GraphEvents.BrzGraphQuery;
+import com.breeze.packets.LiveConnectionEvents.BrzLiveConnectionReady;
+import com.breeze.packets.LiveConnectionEvents.BrzLiveConnectionRequest;
 import com.breeze.packets.MessageEvents.BrzMessageReceipt;
 
 import org.json.JSONObject;
@@ -25,7 +27,9 @@ public class BrzPacket implements BrzSerializable {
 
         CHAT_HANDSHAKE, CHAT_RESPONSE,
 
-        MESSAGE_RECEIPT, PUBLIC_MESSAGE
+        MESSAGE_RECEIPT, PUBLIC_MESSAGE,
+
+        STREAM_REQ, STREAM_READY, STREAM_EVENT
     }
 
     public String id = UUID.randomUUID().toString();
@@ -83,6 +87,10 @@ public class BrzPacket implements BrzSerializable {
     public BrzMessageReceipt messageReceipt() {
         return new BrzMessageReceipt(this.body);
     }
+
+    public BrzLiveConnectionRequest connectionRequest(){ return new BrzLiveConnectionRequest(this.body); }
+
+    public BrzLiveConnectionReady connectionReady() { return new BrzLiveConnectionReady(this.body); }
 
     @Override
     public String toJSON() {

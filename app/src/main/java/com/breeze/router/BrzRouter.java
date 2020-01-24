@@ -12,6 +12,7 @@ import com.breeze.graph.BrzGraph;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
+import com.breeze.packets.LiveConnectionEvents.BrzLiveConnectionRequest;
 import com.breeze.router.handlers.BrzFileInfoPktHandler;
 import com.breeze.router.handlers.BrzGraphHandler;
 import com.breeze.router.handlers.BrzHandshakeHandler;
@@ -19,7 +20,12 @@ import com.breeze.router.handlers.BrzMessageHandler;
 import com.breeze.router.handlers.BrzPublicMessageHandler;
 import com.breeze.router.handlers.BrzMessageReceiptHandler;
 import com.breeze.router.handlers.BrzRouterHandler;
+import com.breeze.router.handlers.LiveConnectionHandlers.BrzLiveConnectionEventHandler;
+import com.breeze.router.handlers.LiveConnectionHandlers.BrzLiveConnectionReadyHandler;
+import com.breeze.router.handlers.LiveConnectionHandlers.BrzLiveConnectionRequestHandler;
 import com.breeze.state.BrzStateStore;
+import com.breeze.streams.BrzLiveAudioConsumer;
+import com.breeze.views.UserSelection.UserList;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
@@ -33,6 +39,9 @@ import com.google.android.gms.nearby.connection.Payload;
 import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import com.google.android.gms.nearby.connection.Strategy;
+import com.google.android.gms.tasks.Task;
+
+import org.bouncycastle.jcajce.provider.asymmetric.ec.KeyFactorySpi;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -88,8 +97,10 @@ public class BrzRouter extends EventEmitter {
         this.handlers.add(new BrzHandshakeHandler(this));
         this.handlers.add(new BrzFileInfoPktHandler(this));
         this.handlers.add(new BrzMessageReceiptHandler());
+        this.handlers.add(new BrzLiveConnectionEventHandler());
+        this.handlers.add(new BrzLiveConnectionReadyHandler());
+        this.handlers.add(new BrzLiveConnectionRequestHandler());
     }
-
     //
     //
     // Public access packet sending handlers
@@ -109,6 +120,10 @@ public class BrzRouter extends EventEmitter {
             if (!id.equals(ignoreEndpoint))
                 connectionsClient.sendPayload(id, p);
         }
+    }
+
+    public void sendAudioStream(String to, Payload p){
+        connectionsClient.sendPayload(to, p);
     }
 
     public void send(BrzPacket packet) {
@@ -316,7 +331,19 @@ public class BrzRouter extends EventEmitter {
             if (payload.getType() == Payload.Type.FILE) {
                 pendingFilePayloads.put(payload.getId(), payload);
             } else {
-                payloadBuffer.addIncoming(payload);
+                try{
+                    BreezeAPI api = BreezeAPI.getInstance();
+                    //Check if any audio consumers are waiting on this payload
+                    if(api.state.consumerReady(payload.getId() + '_' + endpointId)){
+                        BrzLiveAudioConsumer audioConsumer = api.state.getConsumer(payload.getId() + '_' + endpointId);
+                        api.streams.consumeAudioProducer(audioConsumer, payload.asStream().asInputStream());
+                    }
+                    else {
+                        payloadBuffer.addIncoming(payload);
+                    }
+                }catch(Exception e){
+                    payloadBuffer.addIncoming(payload);
+                }
             }
         }
 
@@ -325,11 +352,12 @@ public class BrzRouter extends EventEmitter {
             if (update.getStatus() != PayloadTransferUpdate.Status.SUCCESS)
                 return;
             Long payloadId = update.getPayloadId();
-
             // Incomming packet was a success!
             if (payloadBuffer.isIncomming(payloadId)) {
                 Log.i("ENDPOINT", "Received a payload");
                 Payload payload = payloadBuffer.popIncoming(payloadId);
+
+
 
                 BrzPacket packet = new BrzPacket(payloadBuffer.getStreamString(payload));
                 handlePacket(packet, endpointId);
@@ -355,7 +383,11 @@ public class BrzRouter extends EventEmitter {
         public void onEndpointFound(@NonNull String endpointId, DiscoveredEndpointInfo info) {
             if (info.getServiceId().equals(pkgName)) {
                 Log.i("ENDPOINT", "Endpoint found");
-                connectionsClient.requestConnection(hostNode.id, endpointId, connectionLifecycleCallback);
+                Log.i("ENDPOINT", info.getEndpointName());
+                stopDiscovery();
+                Task t = connectionsClient.requestConnection(hostNode.id, endpointId, connectionLifecycleCallback);
+                Log.i("ENDPOINT", t.toString());
+                Log.i("ENDPOINT", "emmitting found endpoint ");
                 emit("endpointFound", endpointId);
             }
         }
@@ -363,6 +395,7 @@ public class BrzRouter extends EventEmitter {
         @Override
         public void onEndpointLost(@NonNull String endpointId) {
             Log.i("ENDPOINT", "Endpoint lost callback fired");
+            connectionsClient.rejectConnection(endpointId);
             emit("endpointDisconnected", endpointId);
         }
     };

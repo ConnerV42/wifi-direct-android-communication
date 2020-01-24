@@ -67,9 +67,21 @@
             android:padding="5dp"
             android:src="@drawable/ic_audiotrack_24px" />
 
+        <ImageButton
+            android:id="@+id/streamAudio"
+            style="@style/Widget.AppCompat.ImageButton"
+            android:layout_width="17dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:padding="10dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/mic" />
+
         <EditText
             android:id="@+id/editText"
-            android:layout_width="0dp"
+            android:layout_width="148dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_weight="1"

@@ -19,14 +19,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.ui.AppBarConfiguration;
 
 import com.breeze.application.BreezeAPI;
-import com.breeze.datatypes.BrzChat;
+import com.breeze.views.LiveStreams.LiveAudioStreamActivity;
 import com.breeze.views.MainSettingsActivity;
 import com.breeze.views.Messages.PublicMessagesView;
-import com.breeze.views.StreamsTestingActivity;
+import com.breeze.views.UserSelection.UserList;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -88,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         this.toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setupNavListeners();
+        new UserList(this, null);
     }
 
     private void setupNavListeners(){
@@ -158,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                         case MotionEvent.ACTION_UP: {
                             v.getBackground().clearColorFilter();
                             v.invalidate();
-                            Intent i = new Intent(MainActivity.this, StreamsTestingActivity.class);
+                            Intent i = new Intent(MainActivity.this, LiveAudioStreamActivity.class);
                             startActivity(i);
                             break;
                         }
@@ -218,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         else if( id == R.id.streams_testing_activity){
-            Intent i = new Intent(MainActivity.this, StreamsTestingActivity.class);
+            Intent i = new Intent(MainActivity.this, LiveAudioStreamActivity.class);
             startActivity(i);
         }
         return super.onOptionsItemSelected(item);

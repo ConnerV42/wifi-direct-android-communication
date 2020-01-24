@@ -73,7 +73,7 @@ public class PublicMessagesView extends AppCompatActivity {
             if (chat == null) return;
 
             // Set up content
-            final BrzRouter router = BrzRouter.getInstance();
+            final BrzRouter router = BreezeAPI.getInstance().router;
 
             this.list = new MessageList(this, this.chat);
             RecyclerView msgView = findViewById(R.id.publicMessageList);

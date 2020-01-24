@@ -56,7 +56,7 @@ public class BreezeAPI extends Service {
 
     public BreezeMetastateModule meta = null;
     public BreezeEncryptionModule encryption = null;
-
+    public BreezeLiveStreamModule streams = null;
     // Data members
 
     public BrzNode hostNode = null;
@@ -137,7 +137,8 @@ public class BreezeAPI extends Service {
             this.encryption = new BreezeEncryptionModule(this);
         if (this.meta == null)
             this.meta = new BreezeMetastateModule(this);
-
+        if(this.streams == null)
+            this.streams = new BreezeLiveStreamModule(this);
         // Initialize preferences
         if (this.preferences == null)
             this.preferences = this.getSharedPreferences("Breeze", Context.MODE_PRIVATE);
