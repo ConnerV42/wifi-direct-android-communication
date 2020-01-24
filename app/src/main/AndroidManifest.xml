@@ -25,6 +25,12 @@
         android:requestLegacyExternalStorage="true"
         >
 
+        <receiver android:name=".application.BreezeBroadcastReceiver"  android:exported="true">
+            <intent-filter>
+                <action android:name="com.breeze.actions.MessageReply"/>
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name=".views.UserSelection.UserSelection"
             android:theme="@style/AppTheme.NoActionBar" />

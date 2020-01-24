@@ -6,8 +6,8 @@
 
     <ImageView
         android:id="@+id/message_notif_image"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_marginEnd="20dp"
         android:src="@drawable/ic_person_black_24dp" />
 
@@ -20,11 +20,11 @@
 
         <TextView
             android:id="@+id/message_notif_name"
-            style="@style/TextAppearance.Compat.Notification"
+            style="@style/TextAppearance.Compat.Notification.Title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="name"
-            android:textSize="7pt" />
+            android:textSize="6pt" />
 
         <TextView
             android:id="@+id/message_notif_body"
@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:text="alias"
-            android:textSize="5pt" />
+            android:textSize="6pt" />
     </LinearLayout>
 
 </LinearLayout>

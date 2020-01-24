@@ -13,6 +13,7 @@ import android.widget.RemoteViews;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.RemoteInput;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
@@ -28,6 +29,7 @@ import com.breeze.views.Chats.ChatHandshakeView;
 import com.breeze.views.Messages.MessagesView;
 
 import java.util.List;
+import java.util.Random;
 
 public class BreezeMetastateModule extends BreezeModule {
     BreezeMetastateModule(BreezeAPI api) {
@@ -138,6 +140,8 @@ public class BreezeMetastateModule extends BreezeModule {
         BrzChat c = this.api.state.getChat(message.chatId);
         if (api.state.getCurrentChat().equals(message.chatId)) return;
 
+        int notifId = new Random().nextInt(2000);
+
         Intent chatIntent = MessagesView.getIntent(this.api, message.chatId);
         PendingIntent pending = PendingIntent.getActivity(this.api, 0, chatIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -146,6 +150,22 @@ public class BreezeMetastateModule extends BreezeModule {
             chatImage = api.storage.getProfileImage(c.otherPersonId(), api);
         else
             chatImage = api.storage.getProfileImage(c.id, api);
+
+        // Reply enabling stuff
+        RemoteInput remoteInput = new RemoteInput.Builder(BreezeBroadcastReceiver.KEY_MESSAGE_REPLY)
+                .setLabel("New Message")
+                .build();
+        PendingIntent replyPendingIntent = PendingIntent.getBroadcast(
+                api,
+                notifId,
+                BreezeBroadcastReceiver.getMessageReplyIntent(api, c.id, notifId),
+                PendingIntent.FLAG_ONE_SHOT);
+        // Create the reply action and add the remote input.
+        NotificationCompat.Action action = new NotificationCompat.Action
+                .Builder(R.drawable.ic_send_black_24dp, "Reply", replyPendingIntent)
+                .addRemoteInput(remoteInput)
+                .setAllowGeneratedReplies(true)
+                .build();
 
         RoundedBitmapDrawable chatRounded = RoundedBitmapDrawableFactory.create(api.getResources(), chatImage);
         chatRounded.setCornerRadius(100.0f);
@@ -160,11 +180,11 @@ public class BreezeMetastateModule extends BreezeModule {
                 .setSmallIcon(R.drawable.ic_stat_name)
                 .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                 .setCustomContentView(notifLayout)
-                .setCustomBigContentView(notifLayout)
                 .setAutoCancel(true)
                 .setContentIntent(pending)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setPriority(Notification.PRIORITY_HIGH)
+                .addAction(action)
                 .build();
 
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
@@ -172,7 +192,7 @@ public class BreezeMetastateModule extends BreezeModule {
         notification.defaults |= Notification.DEFAULT_VIBRATE;
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.api);
-        notificationManager.notify(2, notification);
+        notificationManager.notify(notifId, notification);
     }
 
     public void showHandshakeNotification(String chatId) {
