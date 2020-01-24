@@ -263,6 +263,51 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return n;
     }
 
+    public List<BrzChat> getAcceptancePendingChats() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] args = {};
+        Cursor c = db.rawQuery("SELECT * FROM " + BRZCHAT_TABLE_NAME + " where acceptedByHost = 0", args);
+
+        if (c == null) {
+            db.close();
+            return null;
+        } else if (c.getCount() < 1) {
+            c.close();
+            db.close();
+            return null;
+        }
+
+        c.moveToFirst();
+
+        List<BrzChat> chats = new ArrayList<>();
+
+        for (int i = 0; i < c.getCount(); i++) {
+            BrzChat n = new BrzChat();
+
+            n.id = c.getString(c.getColumnIndex("id"));
+            n.name = c.getString(c.getColumnIndex("name"));
+
+            String nodes = c.getString(c.getColumnIndex("nodes"));
+            n.nodesFromJson(nodes);
+
+            int isGroup = c.getInt(c.getColumnIndex("isGroup"));
+            n.isGroup = isGroup == 1;
+
+            int acceptedByHost = c.getInt(c.getColumnIndex("acceptedByHost"));
+            n.acceptedByHost = acceptedByHost == 1;
+
+            int acceptedByRecipient = c.getInt(c.getColumnIndex("acceptedByRecipient"));
+            n.acceptedByRecipient = acceptedByRecipient == 1;
+
+            chats.add(n);
+
+            c.moveToNext();
+        }
+
+        c.close();
+        db.close();
+        return chats;
+    }
 
     /*
      *

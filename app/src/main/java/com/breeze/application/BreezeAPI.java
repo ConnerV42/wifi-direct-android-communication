@@ -257,6 +257,14 @@ public class BreezeAPI extends Service {
             chat.name = n.name;
         }
 
+        // Check to make sure multiple pending chats with the same participants are ignored
+        List<BrzChat> pendingChats = this.db.getAcceptancePendingChats();
+        for (BrzChat pendingChat : pendingChats) {
+            if (pendingChat.nodes.containsAll(chat.nodes))
+                return;
+        }
+
+
         chat.acceptedByHost = false;
         chat.acceptedByRecipient = false;
 
