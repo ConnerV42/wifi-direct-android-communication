@@ -77,7 +77,7 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
             if (messageSenderName != null && messageSenderImage != null) {
                 BrzNode n = BrzGraph.getInstance().getVertex(msg.from);
                 if (group && !outgoing && n != null) {
-                    messageSenderImage.setImageBitmap(BrzStorage.getInstance().getProfileImage("", api));
+                    messageSenderImage.setImageBitmap(BrzStorage.getInstance().getProfileImage(n.id, api));
                     messageSenderImage.setVisibility(View.VISIBLE);
                     messageSenderName.setText(n.name);
                     messageSenderName.setVisibility(View.VISIBLE);
