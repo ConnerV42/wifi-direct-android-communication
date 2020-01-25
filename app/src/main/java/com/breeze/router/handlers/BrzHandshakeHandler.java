@@ -18,8 +18,8 @@ public class BrzHandshakeHandler implements BrzRouterHandler {
 
         if (packet.type == BrzPacket.BrzPacketType.CHAT_HANDSHAKE) {
             BrzChatHandshake handshake = packet.chatHandshake();
-            api.incomingHandshake(handshake);
-            api.meta.showHandshakeNotification(handshake.chat.id);
+            boolean accepted = api.incomingHandshake(handshake);
+            if(accepted) api.meta.showHandshakeNotification(handshake.chat.id);
         } else if (packet.type == BrzPacket.BrzPacketType.CHAT_RESPONSE) {
             api.incomingChatResponse(packet.chatResponse());
         }

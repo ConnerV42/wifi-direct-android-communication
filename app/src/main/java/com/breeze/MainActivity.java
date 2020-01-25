@@ -8,9 +8,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -70,12 +72,25 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.startApplicationService();
-        BreezeAPI.getInstance().initialize(this);
+        BreezeAPI api = BreezeAPI.getInstance();
+        api.initialize(this);
 
         setContentView(R.layout.activity_main);
 
         this.toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // Check if location is on
+        if (!api.isLocationEnabled()) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Location is disabled")  // GPS not found
+                    .setMessage("Breeze needs location services to be enabled in order to find devices near you. Please enable them so you can get chatting!")
+                    .setPositiveButton("Enable", (dialogInterface, i) -> {
+                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        }
     }
 
     @Override

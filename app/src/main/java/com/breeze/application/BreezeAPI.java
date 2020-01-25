@@ -6,19 +6,26 @@ import android.app.Service;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.util.Log;
+import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.FileProvider;
+import androidx.core.location.LocationManagerCompat;
 
 import com.breeze.App;
 import com.breeze.MainActivity;
@@ -151,6 +158,17 @@ public class BreezeAPI extends Service {
             this.preferences = ctx.getSharedPreferences("Breeze", Context.MODE_PRIVATE);
     }
 
+    public Boolean isLocationEnabled() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            LocationManager lm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+            return lm.isLocationEnabled();
+        } else {
+            int mode = Settings.Secure.getInt(this.getContentResolver(), Settings.Secure.LOCATION_MODE,
+                    Settings.Secure.LOCATION_MODE_OFF);
+            return (mode != Settings.Secure.LOCATION_MODE_OFF);
+        }
+    }
+
     //
     //
     // Host Node
@@ -250,7 +268,7 @@ public class BreezeAPI extends Service {
         this.db.setChat(c);
     }
 
-    public void incomingHandshake(BrzChatHandshake handshake) {
+    public boolean incomingHandshake(BrzChatHandshake handshake) {
         BrzChat chat = handshake.chat;
         if (!chat.isGroup) {
             BrzNode n = BrzGraph.getInstance().getVertex(handshake.from);
@@ -259,9 +277,11 @@ public class BreezeAPI extends Service {
 
         // Check to make sure multiple pending chats with the same participants are ignored
         List<BrzChat> pendingChats = this.db.getAcceptancePendingChats();
-        for (BrzChat pendingChat : pendingChats) {
-            if (pendingChat.nodes.containsAll(chat.nodes))
-                return;
+        if (pendingChats != null) {
+            for (BrzChat pendingChat : pendingChats) {
+                if (pendingChat.nodes.containsAll(chat.nodes))
+                    return false;
+            }
         }
 
 
@@ -275,6 +295,7 @@ public class BreezeAPI extends Service {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString("HANDSHAKE_KEY_" + chat.id, handshake.secretKey);
         editor.apply();
+        return true;
     }
 
     public void acceptHandshake(String chatId) {
