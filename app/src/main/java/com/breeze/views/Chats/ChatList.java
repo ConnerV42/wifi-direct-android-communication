@@ -29,6 +29,7 @@ import com.breeze.views.Messages.MessagesView;
 import com.breeze.views.UserSelection.UserList;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -49,6 +50,9 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
         public void bind(BrzChat chat, int position, Context ctx) {
             BrzGraph graph = BrzGraph.getInstance();
 
+            if(chat.id == "PUBLIC_THREAD"){
+                return;
+            }
             TextView chatName = this.v.findViewById(R.id.chat_name);
             chatName.setText(chat.name);
 
@@ -96,7 +100,17 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
             // Delete
             Button deleteButton = this.v.findViewById(R.id.delete_button);
             deleteButton.setOnClickListener(v -> {
-                BreezeAPI.getInstance().leaveChat(chat.id);
+                BreezeAPI api = BreezeAPI.getInstance();
+//                public BrzMessage(String from, String chatId, String body, long datestamp, boolean isStatus) {
+//                    this.from = from;
+//                    this.chatId = chatId;
+//                    this.body = body;
+//                    this.datestamp = datestamp;
+//                    this.isStatus = isStatus;
+//                }
+                api.sendMessage(new BrzMessage(api.hostNode.id, chat.id, api.hostNode.alias + " has left the chat", System.currentTimeMillis(), false));
+                api.leaveChat(chat.id);
+                api.deleteChat(chat.id);
             });
 
             this.v.setOnLongClickListener(v -> {
@@ -130,7 +144,13 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
                 notifyDataSetChanged();
             }
         };
-
+        if(this.chats != null){
+            for(BrzChat c : this.chats){
+                if(c.id.equals("PUBLIC_THREAD")){
+                    this.chats.remove(this.chats.indexOf(c));
+                }
+            }
+        }
         this.messageListener = msgs -> {
             notifyDataSetChanged();
         };

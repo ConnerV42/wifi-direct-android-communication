@@ -46,4 +46,5 @@ dependencies {
     implementation 'de.hdodenhof:circleimageview:3.0.1'
     implementation 'org.jetbrains:annotations:13.0'
     implementation 'org.bouncycastle:bcpkix-jdk15on:1.56'
+    implementation 'androidx.core:core:1.1.0'
 }

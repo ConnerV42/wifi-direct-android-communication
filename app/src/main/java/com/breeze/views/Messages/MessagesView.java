@@ -32,6 +32,7 @@ import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
+import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;
@@ -137,6 +138,22 @@ public class MessagesView extends AppCompatActivity {
             Intent intent = new Intent(Intent.ACTION_PICK);
             intent.setType("*/*");
             startActivityForResult(intent, FILE_REQUEST_CODE);
+        });
+
+        ImageButton liveStreamAudio = findViewById(R.id.streamAudio);
+        liveStreamAudio.setOnClickListener(v -> {
+            if(this.chat.isGroup){
+                Toast.makeText(this, "Cannot start a live audio stream with a group yet", Toast.LENGTH_SHORT).show();
+            }
+            String otherNode = "";
+            for(String n : this.chat.nodes){
+                if(!n.equals(api.hostNode.id)){
+                    otherNode = n;
+                    break;
+                }
+            }
+            if(otherNode != "")
+               api.streams.sendBrzLiveConnectionRequest(otherNode);
         });
     }
 

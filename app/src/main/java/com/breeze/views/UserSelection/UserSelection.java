@@ -41,7 +41,7 @@ public class UserSelection extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_selection);
-
+        this.list = new UserList(this, this.nodes);
         Toolbar userToolbar = findViewById(R.id.user_selection_toolbar);
         setSupportActionBar(userToolbar);
         ActionBar ab = getSupportActionBar();
@@ -75,7 +75,7 @@ public class UserSelection extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        this.list = new UserList(this, this.nodes);
+
         recyclerView.setAdapter(this.list);
 
         // When the user selects a node, add it to the list

@@ -20,14 +20,18 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import com.breeze.App;
 import com.breeze.R;
 import com.breeze.datatypes.BrzChat;
+import com.breeze.streams.BrzLiveAudioConsumer;
+import com.breeze.streams.BrzLiveAudioProducer;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.storage.BrzStorage;
 import com.breeze.views.Chats.ChatHandshakeView;
+import com.breeze.packets.LiveConnectionEvents.BrzLiveConnectionEvent;
 import com.breeze.views.Messages.MessagesView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -45,13 +49,6 @@ public class BreezeMetastateModule extends BreezeModule {
             } else {
                 Log.i("STATE", "No stored chats found!");
             }
-
-        } catch (RuntimeException e) {
-            Log.e("BREEZE_API", "Trying to load chats", e);
-        }
-
-        // Get stored messages
-        try {
             if (chats != null) {
                 for (BrzChat c : chats) {
                     List<BrzMessage> messages = api.db.getChatMessages(c.id);
@@ -96,7 +93,18 @@ public class BreezeMetastateModule extends BreezeModule {
 //        BrzGraph.getInstance().addVertex(new BrzNode("12", "", "", "Conner", "@JJ"));
 //        BrzGraph.getInstance().addVertex(new BrzNode("13", "", "", "Conner", "@JJ"));
 //        BrzGraph.getInstance().addVertex(new BrzNode("14", "", "", "Conner", "@JJ"));
-
+        if(null == api.db.getChat("PUBLIC_THREAD")){
+            BrzChat publicThread = new BrzChat();
+            publicThread.isGroup = true;
+            publicThread.name = "PUBLIC_THREAD";
+            publicThread.acceptedByHost = true;
+            publicThread.acceptedByRecipient = true;
+            publicThread.id = "PUBLIC_THREAD";
+            api.db.setChat(publicThread);
+            if(null == api.state.getChat("PUBLIC_THREAD")){
+                api.state.addChat(publicThread);
+            }
+        }
     }
 
     public boolean getCachedHostNode() {

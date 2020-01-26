@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:right="-2dp"  android:left="-2dp">
+        <shape
+            android:shape="rectangle">
+            <gradient
+                android:startColor="@color/cardview_shadow_end_color"
+                android:centerColor="@color/colorPrimaryDark"
+                android:endColor="@color/cardview_shadow_end_color"
+                android:angle="270"
+                />
+        </shape>
+    </item>
+</layer-list>

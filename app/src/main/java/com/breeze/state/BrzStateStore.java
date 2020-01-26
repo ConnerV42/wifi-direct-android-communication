@@ -3,6 +3,8 @@ package com.breeze.state;
 import android.util.Log;
 
 import com.breeze.EventEmitter;
+import com.breeze.streams.BrzLiveAudioConsumer;
+import com.breeze.streams.BrzLiveAudioProducer;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzChat;
@@ -12,7 +14,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 public class BrzStateStore extends EventEmitter {
 
@@ -138,5 +139,70 @@ public class BrzStateStore extends EventEmitter {
         this.emit("messages");
     }
 
+    //
+    // Audio Producers
+    //
 
+    private HashMap<String, BrzLiveAudioProducer> audioProducerHashMap = new HashMap<>();
+
+    public void addAudioProducer(BrzLiveAudioProducer prod){
+        this.audioProducerHashMap.put(prod.getPayloadId() + prod.getProducerEndpointID(), prod);
+        this.emit("audioproducers");
+        Log.i("BRZSTATESTORE", "BrzLiveAudioProducer added to state with key: " + prod.getPayloadId()  + prod.getProducerEndpointID());
+    }
+
+    public BrzLiveAudioProducer getAudioProducer(String payloadAndEndpointID){
+        return this.audioProducerHashMap.get(payloadAndEndpointID);
+    }
+
+    public void deleteAudioProducer(String payloadAndEndpointID){
+        this.audioProducerHashMap.remove(payloadAndEndpointID);
+        this.emit("audioproducersdelete");
+    }
+
+    public boolean checkIfProducerExists(String payloadAndEndpointID){
+        return this.audioProducerHashMap.containsKey(payloadAndEndpointID);
+    }
+
+    //
+    // Audio Consumers
+    //
+
+    private HashMap<String, BrzLiveAudioConsumer> audioConsumerHashMap = new HashMap<>();
+    public BrzLiveAudioConsumer getConsumer(String producerPayloadAndEndpointID){
+        if(this.audioConsumerHashMap == null || !this.audioConsumerHashMap.containsKey(producerPayloadAndEndpointID)){
+            return null;
+        }
+        return this.audioConsumerHashMap.get(producerPayloadAndEndpointID);
+    }
+    public boolean addAudioConsumer(BrzLiveAudioConsumer consumer){
+        if(this.audioConsumerHashMap == null || consumer == null || this.audioConsumerHashMap.containsKey(consumer.getProducerPayloadID() + consumer.getProducerEndpointId())){
+            return false;
+        }
+        this.audioConsumerHashMap.put(consumer.getProducerPayloadID() + consumer.getProducerEndpointId(), consumer);
+        this.emit("audioconsumers");
+        Log.i("BRZSTATESTORE", "BrzLiveAudioConsumer added with key: " + consumer.getProducerPayloadID() + consumer.getProducerEndpointId());
+        return true;
+    }
+    public boolean consumerReady(String producerPayloadAndEndpointID){
+        if(this.audioConsumerHashMap == null || !this.audioConsumerHashMap.containsKey(producerPayloadAndEndpointID)){
+            return false;
+        }
+        try {
+            return this.audioConsumerHashMap.get(producerPayloadAndEndpointID).isReadyForConsume();
+        } catch(Exception e){
+            return false;
+        }
+    }
+    public boolean deleteConsumer(String producerPayloadAndEndpointID){
+        if(this.audioConsumerHashMap == null || !this.audioConsumerHashMap.containsKey(producerPayloadAndEndpointID)){
+            return false;
+        }
+        this.emit("audioconsumersdelete");
+        this.audioConsumerHashMap.remove(producerPayloadAndEndpointID);
+        return true;
+    }
+    public boolean checkIfConsumerExists(String producerPayloadAndEndpointID){
+        return this.audioConsumerHashMap.containsKey(producerPayloadAndEndpointID);
+    }
 }

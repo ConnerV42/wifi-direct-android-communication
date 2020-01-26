@@ -3,18 +3,32 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.example.meshnet.MainActivity">
     <item
+        android:id="@+id/profile_option"
+        android:orderInCategory="1"
+        android:title="My Profile"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_public_thread"
+        android:orderInCategory="2"
+        android:title="Public Thread"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_toggle_discovery"
         android:checkable="true"
-        android:orderInCategory="1"
+        android:orderInCategory="3"
         android:title="Toggle discovery"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_discovery_scan"
-        android:orderInCategory="2"
+        android:orderInCategory="4"
         android:title="Scan for nearby networks"
         app:showAsAction="never" />
+
     <item android:id="@+id/action_settings"
           android:title="@string/action_settings"
-          android:orderInCategory="3"
+          android:orderInCategory="5"
           app:showAsAction="never"/>
+    <item
+        android:id="@+id/streams_testing_activity"
+        android:title="Test Mic Streams" />
 </menu>

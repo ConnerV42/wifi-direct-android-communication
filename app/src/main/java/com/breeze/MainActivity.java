@@ -4,10 +4,15 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
@@ -18,7 +23,10 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import com.breeze.application.BreezeAPI;
-import com.breeze.router.BrzRouter;
+import com.breeze.views.LiveStreams.LiveAudioStreamActivity;
+import com.breeze.views.MainSettingsActivity;
+import com.breeze.views.Messages.PublicMessagesView;
+import com.breeze.views.UserSelection.UserList;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -39,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.READ_EXTERNAL_STORAGE,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.INTERNET
             };
 
     @Override
@@ -50,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         if (!hasPermissions(this, REQUIRED_PERMISSIONS)) {
             requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_REQUIRED_PERMISSIONS);
         }
-    }
+}
 
     private void startApplicationService() {
         Intent brzService = new Intent(this, BreezeAPI.class);
@@ -91,6 +101,86 @@ public class MainActivity extends AppCompatActivity {
                     .setNegativeButton("Cancel", null)
                     .show();
         }
+        setupNavListeners();
+        new UserList(this, null);
+    }
+
+    private void setupNavListeners(){
+        Button publicThread = findViewById(R.id.nav_public_thread_menu_button);
+        Button myProfile = findViewById(R.id.nav_my_profile_button);
+        Button settings = findViewById(R.id.nav_settings_menu_button);
+        Button micStream = findViewById(R.id.nav_mic_streams_button);
+        publicThread.setOnTouchListener((View v, MotionEvent event) -> {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        v.getBackground().setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
+                        v.invalidate();
+                        break;
+                    }
+                    case MotionEvent.ACTION_UP: {
+                        v.getBackground().clearColorFilter();
+                        v.invalidate();
+                        Intent i = new Intent(MainActivity.this, PublicMessagesView.class);
+                        startActivity(i);
+                        break;
+                    }
+                }
+                return false;
+            }
+        );
+        myProfile.setOnTouchListener((View v, MotionEvent event) -> {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN: {
+                            v.getBackground().setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
+                            v.invalidate();
+                            break;
+                        }
+                        case MotionEvent.ACTION_UP: {
+                            v.getBackground().clearColorFilter();
+                            v.invalidate();
+                            Toast.makeText(this, "My profile option not yet implemented", Toast.LENGTH_SHORT).show();
+                            break;
+                        }
+                    }
+                    return false;
+                }
+        );
+        settings.setOnTouchListener((View v, MotionEvent event) -> {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN: {
+                            v.getBackground().setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
+                            v.invalidate();
+                            break;
+                        }
+                        case MotionEvent.ACTION_UP: {
+                            v.getBackground().clearColorFilter();
+                            v.invalidate();
+                            Intent i = new Intent(MainActivity.this, MainSettingsActivity.class);
+                            startActivity(i);
+                            break;
+                        }
+                    }
+                    return false;
+                }
+        );
+        micStream.setOnTouchListener((View v, MotionEvent event) -> {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN: {
+                            v.getBackground().setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
+                            v.invalidate();
+                            break;
+                        }
+                        case MotionEvent.ACTION_UP: {
+                            v.getBackground().clearColorFilter();
+                            v.invalidate();
+                            Intent i = new Intent(MainActivity.this, LiveAudioStreamActivity.class);
+                            startActivity(i);
+                            break;
+                        }
+                    }
+                    return false;
+                }
+        );
     }
 
     @Override
@@ -115,10 +205,7 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
         BreezeAPI api = BreezeAPI.getInstance();
 
-        if (id == R.id.action_settings) {
-            Log.i("STATE", "Settings selected");
-            return true;
-        } else if (id == R.id.action_toggle_discovery) {
+        if (id == R.id.action_toggle_discovery) {
             if (api.router.isDiscovering) {
                 item.setChecked(false);
                 api.router.stopDiscovery();
@@ -135,7 +222,20 @@ public class MainActivity extends AppCompatActivity {
                 }
             }, 5 * 1000);
         }
+        else if (id == R.id.action_public_thread)
+        {
+            Intent i = new Intent(MainActivity.this, PublicMessagesView.class);
+            startActivity(i);
+        }
+        else if ( id == R.id.action_settings){
+            Intent i = new Intent(MainActivity.this, MainSettingsActivity.class);
+            startActivity(i);
+        }
 
+        else if( id == R.id.streams_testing_activity){
+            Intent i = new Intent(MainActivity.this, LiveAudioStreamActivity.class);
+            startActivity(i);
+        }
         return super.onOptionsItemSelected(item);
     }
 

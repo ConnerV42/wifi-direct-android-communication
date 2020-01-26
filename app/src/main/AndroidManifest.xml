@@ -11,7 +11,8 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
@@ -39,6 +40,7 @@
         <activity android:name=".views.ProfileActivity" />
         <activity android:name=".views.ChatSettingsActivity" />
         <activity android:name=".views.Chats.ChatHandshakeView" />
+        <activity android:name=".views.Messages.PublicMessagesView" />
         <activity
             android:name=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -55,6 +57,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".views.MainSettingsActivity" />
+        <activity android:name=".views.LiveStreams.LiveAudioStreamActivity"/>
         <service android:name=".application.BreezeAPI" />
 
         <provider

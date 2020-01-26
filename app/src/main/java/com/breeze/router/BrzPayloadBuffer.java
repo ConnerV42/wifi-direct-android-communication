@@ -1,5 +1,11 @@
 package com.breeze.router;
 
+import android.media.AudioFormat;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
+import android.media.audiofx.AcousticEchoCanceler;
+import android.media.audiofx.NoiseSuppressor;
+
 import com.google.android.gms.nearby.connection.Payload;
 
 import java.io.ByteArrayInputStream;
@@ -61,6 +67,10 @@ public class BrzPayloadBuffer {
         Payload p = this.incoming.get(payloadId);
         this.removeIncoming(payloadId);
         return p;
+    }
+
+    public void incomingAudioStream(Payload payload){
+
     }
 
     public void addIncoming(Payload payload) {
