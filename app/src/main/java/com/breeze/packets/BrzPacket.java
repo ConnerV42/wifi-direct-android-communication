@@ -72,8 +72,8 @@ public class BrzPacket implements BrzSerializable {
     }
 
     public BrzMessage publicMessage() {
-    }
         return new BrzMessage(this.body);
+    }
     public BrzGraphQuery graphQuery() {
         return new BrzGraphQuery(this.body);
     }

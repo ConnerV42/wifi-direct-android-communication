@@ -14,14 +14,14 @@ public class BrzPublicMessageHandler implements BrzRouterHandler{
     }
 
     @Override
-    public void handle(BrzPacket packet, String fromEndpointId) {
+    public boolean handle(BrzPacket packet, String fromEndpointId) {
         if (!this.handles(packet.type))
             throw new RuntimeException("This handler does not handle packets of type " + packet.type);
 
 
         BrzMessage m = packet.publicMessage();
         if(!m.chatId.equals("PUBLIC_THREAD")){
-            return;
+            return false;
         }
         BreezeAPI api = BreezeAPI.getInstance();
         try {
@@ -34,6 +34,7 @@ public class BrzPublicMessageHandler implements BrzRouterHandler{
             e.printStackTrace();
         }
 
+        return true;
     }
 
     public boolean handles(BrzPacket.BrzPacketType type) {

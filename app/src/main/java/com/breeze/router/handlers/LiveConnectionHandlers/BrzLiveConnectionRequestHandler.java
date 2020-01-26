@@ -23,10 +23,11 @@ public class BrzLiveConnectionRequestHandler implements BrzRouterHandler {
     }
 
     @Override
-    public void handle(BrzPacket packet, String fromEndpointId) {
+    public boolean handle(BrzPacket packet, String fromEndpointId) {
         BrzLiveConnectionRequest req = packet.connectionRequest();
    //     req.setProducerEndpointID(fromEndpointId);
         BreezeAPI.getInstance().streams.receiveBrzLiveConnectionRequest(req.getProducerEndpointID(), req);
+        return true;
     }
 
     @Override

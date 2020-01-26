@@ -9,8 +9,8 @@ public class BrzLiveConnectionEventHandler implements BrzRouterHandler {
     }
 
     @Override
-    public void handle(BrzPacket packet, String fromEndpointId) {
-
+    public boolean handle(BrzPacket packet, String fromEndpointId) {
+        return false;
     }
 
     @Override

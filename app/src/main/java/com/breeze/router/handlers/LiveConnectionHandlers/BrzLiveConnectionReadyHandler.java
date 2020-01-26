@@ -17,9 +17,10 @@ import com.breeze.streams.BrzLiveAudioProducer;
  */
 public class BrzLiveConnectionReadyHandler implements BrzRouterHandler {
     @Override
-    public void handle(BrzPacket packet, String fromEndpointId) {
+    public boolean handle(BrzPacket packet, String fromEndpointId) {
         BrzLiveConnectionReady ready = packet.connectionReady();
         BreezeAPI.getInstance().streams.receiveBrzLiveConnectionReady(ready.getProducerEndpointID(), ready);
+        return true;
     }
 
     @Override

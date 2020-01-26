@@ -22,22 +22,10 @@ public class BrzPacketBuilder {
         BrzMessage body = new BrzMessage(fromId, chatId, msgBody, System.currentTimeMillis(), isStatus);
         return new BrzPacket(body, BrzPacket.BrzPacketType.MESSAGE, msgTo, false);
     }
-     public static BrzPacket publicMessage(String fromId, String msgTo, String msgBody, Boolean isStatus){
+
+    public static BrzPacket publicMessage(String fromId, String msgTo, String msgBody, Boolean isStatus) {
         BrzMessage body = new BrzMessage(fromId, "PUBLIC_THREAD", msgBody, System.currentTimeMillis(), isStatus);
         return new BrzPacket(body, BrzPacket.BrzPacketType.PUBLIC_MESSAGE, msgTo, false);
-     }
-    public static BrzPacket fileInfoPacket(String fromId, String nextId, String chatId, String destinationId, String filePayloadId, String fileName) {
-        BrzFileInfo body = new BrzFileInfo();
-
-        body.fromId = fromId;
-        body.nextId = nextId;
-        body.chatId = chatId;
-        body.destinationId = destinationId;
-        body.filePayloadId = filePayloadId;
-        body.fileName = fileName;
-        body.datestamp = System.currentTimeMillis();
-
-        return new BrzPacket(body, BrzPacket.BrzPacketType.FILE_INFO, nextId, false);
     }
 
     public static BrzPacket graphQuery(String to, String from) {
@@ -68,7 +56,7 @@ public class BrzPacketBuilder {
         return new BrzPacket(mr, BrzPacket.BrzPacketType.MESSAGE_RECEIPT, to, false);
     }
 
-    public static BrzPacket streamRequest(String to, BrzLiveAudioProducer producer){
+    public static BrzPacket streamRequest(String to, BrzLiveAudioProducer producer) {
         String from = BreezeAPI.getInstance().hostNode.id;
         BrzLiveConnectionRequest req = new BrzLiveConnectionRequest();
         req.setProducerEndpointID(producer.getProducerEndpointID());
@@ -76,7 +64,7 @@ public class BrzPacketBuilder {
         return new BrzPacket(req, BrzPacket.BrzPacketType.STREAM_REQ, to, false);
     }
 
-    public static BrzPacket streamReady(String to, BrzLiveAudioConsumer consumer){
+    public static BrzPacket streamReady(String to, BrzLiveAudioConsumer consumer) {
         String from = BreezeAPI.getInstance().hostNode.id;
         BrzLiveConnectionReady ready = new BrzLiveConnectionReady();
         ready.setProducerEndpointID(consumer.getProducerEndpointId());
