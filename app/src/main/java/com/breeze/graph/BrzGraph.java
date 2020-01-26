@@ -243,4 +243,16 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
             Log.i("DESERIALIZATION ERROR", "err", e);
         }
     }
+
+    public String toString() {
+        String graph = "";
+        for(BrzNode node : this.vertexList.values()) {
+            graph += "Node " + node.id + "'s Adjacent Nodes: ";
+            for(String adjacentNode : this.adjList.get(node.id)) {
+                graph += adjacentNode + ", ";
+            }
+            graph += '\n';
+        }
+        return graph;
+    }
 }

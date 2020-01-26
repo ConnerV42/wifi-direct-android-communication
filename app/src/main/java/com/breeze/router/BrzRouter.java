@@ -178,6 +178,8 @@ public class BrzRouter extends EventEmitter {
                 return;
             }
 
+            Log.i("forwardPacket Graph State", graph.toString());
+
             // Get the next hop from the graph
             String nextHopUUID = graph.nextHop(this.hostNode.id, packet.to);
             if (nextHopUUID == null) {
@@ -430,6 +432,8 @@ public class BrzRouter extends EventEmitter {
                 String endpointUUID = endpointUUIDs.get(endpointId);
                 endpointIDs.put(endpointUUID, endpointId);
 
+                Log.i("Connection Event Graph State", graph.toString());
+
                 // Send graph to newly connected node
                 BrzPacket graphPacket = BrzPacketBuilder.graphResponse(graph, hostNode, endpointUUID);
                 connectionsClient.sendPayload(endpointId, BrzPayloadBuffer.getStreamPayload(graphPacket.toJSON()));
@@ -445,10 +449,11 @@ public class BrzRouter extends EventEmitter {
             if (hostNode != null && lostNode != null) {
                 String endpointUUID = endpointUUIDs.get(endpointId);
                 endpointIDs.remove(endpointUUID);
-                // graph.removeEdge(hostNode.id, endpointUUID);
 
                 // removes the vertex and any associated edges
                 graph.removeVertex(endpointUUID);
+
+                Log.i("Disconnection Event Graph State", graph.toString());
 
                 BrzStateStore.getStore().removeChat(endpointUUID);
 
