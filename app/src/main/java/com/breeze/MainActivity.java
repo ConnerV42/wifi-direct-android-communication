@@ -1,8 +1,10 @@
 package com.breeze;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,7 +28,6 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
-
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
     private static final int REQUEST_CODE_PROFILE = 2;
     private static final String[] REQUIRED_PERMISSIONS =

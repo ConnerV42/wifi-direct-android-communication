@@ -57,6 +57,10 @@ public class ChatHandshakeView extends AppCompatActivity {
 
         BreezeAPI api = BreezeAPI.getInstance();
         this.chat = api.state.getChat(chatId);
+        if(this.chat == null) {
+            finish();
+            return;
+        }
 
         TextView chatName = findViewById(R.id.handshake_chat_name);
         chatName.setText(chat.name);
@@ -84,7 +88,9 @@ public class ChatHandshakeView extends AppCompatActivity {
         ActionBar ab = getSupportActionBar();
         if (ab == null) return;
         ab.setTitle("Chat Invitation");
-//        ab.setDisplayHomeAsUpEnabled(true);
-//        ab.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
+
+        // Remove any notifications that are pending for this chat
+        BreezeAPI api = BreezeAPI.getInstance();
+        api.meta.removeNotification(this.chat.id);
     }
 }

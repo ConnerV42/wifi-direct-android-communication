@@ -1,19 +1,21 @@
 package com.breeze.application;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.service.notification.StatusBarNotification;
 import android.util.Log;
-import android.widget.RemoteViews;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.Person;
 import androidx.core.app.RemoteInput;
+import androidx.core.graphics.drawable.IconCompat;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
@@ -22,12 +24,13 @@ import com.breeze.R;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzNode;
+import com.breeze.graph.BrzGraph;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
-import com.breeze.storage.BrzStorage;
-import com.breeze.views.Chats.ChatHandshakeView;
-import com.breeze.views.Messages.MessagesView;
+import com.breeze.packets.ChatEvents.BrzChatHandshake;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -66,37 +69,38 @@ public class BreezeMetastateModule extends BreezeModule {
         } catch (RuntimeException e) {
             Log.e("BREEZE_API", "Trying to load chats", e);
         }
+    }
 
-//        List<String> nodes = new ArrayList<>();
+    void setHostNode(BrzNode hostNode) {
 
-//        nodes.add("test");
-//        BrzChat chat = new BrzChat("Test Chat", nodes);
-//
-//        BrzMessage msg = new BrzMessage("Testing date stuff", "test");
-//        msg.chatId = chat.id;
-//
-//        BrzMessage msg2 = new BrzMessage("Testing date stuff for outgoing", api.hostNode.id);
-//        msg2.chatId = chat.id;
-//
-//        api.state.addChat(chat);
-//        api.state.addMessage(msg);
-//        api.state.addMessage(msg2);
+//        // Add a test node
 //        BrzGraph.getInstance().addVertex(new BrzNode("test", "", "", "Jake", "@JJ"));
 //
-//        BrzGraph.getInstance().addVertex(new BrzNode("2", "", "", "Paul", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("3", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("4", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("5", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("6", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("7", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("8", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("9", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("10", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("11", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("12", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("13", "", "", "Conner", "@JJ"));
-//        BrzGraph.getInstance().addVertex(new BrzNode("14", "", "", "Conner", "@JJ"));
-
+//        // Add a test chat
+//        List<String> nodes = new LinkedList<>();
+//        nodes.add("test");
+//        BrzChat chat = new BrzChat("Test Chat", nodes);
+////        chat.acceptedByHost = true;
+////        chat.acceptedByRecipient = true;
+//        api.state.addChat(chat);
+//
+//        // Add chat to encryption
+//        BrzChatHandshake hand = new BrzChatHandshake(hostNode.id, chat);
+//        api.encryption.makeSecretKey(hand);
+//
+//        BrzMessage msg = BrzPacketBuilder.message("test", "", "Testing date stuff", chat.id, false).message();
+//        BrzMessage msg2 = BrzPacketBuilder.message(hostNode.id, "", "Testing date stuff", chat.id, false).message();
+//        api.state.addMessage(msg);
+//        api.state.addMessage(msg2);
+//
+//        showMessageNotification(msg);
+//
+//        new Timer().schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                showMessageNotification(msg2);
+//            }
+//        }, 5 * 1000);
     }
 
     public boolean getCachedHostNode() {
@@ -115,9 +119,6 @@ public class BreezeMetastateModule extends BreezeModule {
     public void sendDeliveryReceipt(BrzMessage m) {
         BrzPacket p = BrzPacketBuilder.messageReceipt(m.from, m.chatId, m.id, true);
         api.router.send(p);
-
-        // Tracking delivery isn't really necessary
-        // this.setDelivered(m.id);
     }
 
     public void sendReadReceipt(BrzMessage m) {
@@ -136,30 +137,169 @@ public class BreezeMetastateModule extends BreezeModule {
         this.emit("read", messageId);
     }
 
+    //--------------------------------------------------------------------------------------------//
+    //                                     Notifications                                          //
+    //--------------------------------------------------------------------------------------------//
+
+    HashMap<String, Integer> activeNotifications = new HashMap<>();
+
+    public void removeNotification(String id) {
+        Integer notifId = activeNotifications.get(id);
+        if (notifId == null) return;
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.api);
+        notificationManager.cancel(notifId);
+    }
+
+    public void removeAllNotifications() {
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.api);
+        for (int notifId : activeNotifications.values()) {
+            notificationManager.cancel(notifId);
+        }
+    }
+
+
     public void showMessageNotification(BrzMessage message) {
         BrzChat c = this.api.state.getChat(message.chatId);
         if (api.state.getCurrentChat().equals(message.chatId)) return;
 
-        int notifId = new Random().nextInt(2000);
+        // Check if there's already a notification active
+        Integer notifId = activeNotifications.get(message.chatId);
+        if (notifId != null) {
+            addMessageToNotification(this.api, notifId, message);
+            return;
+        }
 
-        Intent chatIntent = MessagesView.getIntent(this.api, message.chatId);
-        PendingIntent pending = PendingIntent.getActivity(this.api, 0, chatIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        // ---------------------------------------------------------//
+        //              Or build a new notification                 //
+        // ---------------------------------------------------------//
 
-        Bitmap chatImage;
-        if (!c.isGroup)
-            chatImage = api.storage.getProfileImage(c.otherPersonId(), api);
-        else
-            chatImage = api.storage.getProfileImage(c.id, api);
+        notifId = new Random().nextInt(2000) + 5;
+        activeNotifications.put(message.chatId, notifId);
+
+        NotificationCompat.MessagingStyle style = new NotificationCompat.MessagingStyle("You");
+        style.setConversationTitle(c.name);
+
+        // Add the new message
+        BrzNode n = BrzGraph.getInstance().getVertex(message.from);
+        style.addMessage(message.body, message.datestamp, getPerson(n));
+        Notification notification = getMessageNotificationBuilder(notifId, style, message.chatId).build();
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.api);
+        notificationManager.notify(notifId, notification);
+    }
+
+
+    public void showHandshakeNotification(String chatId) {
+        BrzChat c = this.api.state.getChat(chatId);
+        if (c == null || api.state.getCurrentChat().equals(chatId)) return;
+
+        // Check if there's already a notification active
+        Integer notifId = activeNotifications.get(chatId);
+        if (notifId != null) return;
+
+
+        // ---------------------------------------------------------//
+        //              Or build a new notification                 //
+        // ---------------------------------------------------------//
+
+        notifId = new Random().nextInt(2000) + 5;
+        activeNotifications.put(chatId, notifId);
+
+        Notification notification = new NotificationCompat.Builder(this.api, App.MESSAGE_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_stat_name)
+                .setContentTitle(c.name)
+                .setContentText("You've been invited to join this chat!")
+                .setAutoCancel(true)
+                .setContentIntent(BreezeBroadcastReceiver.getAcceptChatIntent(api, chatId))
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .build();
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.api);
+        notificationManager.notify(notifId, notification);
+    }
+
+
+    // Notification helpers
+
+    private Notification getActiveNotification(Context ctx, int notifId) {
+        try {
+            NotificationManager manager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (manager == null) return null;
+            StatusBarNotification[] notifications = manager.getActiveNotifications();
+            for (StatusBarNotification notif : notifications) {
+                if (notif.getId() == notifId)
+                    return notif.getNotification();
+            }
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private Person getPerson(BrzNode n) {
+        if (n == null) {
+            return new Person.Builder()
+                    .setBot(false)
+                    .setName("Disconnected")
+                    .build();
+        }
+
+        Person.Builder builder = new Person.Builder();
+
+        if (api.storage.hasProfileImage(n.id)) {
+            Bitmap personIcon = api.storage.getProfileImage(n.id, api);
+            builder.setIcon(IconCompat.createWithBitmap(getRoundIcon(personIcon)));
+        }
+
+        return builder
+                .setBot(false)
+                .setName(n.id.equals(api.hostNode.id) ? "You" : n.name)
+                .setKey(n.id)
+                .build();
+    }
+
+    void addMessageToNotification(Context ctx, int notifId, BrzMessage message) {
+        // Get the chat
+        BrzChat c = api.state.getChat(message.chatId);
+        if (c == null) return;
+
+        // Get the style / messages from the notification
+        Notification notif = getActiveNotification(ctx, notifId);
+        NotificationCompat.MessagingStyle msgStyle = NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(notif);
+
+        // Create a new message style with all the previous messages
+        NotificationCompat.MessagingStyle newMsgStyle = new NotificationCompat.MessagingStyle(getPerson(api.hostNode));
+        newMsgStyle.setConversationTitle(c.name);
+        if (msgStyle != null && msgStyle.getMessages() != null) {
+            for (NotificationCompat.MessagingStyle.Message msg : msgStyle.getMessages()) {
+                newMsgStyle.addMessage(msg);
+            }
+        }
+
+        // Get the builder from the notification
+        NotificationCompat.Builder builder = getMessageNotificationBuilder(notifId, newMsgStyle, message.chatId);
+
+        // Add the new message
+        BrzNode n = BrzGraph.getInstance().getVertex(message.from);
+        newMsgStyle.addMessage(message.body, message.datestamp, getPerson(n));
+
+        // Set the new style to the recovered builder.
+        builder.setStyle(newMsgStyle);
+
+        // Update the active notification.
+        NotificationManagerCompat.from(ctx).notify(notifId, builder.build());
+    }
+
+    private NotificationCompat.Builder getMessageNotificationBuilder(int notifId, NotificationCompat.Style style, String chatId) {
+        PendingIntent pending = BreezeBroadcastReceiver.getOpenChatIntent(api, chatId);
 
         // Reply enabling stuff
         RemoteInput remoteInput = new RemoteInput.Builder(BreezeBroadcastReceiver.KEY_MESSAGE_REPLY)
                 .setLabel("New Message")
                 .build();
-        PendingIntent replyPendingIntent = PendingIntent.getBroadcast(
-                api,
-                notifId,
-                BreezeBroadcastReceiver.getMessageReplyIntent(api, c.id, notifId),
-                PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent replyPendingIntent = BreezeBroadcastReceiver.getMessageReplyIntent(api, chatId, notifId);
+
         // Create the reply action and add the remote input.
         NotificationCompat.Action action = new NotificationCompat.Action
                 .Builder(R.drawable.ic_send_black_24dp, "Reply", replyPendingIntent)
@@ -167,51 +307,14 @@ public class BreezeMetastateModule extends BreezeModule {
                 .setAllowGeneratedReplies(true)
                 .build();
 
-        RoundedBitmapDrawable chatRounded = RoundedBitmapDrawableFactory.create(api.getResources(), chatImage);
-        chatRounded.setCornerRadius(100.0f);
-        chatRounded.setAntiAlias(true);
-
-        RemoteViews notifLayout = new RemoteViews(api.getPackageName(), R.layout.message_notification);
-        notifLayout.setImageViewBitmap(R.id.message_notif_image, drawableToBitmap(chatRounded));
-        notifLayout.setTextViewText(R.id.message_notif_name, c.name);
-        notifLayout.setTextViewText(R.id.message_notif_body, message.body);
-
-        Notification notification = new NotificationCompat.Builder(this.api, App.MESSAGE_CHANNEL_ID)
+        return new NotificationCompat.Builder(this.api, App.MESSAGE_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_stat_name)
-                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                .setCustomContentView(notifLayout)
+                .setStyle(style)
                 .setAutoCancel(true)
                 .setContentIntent(pending)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setPriority(Notification.PRIORITY_HIGH)
-                .addAction(action)
-                .build();
-
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        notification.defaults |= Notification.DEFAULT_SOUND;
-        notification.defaults |= Notification.DEFAULT_VIBRATE;
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.api);
-        notificationManager.notify(notifId, notification);
-    }
-
-    public void showHandshakeNotification(String chatId) {
-        BrzChat c = this.api.state.getChat(chatId);
-        Intent chatIntent = ChatHandshakeView.getIntent(api, chatId);
-        PendingIntent pending = PendingIntent.getActivity(this.api, 0, chatIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        Notification notification = new NotificationCompat.Builder(this.api, App.MESSAGE_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_stat_name)
-                .setContentTitle(c.name)
-                .setContentText("You've been invited to join this chat!")
-                .setAutoCancel(true)
-                .setContentIntent(pending)
-                .setDefaults(Notification.DEFAULT_ALL)
-                .setPriority(Notification.PRIORITY_HIGH)
-                .build();
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.api);
-        notificationManager.notify(3, notification);
+                .addAction(action);
     }
 
     public static Bitmap drawableToBitmap(Drawable drawable) {
@@ -228,4 +331,13 @@ public class BreezeMetastateModule extends BreezeModule {
         drawable.draw(canvas);
         return bitmap;
     }
+
+    private Bitmap getRoundIcon(Bitmap icon) {
+        RoundedBitmapDrawable iconRounded = RoundedBitmapDrawableFactory.create(api.getResources(), icon);
+        iconRounded.setCornerRadius(100.0f);
+        iconRounded.setAntiAlias(true);
+
+        return drawableToBitmap(iconRounded);
+    }
+
 }

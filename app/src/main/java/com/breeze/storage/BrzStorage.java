@@ -215,13 +215,12 @@ public class BrzStorage extends EventEmitter {
     private Bitmap getImage(String name, File imageDir) {
         try {
             File image = new File(imageDir, name);
-            Log.i("STORAGE", image.getAbsolutePath());
             InputStream imageInputStream = new FileInputStream(image);
             Bitmap b = BitmapFactory.decodeStream(imageInputStream);
             imageInputStream.close();
             return b;
         } catch (Exception e) {
-            Log.i("STORAGE", "Failed to retrieve profile image", e);
+            Log.i("STORAGE", "Failed to retrieve a profile image for " + name);
         }
 
         return null;

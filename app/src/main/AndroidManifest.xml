@@ -25,9 +25,12 @@
         android:requestLegacyExternalStorage="true"
         >
 
-        <receiver android:name=".application.BreezeBroadcastReceiver"  android:exported="true">
+        <receiver android:name=".application.BreezeBroadcastReceiver">
             <intent-filter>
                 <action android:name="com.breeze.actions.MessageReply"/>
+                <action android:name="com.breeze.actions.ChatOpen"/>
+                <action android:name="com.breeze.actions.ChatAccept"/>
+                <action android:name="com.breeze.actions.KillApplication"/>
             </intent-filter>
         </receiver>
 
@@ -55,6 +58,7 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".KillAppActivity" />
         <service android:name=".application.BreezeAPI" />
 
         <provider

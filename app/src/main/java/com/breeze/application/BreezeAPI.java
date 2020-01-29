@@ -28,6 +28,7 @@ import androidx.core.content.FileProvider;
 import androidx.core.location.LocationManagerCompat;
 
 import com.breeze.App;
+import com.breeze.EventEmitter;
 import com.breeze.MainActivity;
 import com.breeze.R;
 import com.breeze.database.DatabaseHandler;
@@ -54,14 +55,13 @@ public class BreezeAPI extends Service {
     // Singleton
 
     private static BreezeAPI instance = new BreezeAPI();
-
     public static BreezeAPI getInstance() {
         return instance;
     }
 
-    // Behavioral Modules
 
-    final private String ACTION_STOP_SERVICE = "STOP THIS NOW";
+
+    // Behavioral Modules
     public SharedPreferences preferences;
 
     public BrzRouter router = null;
@@ -88,16 +88,12 @@ public class BreezeAPI extends Service {
         Intent notifIntent = new Intent(this, MainActivity.class);
         PendingIntent pending = PendingIntent.getActivity(this, 0, notifIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        Intent stopSelf = new Intent(this, BreezeAPI.class);
-        stopSelf.setAction(this.ACTION_STOP_SERVICE);
-        PendingIntent pStopSelf = PendingIntent.getService(this, 0, stopSelf, 0);
-
         Notification notification = new NotificationCompat.Builder(this, App.SERVICE_CHANNEL_ID)
                 .setContentTitle("Breeze Service")
                 .setContentText("Breeze is running in the background")
                 .setSmallIcon(R.drawable.ic_stat_name)
                 .setContentIntent(pending)
-                .addAction(R.drawable.ic_launcher, "Stop", pStopSelf)
+                .addAction(R.drawable.ic_launcher, "Kill Application", BreezeBroadcastReceiver.getKillApplicationIntent(this))
                 .build();
 
         startForeground(1, notification);
@@ -116,11 +112,6 @@ public class BreezeAPI extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (ACTION_STOP_SERVICE.equals(intent.getAction())) {
-            stopSelf();
-            router.stop();
-        }
-
         return START_NOT_STICKY;
     }
 
@@ -133,7 +124,14 @@ public class BreezeAPI extends Service {
     @Override
     public void onDestroy() {
         router.stop();
+        stopSelf();
         super.onDestroy();
+    }
+
+    private boolean initialized = false;
+
+    public boolean isInitialized() {
+        return initialized;
     }
 
     public void initialize(Context ctx) {
@@ -156,17 +154,15 @@ public class BreezeAPI extends Service {
         // Initialize preferences
         if (this.preferences == null)
             this.preferences = ctx.getSharedPreferences("Breeze", Context.MODE_PRIVATE);
+
+        this.initialized = true;
     }
 
     public Boolean isLocationEnabled() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            LocationManager lm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-            return lm.isLocationEnabled();
-        } else {
-            int mode = Settings.Secure.getInt(this.getContentResolver(), Settings.Secure.LOCATION_MODE,
-                    Settings.Secure.LOCATION_MODE_OFF);
-            return (mode != Settings.Secure.LOCATION_MODE_OFF);
-        }
+        if(!initialized) return true;
+        int mode = Settings.Secure.getInt(this.getContentResolver(), Settings.Secure.LOCATION_MODE,
+                Settings.Secure.LOCATION_MODE_OFF);
+        return (mode != Settings.Secure.LOCATION_MODE_OFF);
     }
 
     //
@@ -193,6 +189,8 @@ public class BreezeAPI extends Service {
         this.router.start(hostNode);
         this.state.setHostNode(hostNode);
         this.db.setNode(hostNode);
+
+        this.meta.setHostNode(hostNode);
     }
 
     //

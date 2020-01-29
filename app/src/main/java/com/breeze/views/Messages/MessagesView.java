@@ -200,6 +200,9 @@ public class MessagesView extends AppCompatActivity {
 
         api.state.on("chat" + this.chat.id, this.onChatUpdate);
         this.onChatUpdate.accept(chat);
+
+        // Remove any notifications that are pending for this chat
+        api.meta.removeNotification(this.chat.id);
     }
 
     @Override
