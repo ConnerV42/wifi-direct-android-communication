@@ -50,7 +50,7 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
             // Set bitmap if it exists in BrzStorage
             ImageView user_image = v.findViewById(R.id.user_image);
             BreezeAPI api = BreezeAPI.getInstance();
-            Bitmap bm = api.storage.getProfileImage(node.id, v.getContext());
+            Bitmap bm = api.storage.getProfileImage(api.storage.PROFILE_DIR, node.id);
             if (bm != null)
                 user_image.setImageBitmap(bm);
 

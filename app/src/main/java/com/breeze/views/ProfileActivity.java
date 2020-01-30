@@ -38,9 +38,8 @@ public class ProfileActivity extends AppCompatActivity {
 
         // When the image uploader is clicked, choose a profile image
         ImageView profileImage = findViewById(R.id.profile_image);
-        BrzStorage storage = BrzStorage.getInstance();
-        if (storage != null)
-            profileImage.setImageBitmap(BrzStorage.getInstance().getProfileImage("default", this));
+        BreezeAPI api = BreezeAPI.getInstance();
+        profileImage.setImageBitmap(api.storage.getProfileImage(api.storage.PROFILE_DIR, "default"));
         profileImage.setOnClickListener(e -> {
             Intent intent = new Intent(Intent.ACTION_PICK,
                     android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -79,7 +78,8 @@ public class ProfileActivity extends AppCompatActivity {
                 profileImage.setImageBitmap(bitmap);
 
                 // Set user profileImage
-                BreezeAPI.getInstance().storage.saveProfileImage(bitmap, this.node.id);
+                BreezeAPI api = BreezeAPI.getInstance();
+                api.storage.saveProfileImage(api.storage.PROFILE_DIR, this.node.id, bitmap);
 
             } catch (Exception e) {
                 Log.e("FILE_ACCESS", "Failure ", e);

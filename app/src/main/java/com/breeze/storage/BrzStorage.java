@@ -1,7 +1,5 @@
 package com.breeze.storage;
 
-import android.content.Context;
-import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -14,27 +12,17 @@ import com.breeze.EventEmitter;
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzMessage;
-import com.breeze.datatypes.BrzNode;
-import com.breeze.packets.BrzPacket;
-import com.breeze.packets.ProfileEvents.BrzProfileImageEvent;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 
 public class BrzStorage extends EventEmitter {
-    private ContextWrapper cw;
-
-    private BrzStorage(Context c) {
-        this.cw = new ContextWrapper(c);
-    }
-
     // Singleton stuff
     private static BrzStorage instance = null;
 
@@ -42,9 +30,129 @@ public class BrzStorage extends EventEmitter {
         return instance;
     }
 
-    public static BrzStorage initialize(Context c) {
-        if (instance == null) instance = new BrzStorage(c);
+    public static BrzStorage initialize(BreezeAPI api) {
+        if (instance == null) instance = new BrzStorage(api);
         return instance;
+    }
+
+    // Constructor
+
+    private BreezeAPI api;
+
+    private BrzStorage(BreezeAPI api) {
+        this.api = api;
+    }
+
+    // File streaming helpers
+
+    private HashMap<String, Boolean> downloadingFiles = new HashMap<>();
+
+    public boolean isDownloading(String fileKey) {
+        return downloadingFiles.get(fileKey) != null;
+    }
+
+    public void saveStreamToFile(String fileKey, File outputFile, InputStream data) {
+        try {
+            outputFile.mkdirs();
+            if (outputFile.exists()) outputFile.delete();
+            outputFile.createNewFile();
+        } catch (Exception e) {
+            Log.e("STORAGE", "Failed to create file " + outputFile.getAbsolutePath(), e);
+        }
+
+        downloadingFiles.put(fileKey, true);
+
+        Thread saverThread = new Thread(() -> {
+            try {
+                OutputStream out = new FileOutputStream(outputFile);
+                byte[] buf = new byte[80000];
+                int len;
+                while ((len = data.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+                out.flush();
+                out.close();
+                data.close();
+            } catch (Exception e) {
+                Log.e("STORAGE", "Failed to output stream to the file " + outputFile.getAbsolutePath(), e);
+            } finally {
+                downloadingFiles.remove(fileKey);
+                emit("downloadDone", fileKey);
+            }
+        });
+        saverThread.start();
+    }
+
+    public void saveStreamToFileSync(File outputFile, InputStream data) {
+        try {
+            outputFile.mkdirs();
+            if (outputFile.exists()) outputFile.delete();
+            outputFile.createNewFile();
+        } catch (Exception e) {
+            Log.e("STORAGE", "Failed to create file " + outputFile.getAbsolutePath(), e);
+        }
+
+        try {
+            OutputStream out = new FileOutputStream(outputFile);
+            byte[] buf = new byte[80000];
+            int len;
+            while ((len = data.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            out.flush();
+            out.close();
+            data.close();
+        } catch (Exception e) {
+            Log.e("STORAGE", "Failed to output stream to the file " + outputFile.getAbsolutePath(), e);
+        }
+    }
+
+    public void saveBitmapToFile(File outputFile, Bitmap bm) {
+        try {
+            outputFile.mkdirs();
+            if (outputFile.exists()) outputFile.delete();
+            outputFile.createNewFile();
+        } catch (Exception e) {
+            Log.e("STORAGE", "Failed to create file " + outputFile.getAbsolutePath(), e);
+        }
+
+        try {
+            FileOutputStream stream = new FileOutputStream(outputFile);
+            bm.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+            stream.close();
+        } catch (Exception e) {
+            Log.i("STORAGE", "Failed to save bitmap to file " + outputFile.getAbsolutePath(), e);
+        }
+    }
+
+    public Bitmap getFileAsBitmap(File imageFile) {
+        try {
+            InputStream imageInputStream = new FileInputStream(imageFile);
+            Bitmap b = BitmapFactory.decodeStream(imageInputStream);
+            imageInputStream.close();
+            return b;
+        } catch (Exception e) {
+            Log.i("STORAGE", "Failed to retrieve image file " + imageFile.getAbsolutePath(), e);
+        }
+
+        return null;
+    }
+
+    public Bitmap getVectorAsBitmap(int drawableId) {
+        Drawable drawable = ContextCompat.getDrawable(api, drawableId);
+        Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
+    }
+
+    public void deleteFile(File outputFile) {
+        try {
+            outputFile.delete();
+        } catch (Exception e) {
+            Log.e("STORAGE", "Failed to delete file " + outputFile.getAbsolutePath(), e);
+        }
     }
 
     /*
@@ -53,129 +161,57 @@ public class BrzStorage extends EventEmitter {
      *
      */
 
-    private final String PROFILE_IMAGE_DIR = "profile_images";
+    public final String PROFILE_DIR = "profile_images";
+    public final String CHAT_DIR = "chat_images";
 
-    public void saveProfileImageFile(BrzPacket p, InputStream stream) {
-        BrzProfileImageEvent event = p.profileImageEvent();
-        BreezeAPI api = BreezeAPI.getInstance();
-
-        File profileImageDirectory = api.getExternalFilesDir(PROFILE_IMAGE_DIR);
-        File profileImage = new File(profileImageDirectory, event.nodeId);
-
-        try {
-            profileImage.mkdirs();
-            if (profileImage.exists()) profileImage.delete();
-            profileImage.createNewFile();
-
-            OutputStream out = new FileOutputStream(profileImage);
-            byte[] buf = new byte[80000];
-            int len;
-            while ((len = stream.read(buf)) > 0) {
-                out.write(buf, 0, len);
-            }
-            out.flush();
-            out.close();
-            stream.close();
-
-            emit("profileImage", event.nodeId);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void saveProfileImage(String directory, String fileName, InputStream stream) {
+        File profileImageFile = new File(api.getExternalFilesDir(directory), fileName);
+        saveStreamToFile(fileName, profileImageFile, stream);
     }
 
-    public void saveProfileImage(Bitmap bm, String fileName) {
-        this.saveImage(bm, fileName, cw.getExternalFilesDir(PROFILE_IMAGE_DIR));
+    public void saveProfileImage(String directory, String fileName, Bitmap bm) {
+        File profileImageFile = new File(api.getExternalFilesDir(directory), fileName);
+        saveBitmapToFile(profileImageFile, bm);
     }
 
-    public void deleteProfileImage(String fileName) {
-        this.deleteImage(fileName, PROFILE_IMAGE_DIR);
+    public void deleteProfileImage(String directory, String fileName) {
+        File profileImageFile = new File(api.getExternalFilesDir(directory), fileName);
+        deleteFile(profileImageFile);
     }
 
-    public Bitmap getProfileImage(String fileName, Context ctx) {
-        Bitmap b = getImage(fileName, cw.getExternalFilesDir(PROFILE_IMAGE_DIR));
-        if (b == null)
-            b = bitmapFromVector(ctx, R.drawable.ic_person_black_24dp);
+    public Bitmap getProfileImage(String directory, String fileName) {
+        File profileImageFile = new File(api.getExternalFilesDir(directory), fileName);
+        Bitmap b = getFileAsBitmap(profileImageFile);
+        if (b == null) return getVectorAsBitmap(R.drawable.ic_person_black_24dp);
         return b;
     }
 
-    public boolean hasProfileImage(String fileName) {
-        Bitmap b = getImage(fileName, cw.getExternalFilesDir(PROFILE_IMAGE_DIR));
-        if (b == null)
-            return false;
-        return true;
+    public boolean hasProfileImage(String directory, String fileName) {
+        File profileImageFile = new File(api.getExternalFilesDir(directory), fileName);
+        return profileImageFile.exists();
     }
 
     /*
      *
-     *      Chat image handling
+     *      Message file handling
      *
      */
 
-    private final String CHAT_IMAGE_DIR = "chat_images";
-
-    public void saveChatImage(Bitmap bm, String fileName) {
-        this.saveImage(bm, fileName, cw.getExternalFilesDir(CHAT_IMAGE_DIR));
-    }
-
-    public void deleteChatImage(String fileName) {
-        this.deleteImage(fileName, CHAT_IMAGE_DIR);
-    }
-
-    public Bitmap getChatImage(String fileName, Context ctx) {
-        Bitmap b = getImage(fileName, cw.getExternalFilesDir(CHAT_IMAGE_DIR));
-        if (b == null)
-            b = bitmapFromVector(ctx, R.drawable.ic_person_black_24dp);
-        return b;
-    }
-
-    /*
-
-        Stream message test
-
-     */
-
-    private final String FILE_MESSAGES_DIR = "BreezeMedia";
+    public final String FILE_MESSAGES_DIR = "BreezeMedia";
 
     public void saveMessageFile(BrzMessage message, InputStream stream) {
-        BreezeAPI api = BreezeAPI.getInstance();
         File messagesDir = api.getExternalFilesDir(FILE_MESSAGES_DIR);
         File chatDir = new File(messagesDir, message.chatId);
         File messageFile = new File(chatDir, message.id);
 
-        this.saveMessageFile(messageFile, stream);
-
+        saveStreamToFile(message.id, messageFile, stream);
     }
 
-    public void saveMessageFile(File messageFile, InputStream stream) {
-        try {
-            messageFile.mkdirs();
-            if (messageFile.exists()) messageFile.delete();
-            messageFile.createNewFile();
-        } catch (Exception e) {
-            Log.e("STORAGE", "Failed to create message file", e);
-        }
-
-        Thread saverThread = new Thread(() -> {
-            try {
-                OutputStream out = new FileOutputStream(messageFile);
-                byte[] buf = new byte[80000];
-                int len;
-                while ((len = stream.read(buf)) > 0) {
-                    out.write(buf, 0, len);
-                }
-                out.flush();
-                out.close();
-                stream.close();
-            } catch (Exception e) {
-
-            }
-        });
-        saverThread.start();
+    public boolean messageFileIsDownloading(BrzMessage message) {
+        return isDownloading(message.id);
     }
 
-    public boolean hasMessageFile(BrzMessage message) {
-        BreezeAPI api = BreezeAPI.getInstance();
+    public boolean messageFileExists(BrzMessage message) {
         File messagesDir = api.getExternalFilesDir(FILE_MESSAGES_DIR);
         File chatDir = new File(messagesDir, message.chatId);
         File messageFile = new File(chatDir, message.id);
@@ -183,8 +219,7 @@ public class BrzStorage extends EventEmitter {
     }
 
     public File getMessageFile(BrzMessage message) {
-        if (hasMessageFile(message)) {
-            BreezeAPI api = BreezeAPI.getInstance();
+        if (messageFileExists(message)) {
             File messagesDir = api.getExternalFilesDir(FILE_MESSAGES_DIR);
             File chatDir = new File(messagesDir, message.chatId);
             return new File(chatDir, message.id);
@@ -193,86 +228,33 @@ public class BrzStorage extends EventEmitter {
     }
 
     public Bitmap getMessageFileAsBitmap(BrzMessage message) {
-        BreezeAPI api = BreezeAPI.getInstance();
         File messagesDir = api.getExternalFilesDir(FILE_MESSAGES_DIR);
         File chatDir = new File(messagesDir, message.chatId);
         File messageFile = new File(chatDir, message.id);
-        return getImage(messageFile);
+        Bitmap bm = getFileAsBitmap(messageFile);
+        if (bm == null) return null;
+        return scaleBitmap(bm, 750);
     }
 
     /*
      *
-     *      File access helpers
+     *      Bitmap helpers
      *
      */
 
-    private void saveImage(Bitmap bm, String name, File imageDir) {
-        File imagePath = new File(imageDir, name);
-        try {
-            imageDir.mkdir();
-            imagePath.createNewFile();
-            FileOutputStream stream = new FileOutputStream(imagePath);
-            bm.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-            stream.close();
-        } catch (Exception e) {
-            Log.i("STORAGE", "Profile image failed to save", e);
+    private Bitmap scaleBitmap(Bitmap image, final int maxSize) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        float bitmapRatio = (float) width / (float) height;
+        if (bitmapRatio > 0) {
+            width = maxSize;
+            height = (int) (width / bitmapRatio);
+        } else {
+            height = maxSize;
+            width = (int) (height * bitmapRatio);
         }
-    }
-
-    private Bitmap getImage(String name, File imageDir) {
-        try {
-            File image = new File(imageDir, name);
-            InputStream imageInputStream = new FileInputStream(image);
-            Bitmap b = BitmapFactory.decodeStream(imageInputStream);
-            imageInputStream.close();
-            return b;
-        } catch (Exception e) {
-            Log.i("STORAGE", "Failed to retrieve a profile image for " + name);
-        }
-
-        return null;
-    }
-
-    private Bitmap getImage(File imageFile) {
-        try {
-            InputStream imageInputStream = new FileInputStream(imageFile);
-            Bitmap image = BitmapFactory.decodeStream(imageInputStream);
-            imageInputStream.close();
-
-            final int maxSize = 750;
-
-            int width = image.getWidth();
-            int height = image.getHeight();
-
-            float bitmapRatio = (float) width / (float) height;
-            if (bitmapRatio > 0) {
-                width = maxSize;
-                height = (int) (width / bitmapRatio);
-            } else {
-                height = maxSize;
-                width = (int) (height * bitmapRatio);
-            }
-            return Bitmap.createScaledBitmap(image, width, height, true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    private void deleteImage(String name, String dir) {
-        File imageDirectory = cw.getDir(dir, Context.MODE_PRIVATE);
-        File imagePath = new File(imageDirectory, name);
-        imagePath.delete();
-    }
-
-    public Bitmap bitmapFromVector(Context context, int drawableId) {
-        Drawable drawable = ContextCompat.getDrawable(context, drawableId);
-        Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-        return bitmap;
+        return Bitmap.createScaledBitmap(image, width, height, true);
     }
 
     public static InputStream bitmapToInputStream(Bitmap bm, int quality) {

@@ -42,10 +42,12 @@ public class ChatSettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_settings);
 
+        BreezeAPI api = BreezeAPI.getInstance();
+
         // Snag the chat object from the argument
         Intent i = getIntent();
         String chatId = i.getStringExtra("ARG_CHAT_ID");
-        this.chat = BrzStateStore.getStore().getChat(chatId);
+        this.chat = api.state.getChat(chatId);
 
         // Set name textbox to be the chat's current name
         EditText nameTextbox = findViewById(R.id.chat_settings_name);
@@ -53,7 +55,7 @@ public class ChatSettingsActivity extends AppCompatActivity {
 
         // Get an image when the imageview is clicked
         ImageView chatImage = findViewById(R.id.chat_settings_image);
-        chatImage.setImageBitmap(BrzStorage.getInstance().getChatImage(this.chat.id, this));
+        chatImage.setImageBitmap(api.storage.getProfileImage(api.storage.CHAT_DIR, this.chat.id));
         chatImage.setOnClickListener(e -> {
             Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(intent, READ_REQUEST_CODE);
@@ -85,8 +87,9 @@ public class ChatSettingsActivity extends AppCompatActivity {
                 ImageView chatImage = findViewById(R.id.chat_settings_image);
                 chatImage.setImageBitmap(bitmap);
 
-                // Set user profileImage
-                BrzStorage.getInstance().saveChatImage(bitmap, this.chat.id);
+                // Set chat image
+                BreezeAPI api = BreezeAPI.getInstance();
+                api.storage.saveProfileImage(api.storage.CHAT_DIR, this.chat.id, bitmap);
 
             } catch (Exception e) {
                 Log.e("FILE_ACCESS", "Failure ", e);
@@ -98,7 +101,7 @@ public class ChatSettingsActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         ActionBar ab = getSupportActionBar();
-        if(ab == null) return;
+        if (ab == null) return;
 
         ab.setTitle("Chat settings");
         ab.setDisplayHomeAsUpEnabled(true);

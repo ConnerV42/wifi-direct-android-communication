@@ -48,6 +48,7 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
 
         public void bind(BrzChat chat, int position, Context ctx) {
             BrzGraph graph = BrzGraph.getInstance();
+            BreezeAPI api = BreezeAPI.getInstance();
 
             TextView chatName = this.v.findViewById(R.id.chat_name);
             chatName.setText(chat.name);
@@ -76,14 +77,12 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
 
             // Chat's image
             ImageView chatImage = this.v.findViewById(R.id.chat_image);
-            if (!chat.isGroup)
-                chatImage.setImageBitmap(BrzStorage.getInstance().getProfileImage(chat.otherPersonId(), ctx));
-            else
-                chatImage.setImageBitmap(BrzStorage.getInstance().getChatImage(chat.id, ctx));
+            String dir = chat.isGroup ? api.storage.CHAT_DIR : api.storage.PROFILE_DIR;
+            String chatImageFile = chat.isGroup ? chat.id : chat.otherPersonId();
+            chatImage.setImageBitmap(api.storage.getProfileImage(dir, chatImageFile));
 
             // Unread
             TextView numberUnread = this.v.findViewById(R.id.number_unread_messages);
-            BreezeAPI api = BreezeAPI.getInstance();
             int unread = api.db.getUnreadCount(chat.id, api.hostNode.id);
             Log.i("STATE", "Unread " + unread);
             if (unread == 0) {

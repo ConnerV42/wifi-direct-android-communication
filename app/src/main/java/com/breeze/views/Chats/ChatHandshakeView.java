@@ -1,40 +1,40 @@
 package com.breeze.views.Chats;
 
-        import android.app.Activity;
-        import android.content.Context;
-        import android.content.Intent;
-        import android.net.Uri;
-        import android.content.Intent;
-        import android.os.Bundle;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.content.Intent;
+import android.os.Bundle;
 
-        import androidx.annotation.Nullable;
-        import androidx.appcompat.app.ActionBar;
-        import androidx.appcompat.app.AppCompatActivity;
-        import androidx.recyclerview.widget.LinearLayoutManager;
-        import androidx.recyclerview.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-        import android.os.ParcelFileDescriptor;
-        import android.util.Log;
-        import android.view.Menu;
-        import android.view.MenuItem;
-        import android.widget.Button;
-        import android.widget.EditText;
-        import android.widget.ImageButton;
-        import android.widget.ImageView;
-        import android.widget.TextView;
+import android.os.ParcelFileDescriptor;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-        import com.breeze.R;
-        import com.breeze.application.BreezeAPI;
-        import com.breeze.datatypes.BrzChat;
-        import com.breeze.packets.BrzPacket;
-        import com.breeze.packets.BrzPacketBuilder;
-        import com.breeze.router.BrzRouter;
-        import com.breeze.state.BrzStateStore;
-        import com.breeze.storage.BrzStorage;
-        import com.breeze.views.Messages.MessageList;
-        import com.breeze.views.Messages.MessagesView;
-        import com.google.android.gms.nearby.connection.Payload;
-        import com.breeze.views.ChatSettingsActivity;
+import com.breeze.R;
+import com.breeze.application.BreezeAPI;
+import com.breeze.datatypes.BrzChat;
+import com.breeze.packets.BrzPacket;
+import com.breeze.packets.BrzPacketBuilder;
+import com.breeze.router.BrzRouter;
+import com.breeze.state.BrzStateStore;
+import com.breeze.storage.BrzStorage;
+import com.breeze.views.Messages.MessageList;
+import com.breeze.views.Messages.MessagesView;
+import com.google.android.gms.nearby.connection.Payload;
+import com.breeze.views.ChatSettingsActivity;
 
 public class ChatHandshakeView extends AppCompatActivity {
     private BrzChat chat;
@@ -57,7 +57,7 @@ public class ChatHandshakeView extends AppCompatActivity {
 
         BreezeAPI api = BreezeAPI.getInstance();
         this.chat = api.state.getChat(chatId);
-        if(this.chat == null) {
+        if (this.chat == null) {
             finish();
             return;
         }
@@ -66,7 +66,7 @@ public class ChatHandshakeView extends AppCompatActivity {
         chatName.setText(chat.name);
 
         ImageView chatImage = findViewById(R.id.profile_image);
-        chatImage.setImageBitmap(api.storage.getChatImage(this.chat.id, this));
+        chatImage.setImageBitmap(api.storage.getProfileImage(api.storage.CHAT_DIR, this.chat.id));
 
         Button acceptChat = findViewById(R.id.chat_handshake_accept);
         acceptChat.setOnClickListener(view1 -> { // send message

@@ -29,10 +29,10 @@ public class BrzProfileHandler implements BrzRouterStreamHandler {
 
         // If we dont have the image, event isn't handled
         BrzProfileImageEvent request = packet.profileImageEvent();
-        if (!api.storage.hasProfileImage(request.nodeId)) return false;
+        if (!api.storage.hasProfileImage(api.storage.PROFILE_DIR, request.nodeId)) return false;
 
         // Otherwise, handle the request!
-        Bitmap bm = api.storage.getProfileImage(request.nodeId, api);
+        Bitmap bm = api.storage.getProfileImage(api.storage.PROFILE_DIR, request.nodeId);
 
         BrzProfileImageEvent response = new BrzProfileImageEvent(router.hostNode.id, request.nodeId, false);
         BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.PROFILE_RESPONSE, request.from, false);
@@ -49,7 +49,7 @@ public class BrzProfileHandler implements BrzRouterStreamHandler {
         if (!this.handles(packet.type))
             throw new RuntimeException("This handler does not handle packets of type " + packet.type);
         BreezeAPI api = BreezeAPI.getInstance();
-        api.storage.saveProfileImageFile(packet, stream);
+        api.storage.saveProfileImage(api.storage.PROFILE_DIR, packet.profileImageEvent().nodeId, stream);
     }
 
     @Override

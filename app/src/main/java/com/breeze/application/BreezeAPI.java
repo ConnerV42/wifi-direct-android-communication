@@ -55,10 +55,10 @@ public class BreezeAPI extends Service {
     // Singleton
 
     private static BreezeAPI instance = new BreezeAPI();
+
     public static BreezeAPI getInstance() {
         return instance;
     }
-
 
 
     // Behavioral Modules
@@ -139,7 +139,7 @@ public class BreezeAPI extends Service {
         if (this.router == null)
             this.router = BrzRouter.initialize(ctx, "BREEZE_MESSENGER");
         if (this.storage == null)
-            this.storage = BrzStorage.initialize(ctx);
+            this.storage = BrzStorage.initialize(this);
         if (this.state == null)
             this.state = BrzStateStore.getStore();
         if (this.db == null)
@@ -159,7 +159,7 @@ public class BreezeAPI extends Service {
     }
 
     public Boolean isLocationEnabled() {
-        if(!initialized) return true;
+        if (!initialized) return true;
         int mode = Settings.Secure.getInt(this.getContentResolver(), Settings.Secure.LOCATION_MODE,
                 Settings.Secure.LOCATION_MODE_OFF);
         return (mode != Settings.Secure.LOCATION_MODE_OFF);
@@ -382,7 +382,7 @@ public class BreezeAPI extends Service {
         Uri publicFileUri = FileProvider.getUriForFile(this, "com.breeze.fileprovider", publicFile);
 
         try {
-            this.storage.saveMessageFile(publicFile, res.openInputStream(Uri.fromFile(privateFile)));
+            this.storage.saveStreamToFileSync(publicFile, res.openInputStream(Uri.fromFile(privateFile)));
         } catch (Exception e) {
             Log.e("API", "Error saving public access file", e);
         }
@@ -470,7 +470,7 @@ public class BreezeAPI extends Service {
 
     public void requestProfileImage(String nodeId) {
         BrzNode node = router.graph.getVertex(nodeId);
-        if (node == null || storage.hasProfileImage(node.id)) return;
+        if (node == null || storage.hasProfileImage(storage.PROFILE_DIR, node.id)) return;
 
         BrzProfileImageEvent profileRequest = new BrzProfileImageEvent(this.hostNode.id, nodeId, true);
         BrzPacket p = new BrzPacket(profileRequest, BrzPacket.BrzPacketType.PROFILE_REQUEST, "", true);

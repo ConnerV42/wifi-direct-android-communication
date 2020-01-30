@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.VideoView;
 
@@ -51,7 +52,7 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
             this.viewType = viewType;
         }
 
-        void bind(BrzMessage msg, Context ctx, boolean outgoing, boolean group, MessageType type, int position) {
+        void bind(BrzMessage msg, Context ctx, boolean outgoing, boolean group, MessageType type, boolean downloading, int position) {
             BreezeAPI api = BreezeAPI.getInstance();
 
             if (msg.isStatus) {
@@ -77,7 +78,7 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
             if (messageSenderName != null && messageSenderImage != null) {
                 BrzNode n = BrzGraph.getInstance().getVertex(msg.from);
                 if (group && !outgoing && n != null) {
-                    messageSenderImage.setImageBitmap(BrzStorage.getInstance().getProfileImage(n.id, api));
+                    messageSenderImage.setImageBitmap(api.storage.getProfileImage(api.storage.PROFILE_DIR, n.id));
                     messageSenderImage.setVisibility(View.VISIBLE);
                     messageSenderName.setText(n.name);
                     messageSenderName.setVisibility(View.VISIBLE);
@@ -104,7 +105,7 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
                     statusIcon = R.drawable.ic_done_all_black_24dp;
                 else if (api.db.isDelivered(msg.id))
                     statusIcon = R.drawable.ic_done_black_24dp;
-                messageStatus.setImageBitmap(api.storage.bitmapFromVector(api, statusIcon));
+                messageStatus.setImageBitmap(api.storage.getVectorAsBitmap(statusIcon));
             } else if (messageStatus != null) {
                 messageStatus.setVisibility(View.GONE);
             }
@@ -122,7 +123,23 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
             messageVideo.setVisibility(View.GONE);
             messageFileContainer.setVisibility(View.GONE);
 
-            if (type == MessageType.IMAGE) {
+            messageImage.setImageDrawable(null);
+            messageVideo.stopPlayback();
+
+            if (downloading) {
+                messageFileContainer.setVisibility(View.VISIBLE);
+                TextView messageFileName = v.findViewById(R.id.messageFileName);
+                messageFileName.setText("Downloading...");
+
+                ProgressBar messageProgressBar = v.findViewById(R.id.messageProgressBar);
+                messageProgressBar.setVisibility(View.VISIBLE);
+
+                ImageButton messageFile = v.findViewById(R.id.messageFile);
+                messageFile.setVisibility(View.GONE);
+
+                if (outgoing) messageFileContainer.setBackgroundResource(R.drawable.status_bubble);
+                else messageFileContainer.setBackgroundResource(R.drawable.message_bubble);
+            } else if (type == MessageType.IMAGE) {
                 messageImage.setVisibility(View.VISIBLE);
                 messageImage.setImageBitmap(api.storage.getMessageFileAsBitmap(msg));
             } else if (type == MessageType.AUDIO) {
@@ -152,7 +169,11 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
                 TextView messageFileName = v.findViewById(R.id.messageFileName);
                 messageFileName.setText(msg.body);
 
+                ProgressBar messageProgressBar = v.findViewById(R.id.messageProgressBar);
+                messageProgressBar.setVisibility(View.GONE);
+
                 ImageButton messageFile = v.findViewById(R.id.messageFile);
+                messageFile.setVisibility(View.VISIBLE);
                 messageFile.setOnClickListener((e) -> {
                     api.openFile(api.storage.getMessageFile(msg), msg.body.replace("File: ", ""));
                 });
@@ -187,7 +208,7 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
     private final int TYPE_STATUS = 0;
     private final int TYPE_NORMAL = 1;
 
-    public static enum MessageType {
+    public enum MessageType {
         STRING, IMAGE, VIDEO, AUDIO, FILE
     }
 
@@ -230,6 +251,8 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
 
         api.meta.on("delivered", receiptListener);
         api.meta.on("read", receiptListener);
+
+        api.storage.on("downloadDone", receiptListener);
     }
 
     public void cleanup() {
@@ -237,6 +260,7 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
         api.state.off("messages" + chat.id, this.messageListener);
         api.meta.off("delivered", receiptListener);
         api.meta.off("read", receiptListener);
+        api.storage.off("downloadDone", receiptListener);
     }
 
 
@@ -273,16 +297,16 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
         BrzChat c = api.state.getChat(m.chatId);
         boolean outgoing = m.from.equals(api.hostNode.id);
         MessageType type = MessageType.STRING;
-        if (api.storage.hasMessageFile(m) && m.body.equals("Image"))
+        if (api.storage.messageFileExists(m) && m.body.equals("Image"))
             type = MessageType.IMAGE;
-        else if (api.storage.hasMessageFile(m) && m.body.equals("Video"))
+        else if (api.storage.messageFileExists(m) && m.body.equals("Video"))
             type = MessageType.VIDEO;
-        else if (api.storage.hasMessageFile(m) && m.body.equals("Audio"))
+        else if (api.storage.messageFileExists(m) && m.body.equals("Audio"))
             type = MessageType.AUDIO;
-        else if (api.storage.hasMessageFile(m))
+        else if (api.storage.messageFileExists(m))
             type = MessageType.FILE;
 
-        holder.bind(m, this.ctx, outgoing, c.isGroup, type, position);
+        holder.bind(m, this.ctx, outgoing, c.isGroup, type, api.storage.messageFileIsDownloading(m), position);
     }
 
     @Override

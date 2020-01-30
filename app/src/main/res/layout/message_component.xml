@@ -62,6 +62,13 @@
             android:orientation="vertical"
             android:padding="10dp">
 
+            <ProgressBar
+                android:id="@+id/messageProgressBar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:progressTint="@android:color/white" />
+
             <ImageButton
                 android:id="@+id/messageFile"
                 android:layout_width="70dp"
@@ -76,6 +83,7 @@
                 android:layout_height="wrap_content"
                 android:text="TextView"
                 android:textAlignment="center" />
+
         </LinearLayout>
 
         <LinearLayout

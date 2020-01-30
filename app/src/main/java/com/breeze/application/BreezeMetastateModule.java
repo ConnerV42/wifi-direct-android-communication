@@ -73,7 +73,8 @@ public class BreezeMetastateModule extends BreezeModule {
         }
     }
 
-    void setHostNode(BrzNode hostNode) { }
+    void setHostNode(BrzNode hostNode) {
+    }
 
     public boolean getCachedHostNode() {
         // Get stored hostNode info
@@ -219,8 +220,8 @@ public class BreezeMetastateModule extends BreezeModule {
 
         Person.Builder builder = new Person.Builder();
 
-        if (api.storage.hasProfileImage(n.id)) {
-            Bitmap personIcon = api.storage.getProfileImage(n.id, api);
+        if (api.storage.hasProfileImage(api.storage.PROFILE_DIR, n.id)) {
+            Bitmap personIcon = api.storage.getProfileImage(api.storage.PROFILE_DIR, n.id);
             builder.setIcon(IconCompat.createWithBitmap(getRoundIcon(personIcon)));
         }
 
