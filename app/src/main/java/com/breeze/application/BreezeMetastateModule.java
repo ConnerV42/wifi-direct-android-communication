@@ -33,6 +33,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class BreezeMetastateModule extends BreezeModule {
     BreezeMetastateModule(BreezeAPI api) {
@@ -72,35 +74,10 @@ public class BreezeMetastateModule extends BreezeModule {
     }
 
     void setHostNode(BrzNode hostNode) {
-
-//        // Add a test node
-//        BrzGraph.getInstance().addVertex(new BrzNode("test", "", "", "Jake", "@JJ"));
-//
-//        // Add a test chat
-//        List<String> nodes = new LinkedList<>();
-//        nodes.add("test");
-//        BrzChat chat = new BrzChat("Test Chat", nodes);
-////        chat.acceptedByHost = true;
-////        chat.acceptedByRecipient = true;
-//        api.state.addChat(chat);
-//
-//        // Add chat to encryption
-//        BrzChatHandshake hand = new BrzChatHandshake(hostNode.id, chat);
-//        api.encryption.makeSecretKey(hand);
-//
-//        BrzMessage msg = BrzPacketBuilder.message("test", "", "Testing date stuff", chat.id, false).message();
-//        BrzMessage msg2 = BrzPacketBuilder.message(hostNode.id, "", "Testing date stuff", chat.id, false).message();
-//        api.state.addMessage(msg);
-//        api.state.addMessage(msg2);
-//
-//        showMessageNotification(msg);
-//
-//        new Timer().schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                showMessageNotification(msg2);
-//            }
-//        }, 5 * 1000);
+        BrzGraph.getInstance().addVertex(new BrzNode("test1", "", "", "Jake", "Jake"));
+        BrzGraph.getInstance().addVertex(new BrzNode("test2", "", "", "Zach", "Zach"));
+        BrzGraph.getInstance().addVertex(new BrzNode("test3", "", "", "Conner", "Conner"));
+        BrzGraph.getInstance().addVertex(new BrzNode("test4", "", "", "Pavel", "Pavel"));
     }
 
     public boolean getCachedHostNode() {
@@ -141,7 +118,7 @@ public class BreezeMetastateModule extends BreezeModule {
     //                                     Notifications                                          //
     //--------------------------------------------------------------------------------------------//
 
-    HashMap<String, Integer> activeNotifications = new HashMap<>();
+    private HashMap<String, Integer> activeNotifications = new HashMap<>();
 
     public void removeNotification(String id) {
         Integer notifId = activeNotifications.get(id);
@@ -176,7 +153,7 @@ public class BreezeMetastateModule extends BreezeModule {
         notifId = new Random().nextInt(2000) + 5;
         activeNotifications.put(message.chatId, notifId);
 
-        NotificationCompat.MessagingStyle style = new NotificationCompat.MessagingStyle("You");
+        NotificationCompat.MessagingStyle style = new NotificationCompat.MessagingStyle(getPerson(api.hostNode));
         style.setConversationTitle(c.name);
 
         // Add the new message

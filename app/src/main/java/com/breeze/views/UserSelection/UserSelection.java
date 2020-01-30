@@ -1,19 +1,20 @@
 package com.breeze.views.UserSelection;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -28,33 +29,37 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.function.Consumer;
 
-public class UserSelection extends AppCompatActivity {
-    List<String> nodes = new LinkedList<>();
+public class UserSelection extends Fragment {
+
+    private List<String> nodes = new LinkedList<>();
     List<TextView> nodeViews = new LinkedList<>();
     private UserList list;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_user_selection);
+    }
 
-        Toolbar userToolbar = findViewById(R.id.user_selection_toolbar);
-        setSupportActionBar(userToolbar);
-        ActionBar ab = getSupportActionBar();
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_user_selection, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity == null) return;
+        ActionBar ab = activity.getSupportActionBar();
         if (ab == null) return;
-
-        ab.setDisplayHomeAsUpEnabled(true);
-        ab.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
-
         ab.setTitle("New chat");
-        userToolbar.getOverflowIcon().setTint(getColor(android.R.color.white));
 
         // Set the done
-        FloatingActionButton fab = findViewById(R.id.user_selection_fab);
+        FloatingActionButton fab = view.findViewById(R.id.user_selection_fab);
         fab.hide();
         fab.setOnClickListener(e -> {
             if (nodes.size() == 1) {
@@ -66,16 +71,16 @@ public class UserSelection extends AppCompatActivity {
                 BrzChat newChat = new BrzChat("New chat", nodes);
                 BreezeAPI.getInstance().sendChatHandshakes(newChat);
             }
-
-            finish();
+//
+//            finish();
         });
 
         // Set up the list
-        RecyclerView recyclerView = findViewById(R.id.user_selection_user_list);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        RecyclerView recyclerView = view.findViewById(R.id.user_selection_user_list);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(activity);
         recyclerView.setLayoutManager(layoutManager);
 
-        this.list = new UserList(this, this.nodes);
+        this.list = new UserList(activity, this.nodes);
         recyclerView.setAdapter(this.list);
 
         // When the user selects a node, add it to the list
@@ -86,20 +91,20 @@ public class UserSelection extends AppCompatActivity {
                 nodeLayout.leftMargin = 10;
                 nodeLayout.bottomMargin = 10;
 
-                TextView nodeView = new TextView(this);
+                TextView nodeView = new TextView(activity);
                 nodeView.setText(node.name);
                 nodeView.setPadding(20, 15, 20, 15);
                 nodeView.setLayoutParams(nodeLayout);
                 nodeView.setBackgroundResource(R.drawable.status_bubble);
                 nodeView.setId(nodeI);
 
-                FlexboxLayout toList = findViewById(R.id.user_selection_to_list);
+                FlexboxLayout toList = view.findViewById(R.id.user_selection_to_list);
                 toList.addView(nodeView);
 
                 nodes.add(node.id);
                 nodeViews.add(nodeView);
             } else {
-                FlexboxLayout toList = findViewById(R.id.user_selection_to_list);
+                FlexboxLayout toList = view.findViewById(R.id.user_selection_to_list);
                 toList.removeView(nodeViews.get(nodeI));
 
                 nodes.remove(nodeI);
@@ -114,7 +119,7 @@ public class UserSelection extends AppCompatActivity {
         });
 
         // When the user types a search query, filter the list
-        EditText search = findViewById(R.id.user_selection_search);
+        EditText search = view.findViewById(R.id.user_selection_search);
         search.requestFocus();
         search.addTextChangedListener(new TextWatcher() {
             @Override
@@ -132,49 +137,10 @@ public class UserSelection extends AppCompatActivity {
         });
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-        BreezeAPI api = BreezeAPI.getInstance();
-
-        if (id == R.id.action_settings) {
-            Log.i("STATE", "Settings selected");
-            return true;
-        } else if (id == R.id.action_toggle_discovery) {
-            if (api.router.isDiscovering) {
-                item.setChecked(false);
-                api.router.stopDiscovery();
-            } else {
-                item.setChecked(true);
-                api.router.startDiscovery();
-            }
-        } else if (id == R.id.action_discovery_scan) {
-            api.router.startDiscovery();
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    api.router.stopDiscovery();
-                }
-            }, 5 * 1000);
-        } else {
-            list.cleanup();
-            finish();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
     private Consumer<Object> graphListener;
+
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
 
         BreezeAPI api = BreezeAPI.getInstance();

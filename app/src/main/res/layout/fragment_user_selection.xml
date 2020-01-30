@@ -1,27 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    tools:context=".views.UserSelection.UserSelection">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/user_selection_toolbar"
-        android:layout_width="match_parent"
-
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/user_selection_fab"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+        android:layout_gravity="bottom|end"
+        android:layout_margin="15dp"
+
+        android:src="@drawable/ic_done_black_24dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="5dp">
 
             <com.google.android.flexbox.FlexboxLayout
                 android:id="@+id/user_selection_to_list"
@@ -37,28 +42,9 @@
                 android:id="@+id/user_selection_search"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#fff"
-                android:background="@android:color/transparent"
                 android:layout_marginBottom="10dp"
-                android:hint="User search" />
-
+                android:hint="Search" />
         </androidx.appcompat.widget.LinearLayoutCompat>
-    </androidx.appcompat.widget.Toolbar>
-
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/user_selection_fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            android:layout_gravity="bottom|end"
-            android:layout_margin="15dp"
-
-            android:src="@drawable/ic_done_black_24dp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/user_selection_user_list"
@@ -66,5 +52,6 @@
             android:layout_height="match_parent">
 
         </androidx.recyclerview.widget.RecyclerView>
-    </FrameLayout>
-</LinearLayout>
+
+    </LinearLayout>
+</FrameLayout>

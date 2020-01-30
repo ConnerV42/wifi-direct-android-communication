@@ -54,7 +54,6 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
             if (bm != null)
                 user_image.setImageBitmap(bm);
 
-
             if (nodes.contains(node.id)) {
                 user_name.setTextColor(ctx.getColor(R.color.colorAccent));
                 user_alias.setTextColor(ctx.getColor(R.color.colorAccent));
@@ -101,14 +100,9 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
         BrzRouter router = api.router;
 
         this.graphListener = newNode -> {
-            this.allNodes = new ArrayList<>();
-
-            for (BrzNode node : graph) {
-                this.allNodes.add(node);
-            }
-
-            this.getFilter().filter("");
+            this.allNodes = new ArrayList<>(graph.getNodeCollection());
             notifyDataSetChanged();
+            this.getFilter().filter("");
         };
 
         // Set up event listeners

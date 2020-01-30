@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/chats"
+        android:icon="@drawable/ic_chat_black_24dp"
+        android:title="Chats" />
+    <item
+        android:id="@+id/newChat"
+        android:icon="@drawable/ic_add_black_24dp"
+        android:title="New Chat" />
+    <item
+        android:id="@+id/broadcasts"
+        android:icon="@drawable/ic_wifi_tethering_black_24dp"
+        android:title="Public" />
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/ic_settings_black_24dp"
+        android:title="Settings" />
+</menu>

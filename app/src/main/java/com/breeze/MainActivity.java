@@ -1,16 +1,14 @@
 package com.breeze;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,9 +16,11 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.breeze.application.BreezeAPI;
-import com.breeze.router.BrzRouter;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -92,20 +92,25 @@ public class MainActivity extends AppCompatActivity {
                     .setNegativeButton("Cancel", null)
                     .show();
         }
-    }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener((item) -> {
+            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 
-        // We've got a profile!
-        if (requestCode == REQUEST_CODE_PROFILE) {
-        }
+            if (item.getItemId() == R.id.chats) {
+                navController.navigate(R.id.chatsView);
+            } else if (item.getItemId() == R.id.newChat) {
+                navController.navigate(R.id.userSelection);
+            } else if (item.getItemId() == R.id.broadcasts) {
+            } else if (item.getItemId() == R.id.settings) {
+            }
+
+            return true;
+        });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }

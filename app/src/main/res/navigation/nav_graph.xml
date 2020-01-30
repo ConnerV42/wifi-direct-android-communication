@@ -3,39 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/contactView">
+    app:startDestination="@id/chatsView">
     <fragment
-        android:id="@+id/contactView"
+        android:id="@+id/chatsView"
         android:name="com.breeze.views.Chats.ChatsView"
-        android:label="fragment_contact_view"
+        android:label="fragment_chats_view"
         tools:layout="@layout/fragment_chats_view" >
         <action
-            android:id="@+id/action_contactView_to_profileActivity"
-            app:destination="@id/profileActivity" />
-        <action
-            android:id="@+id/action_contactView_to_userSelection"
+            android:id="@+id/action_chatsView_to_userSelection"
             app:destination="@id/userSelection" />
-        <action
-            android:id="@+id/action_contactView_to_messagesView"
-            app:destination="@id/messagesView" />
     </fragment>
-    <activity
-        android:id="@+id/profileActivity"
-        android:name="com.breeze.views.ProfileActivity"
-        android:label="activity_profile"
-        tools:layout="@layout/activity_profile" />
-    <activity
+    <fragment
         android:id="@+id/userSelection"
         android:name="com.breeze.views.UserSelection.UserSelection"
         android:label="activity_user_selection"
-        tools:layout="@layout/activity_user_selection" />
-    <activity
-        android:id="@+id/chatSettingsActivity"
-        android:name="com.breeze.views.ChatSettingsActivity"
-        android:label="ChatSettingsActivity" />
-    <activity
-        android:id="@+id/messagesView"
-        android:name="com.breeze.views.Messages.MessagesView"
-        android:label="fragment_chat"
-        tools:layout="@layout/activity_messages_view" />
+        tools:layout="@layout/fragment_user_selection" />
 </navigation>

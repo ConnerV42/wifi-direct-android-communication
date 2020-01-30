@@ -6,6 +6,8 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -45,9 +47,7 @@ public class ChatsView extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_chats_view, container, false);
     }
 
@@ -55,7 +55,13 @@ public class ChatsView extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        this.list = new ChatList(getActivity());
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity == null) return;
+        ActionBar ab = activity.getSupportActionBar();
+        if (ab == null) return;
+        ab.setTitle("Breeze Chats");
+
+        this.list = new ChatList(activity);
 
         // Set up the list
         RecyclerView recyclerView = view.findViewById(R.id.contactList);
@@ -69,13 +75,6 @@ public class ChatsView extends Fragment {
             } else {
                 startActivity(ChatHandshakeView.getIntent(getContext(), selectedChat.id));
             }
-        });
-
-        FloatingActionButton fab = view.findViewById(R.id.chat_view_fab);
-        fab.setOnClickListener(e -> {
-            Intent i = new Intent(this.getContext(), UserSelection.class);
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            this.startActivity(i);
         });
     }
 
