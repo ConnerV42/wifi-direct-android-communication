@@ -152,19 +152,26 @@ public class BrzStorage extends EventEmitter {
             messageFile.mkdirs();
             if (messageFile.exists()) messageFile.delete();
             messageFile.createNewFile();
-
-            OutputStream out = new FileOutputStream(messageFile);
-            byte[] buf = new byte[80000];
-            int len;
-            while ((len = stream.read(buf)) > 0) {
-                out.write(buf, 0, len);
-            }
-            out.flush();
-            out.close();
-            stream.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("STORAGE", "Failed to create message file", e);
         }
+
+        Thread saverThread = new Thread(() -> {
+            try {
+                OutputStream out = new FileOutputStream(messageFile);
+                byte[] buf = new byte[80000];
+                int len;
+                while ((len = stream.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+                out.flush();
+                out.close();
+                stream.close();
+            } catch (Exception e) {
+
+            }
+        });
+        saverThread.start();
     }
 
     public boolean hasMessageFile(BrzMessage message) {
