@@ -73,12 +73,7 @@ public class BreezeMetastateModule extends BreezeModule {
         }
     }
 
-    void setHostNode(BrzNode hostNode) {
-        BrzGraph.getInstance().addVertex(new BrzNode("test1", "", "", "Jake", "Jake"));
-        BrzGraph.getInstance().addVertex(new BrzNode("test2", "", "", "Zach", "Zach"));
-        BrzGraph.getInstance().addVertex(new BrzNode("test3", "", "", "Conner", "Conner"));
-        BrzGraph.getInstance().addVertex(new BrzNode("test4", "", "", "Pavel", "Pavel"));
-    }
+    void setHostNode(BrzNode hostNode) { }
 
     public boolean getCachedHostNode() {
         // Get stored hostNode info

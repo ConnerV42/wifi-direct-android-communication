@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/chats"
+        android:id="@+id/chatsView"
         android:icon="@drawable/ic_chat_black_24dp"
         android:title="Chats" />
     <item
-        android:id="@+id/newChat"
+        android:id="@+id/userSelection"
         android:icon="@drawable/ic_add_black_24dp"
         android:title="New Chat" />
     <item

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,6 +19,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.ui.NavigationUI;
 
 import com.breeze.application.BreezeAPI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -27,9 +29,7 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Toolbar toolbar;
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
-    private static final int REQUEST_CODE_PROFILE = 2;
     private static final String[] REQUIRED_PERMISSIONS =
             new String[]{
                     Manifest.permission.BLUETOOTH,
@@ -77,9 +77,19 @@ public class MainActivity extends AppCompatActivity {
         api.initialize(this);
 
         setContentView(R.layout.activity_main);
+        setSupportActionBar(findViewById(R.id.toolbar));
 
-        this.toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        // Enable the sync button
+        ImageButton scanButton = findViewById(R.id.scanButton);
+        scanButton.setOnClickListener((l) -> {
+            api.router.startDiscovery();
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    api.router.stopDiscovery();
+                }
+            }, 10 * 1000);
+        });
 
         // Check if location is on
         if (!api.isLocationEnabled()) {
@@ -93,56 +103,11 @@ public class MainActivity extends AppCompatActivity {
                     .show();
         }
 
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setOnNavigationItemSelectedListener((item) -> {
-            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 
-            if (item.getItemId() == R.id.chats) {
-                navController.navigate(R.id.chatsView);
-            } else if (item.getItemId() == R.id.newChat) {
-                navController.navigate(R.id.userSelection);
-            } else if (item.getItemId() == R.id.broadcasts) {
-            } else if (item.getItemId() == R.id.settings) {
-            }
-
-            return true;
-        });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        BreezeAPI api = BreezeAPI.getInstance();
-
-        if (id == R.id.action_settings) {
-            Log.i("STATE", "Settings selected");
-            return true;
-        } else if (id == R.id.action_toggle_discovery) {
-            if (api.router.isDiscovering) {
-                item.setChecked(false);
-                api.router.stopDiscovery();
-            } else {
-                item.setChecked(true);
-                api.router.startDiscovery();
-            }
-        } else if (id == R.id.action_discovery_scan) {
-            api.router.startDiscovery();
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    api.router.stopDiscovery();
-                }
-            }, 5 * 1000);
-        }
-
-        return super.onOptionsItemSelected(item);
+        // Bind the navController to the UI
+        NavigationUI.setupWithNavController(bottomNavigationView, navController);
     }
 
     private static boolean hasPermissions(Context context, String... permissions) {

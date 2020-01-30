@@ -22,18 +22,24 @@
         android:orientation="vertical">
 
 
-        <androidx.appcompat.widget.LinearLayoutCompat
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="5dp">
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="To:"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
             <com.google.android.flexbox.FlexboxLayout
                 android:id="@+id/user_selection_to_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dp"
-                android:paddingBottom="5dp"
                 app:alignItems="center"
                 app:flexWrap="wrap"
                 app:maxLine="3" />
@@ -42,16 +48,31 @@
                 android:id="@+id/user_selection_search"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:hint="Search" />
-        </androidx.appcompat.widget.LinearLayoutCompat>
+                android:background="@drawable/status_bubble"
+                android:hint="Search"
+                android:padding="10dp" />
+        </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/user_selection_user_list"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="5dp">
 
-        </androidx.recyclerview.widget.RecyclerView>
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Connected:"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/user_selection_user_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            </androidx.recyclerview.widget.RecyclerView>
+        </LinearLayout>
 
     </LinearLayout>
 </FrameLayout>

@@ -4,8 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -71,8 +71,10 @@ public class UserSelection extends Fragment {
                 BrzChat newChat = new BrzChat("New chat", nodes);
                 BreezeAPI.getInstance().sendChatHandshakes(newChat);
             }
-//
-//            finish();
+
+            // Navigate back to chats
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.chatsView);
         });
 
         // Set up the list

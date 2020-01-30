@@ -8,11 +8,7 @@
         android:id="@+id/chatsView"
         android:name="com.breeze.views.Chats.ChatsView"
         android:label="fragment_chats_view"
-        tools:layout="@layout/fragment_chats_view" >
-        <action
-            android:id="@+id/action_chatsView_to_userSelection"
-            app:destination="@id/userSelection" />
-    </fragment>
+        tools:layout="@layout/fragment_chats_view" />
     <fragment
         android:id="@+id/userSelection"
         android:name="com.breeze.views.UserSelection.UserSelection"
