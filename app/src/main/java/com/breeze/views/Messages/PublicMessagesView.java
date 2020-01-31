@@ -1,5 +1,6 @@
 package com.breeze.views.Messages;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -52,6 +53,7 @@ public class PublicMessagesView extends AppCompatActivity {
         return i;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
@@ -74,12 +76,11 @@ public class PublicMessagesView extends AppCompatActivity {
 
             // Set up content
             final BrzRouter router = BreezeAPI.getInstance().router;
-
+            Switch publicSwitch = findViewById(R.id.PublicSwitch);
+            publicSwitch.setChecked(true);
             this.list = new MessageList(this, this.chat);
             RecyclerView msgView = findViewById(R.id.publicMessageList);
             msgView.setAdapter(this.list);
-            Switch publicSwitch = findViewById(R.id.PublicSwitch);
-            publicSwitch.setChecked(true);
 
             publicSwitch.setOnTouchListener((View v, MotionEvent e) -> {
                 switch(e.getAction()){

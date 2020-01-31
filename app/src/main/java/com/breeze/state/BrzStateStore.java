@@ -3,6 +3,7 @@ package com.breeze.state;
 import android.util.Log;
 
 import com.breeze.EventEmitter;
+import com.breeze.application.BreezeAPI;
 import com.breeze.streams.BrzLiveAudioConsumer;
 import com.breeze.streams.BrzLiveAudioProducer;
 import com.breeze.datatypes.BrzNode;
@@ -59,6 +60,18 @@ public class BrzStateStore extends EventEmitter {
         return new ArrayList<>(this.chats.values());
     }
 
+
+    public List<BrzChat> getAllChatsNoPublicThread()
+    {
+         List<BrzChat> privChats = null;
+         for(BrzChat c : this.chats.values())
+         {
+             if(!(c.id.equals("PUBLIC_THREAD"))) {
+                 privChats.add(c);
+             }
+         }
+        return privChats;
+    }
     public BrzChat getChat(String chatId) {
         return this.chats.get(chatId);
     }
