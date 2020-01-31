@@ -24,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -32,6 +33,7 @@ import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
+import com.breeze.graph.BrzGraph;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;
@@ -50,6 +52,7 @@ public class MessagesView extends AppCompatActivity {
     private BrzChat chat;
     private MessageList list;
     private Consumer<BrzChat> onChatUpdate;
+    private Consumer<Object> onGraphUpdate;
 
     public static Intent getIntent(Context ctx, String chatId) {
         Intent i = new Intent(ctx, MessagesView.class);
@@ -164,12 +167,43 @@ public class MessagesView extends AppCompatActivity {
         super.onStart();
         BreezeAPI api = BreezeAPI.getInstance();
 
+        setSupportActionBar(findViewById(R.id.messagesToolbar));
         ActionBar ab = getSupportActionBar();
         if (ab == null) return;
         ab.setDisplayHomeAsUpEnabled(true);
         ab.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
 
-        if (this.chat != null) ab.setTitle(this.chat.name);
+        if (this.chat != null) {
+            TextView chatName = findViewById(R.id.chat_name);
+            chatName.setText(chat.name);
+
+            TextView onlineIndicator = findViewById(R.id.online_indicator);
+            TextView offlineIndicator = findViewById(R.id.offline_indicator);
+
+            BrzGraph graph = BrzGraph.getInstance();
+            this.onGraphUpdate = newNode -> {
+                if (!chat.isGroup && graph.getVertex(chat.otherPersonId()) != null) {
+                    onlineIndicator.setVisibility(View.VISIBLE);
+                    offlineIndicator.setVisibility(View.GONE);
+                } else if (!chat.isGroup) {
+                    offlineIndicator.setVisibility(View.VISIBLE);
+                    onlineIndicator.setVisibility(View.GONE);
+                }
+            };
+            // Set up event listeners
+            this.onGraphUpdate.accept(null);
+            graph.on("addVertex", this.onGraphUpdate);
+            graph.on("deleteVertex", this.onGraphUpdate);
+            graph.on("setVertex", this.onGraphUpdate);
+
+
+            // Chat's image
+            ImageView chatImage = findViewById(R.id.chat_image);
+            String dir = chat.isGroup ? api.storage.CHAT_DIR : api.storage.PROFILE_DIR;
+            String chatImageFile = chat.isGroup ? chat.id : chat.otherPersonId();
+            chatImage.setImageBitmap(api.storage.getProfileImage(dir, chatImageFile));
+        }
+        ;
 
         //-------------------------------------------------------------------------------//
 
@@ -222,6 +256,12 @@ public class MessagesView extends AppCompatActivity {
         api.state.setCurrentChat("");
         api.state.off("chat" + this.chat.id, this.onChatUpdate);
         this.list.cleanup();
+
+        // Set up event listeners
+        BrzGraph graph = BrzGraph.getInstance();
+        graph.off("addVertex", this.onGraphUpdate);
+        graph.off("deleteVertex", this.onGraphUpdate);
+        graph.off("setVertex", this.onGraphUpdate);
     }
 
     // Helpers
