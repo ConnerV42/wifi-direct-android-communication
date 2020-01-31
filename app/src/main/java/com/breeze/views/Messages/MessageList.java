@@ -34,6 +34,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.function.Consumer;
 
 public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder> {
@@ -214,13 +216,15 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
 
     private List<BrzMessage> messages = new ArrayList<>();
     private Context ctx;
+    private RecyclerView view;
     private BrzChat chat;
 
     private Consumer<List<BrzMessage>> messageListener;
     private Consumer receiptListener;
 
-    MessageList(Context ctx, BrzChat chat) {
+    MessageList(Context ctx, RecyclerView view, BrzChat chat) {
         this.ctx = ctx;
+        this.view = view;
         this.chat = chat;
 
         BreezeAPI api = BreezeAPI.getInstance();
@@ -228,6 +232,7 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
             if (messages != null) {
                 this.messages = messages;
                 notifyDataSetChanged();
+                view.smoothScrollToPosition(getItemCount());
 
                 for (BrzMessage m : this.messages) {
                     // Message has not been read by the user yet, send receipt
@@ -239,6 +244,7 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
                         }
                     }
                 }
+
             }
         };
 
@@ -248,10 +254,8 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
         this.receiptListener = msgId -> {
             notifyDataSetChanged();
         };
-
         api.meta.on("delivered", receiptListener);
         api.meta.on("read", receiptListener);
-
         api.storage.on("downloadDone", receiptListener);
     }
 

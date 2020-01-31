@@ -45,7 +45,7 @@ public class BrzStorage extends EventEmitter {
 
     // File streaming helpers
 
-    private HashMap<String, Boolean> downloadingFiles = new HashMap<>();
+    HashMap<String, Boolean> downloadingFiles = new HashMap<>();
 
     public boolean isDownloading(String fileKey) {
         return downloadingFiles.get(fileKey) != null;
@@ -61,26 +61,7 @@ public class BrzStorage extends EventEmitter {
         }
 
         downloadingFiles.put(fileKey, true);
-
-        Thread saverThread = new Thread(() -> {
-            try {
-                OutputStream out = new FileOutputStream(outputFile);
-                byte[] buf = new byte[80000];
-                int len;
-                while ((len = data.read(buf)) > 0) {
-                    out.write(buf, 0, len);
-                }
-                out.flush();
-                out.close();
-                data.close();
-            } catch (Exception e) {
-                Log.e("STORAGE", "Failed to output stream to the file " + outputFile.getAbsolutePath(), e);
-            } finally {
-                downloadingFiles.remove(fileKey);
-                emit("downloadDone", fileKey);
-            }
-        });
-        saverThread.start();
+        new BrzStorageStreamWorker(fileKey, outputFile, data).execute();
     }
 
     public void saveStreamToFileSync(File outputFile, InputStream data) {
@@ -94,7 +75,7 @@ public class BrzStorage extends EventEmitter {
 
         try {
             OutputStream out = new FileOutputStream(outputFile);
-            byte[] buf = new byte[80000];
+            byte[] buf = new byte[5000];
             int len;
             while ((len = data.read(buf)) > 0) {
                 out.write(buf, 0, len);
@@ -205,6 +186,14 @@ public class BrzStorage extends EventEmitter {
         File messageFile = new File(chatDir, message.id);
 
         saveStreamToFile(message.id, messageFile, stream);
+    }
+
+    public void saveMessageFileSync(BrzMessage message, InputStream stream) {
+        File messagesDir = api.getExternalFilesDir(FILE_MESSAGES_DIR);
+        File chatDir = new File(messagesDir, message.chatId);
+        File messageFile = new File(chatDir, message.id);
+
+        saveStreamToFileSync(messageFile, stream);
     }
 
     public boolean messageFileIsDownloading(BrzMessage message) {

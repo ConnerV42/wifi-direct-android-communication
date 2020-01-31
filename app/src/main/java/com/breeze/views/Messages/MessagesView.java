@@ -51,8 +51,6 @@ public class MessagesView extends AppCompatActivity {
     private MessageList list;
     private Consumer<BrzChat> onChatUpdate;
 
-    private Consumer<List<BrzMessage>> messageListener;
-
     public static Intent getIntent(Context ctx, String chatId) {
         Intent i = new Intent(ctx, MessagesView.class);
         i.putExtra("ARG_CHAT_ID", chatId);
@@ -77,10 +75,10 @@ public class MessagesView extends AppCompatActivity {
         api.state.setCurrentChat(chatId);
 
         // Set up content
-        this.list = new MessageList(this, this.chat);
-
         RecyclerView msgView = findViewById(R.id.messageList);
         LinearLayoutManager msgLayout = new LinearLayoutManager(this);
+
+        this.list = new MessageList(this, msgView, this.chat);
 
         ImageButton sendPhoto = findViewById(R.id.sendPhoto);
         ImageButton sendVideo = findViewById(R.id.sendVideo);
@@ -173,15 +171,6 @@ public class MessagesView extends AppCompatActivity {
 
         if (this.chat != null) ab.setTitle(this.chat.name);
 
-        RecyclerView msgView = findViewById(R.id.messageList);
-        this.messageListener = messages -> {
-            if (messages != null) {
-                msgView.scrollToPosition(messages.size() - 1);
-                Log.i("BLAH", "Scrolling list");
-            }
-        };
-        api.state.on("messages" + this.chat.id, messageListener);
-
         //-------------------------------------------------------------------------------//
 
         LinearLayout messageEditor = findViewById(R.id.messages_editor);
@@ -231,7 +220,6 @@ public class MessagesView extends AppCompatActivity {
         super.onStop();
         BreezeAPI api = BreezeAPI.getInstance();
         api.state.setCurrentChat("");
-        api.state.off("messages" + chat.id, this.messageListener);
         api.state.off("chat" + this.chat.id, this.onChatUpdate);
         this.list.cleanup();
     }

@@ -128,7 +128,7 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
             this.notifyDataSetChanged();
         };
 
-        api.storage.on("profileImage", this.profileImageListener);
+        api.storage.on("downloadDone", this.profileImageListener);
     }
 
 
@@ -219,7 +219,7 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
         api.router.off("endpointConnected", this.removePlaceholderListener);
         api.router.off("endpointDisconnected", this.removePlaceholderListener);
 
-        api.storage.off("profileImage", this.profileImageListener);
+        api.storage.off("downloadDone", this.profileImageListener);
     }
 
 }
