@@ -239,7 +239,11 @@ public final class BrzEncryption {
             SecretKey secretKey = (SecretKey) ks.getKey(alias, null);
 
             Cipher cipher = Cipher.getInstance(SYM_CIPHER);
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            try {
+                cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            } catch (IllegalStateException e) {
+                Log.i("IllegalStateException", "Location: encryptStream in BrzEncryption");
+            }
 
             byte[] initialVector = cipher.getIV();
             fileInfo.initialVector = Base64.encodeToString(initialVector, Base64.DEFAULT);
@@ -260,7 +264,11 @@ public final class BrzEncryption {
             byte[] initialVector = Base64.decode(fileInfo.initialVector, Base64.DEFAULT);
 
             Cipher cipher = Cipher.getInstance(SYM_CIPHER);
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, new GCMParameterSpec(128, initialVector));
+            try {
+                cipher.init(Cipher.DECRYPT_MODE, secretKey, new GCMParameterSpec(128, initialVector));
+            } catch (IllegalStateException e) {
+                Log.i("IllegalStateException", "Location: encryptStream in BrzEncryption");
+            }
 
             return new CipherInputStream(inputStream, cipher);
         } catch (Exception e) {
