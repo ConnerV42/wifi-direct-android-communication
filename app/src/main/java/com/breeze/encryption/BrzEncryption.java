@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -327,7 +328,7 @@ public final class BrzEncryption {
             SecretKey secretKey = generateSymmetricKey();
             if (secretKey == null)
                 throw new RuntimeException("Could not generate 'one off' secret key");
-            byte[] encryptedMessageBytes = symmetricEncrypt(secretKey, message.getBytes());
+            byte[] encryptedMessageBytes = symmetricEncrypt(secretKey, message.getBytes(StandardCharsets.UTF_8));
             if (encryptedMessageBytes == null)
                 throw new RuntimeException("Could not encrypt message using the 'one off' secret key");
 
@@ -379,7 +380,7 @@ public final class BrzEncryption {
             byte[] decryptedMessage = symmetricDecrypt(secretKey, encryptedMessage);
             if (decryptedMessage == null)
                 throw new RuntimeException("Could not decrypt message using 'one off' secret key");
-            return new String(decryptedMessage);
+            return new String(decryptedMessage, StandardCharsets.UTF_8);
         } catch (Exception e) {
             e.printStackTrace();
         }

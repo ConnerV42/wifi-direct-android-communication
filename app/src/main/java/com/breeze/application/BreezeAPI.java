@@ -209,9 +209,8 @@ public class BreezeAPI extends Service {
         BrzChatHandshake handshake = new BrzChatHandshake(this.router.hostNode.id, chat);
         encryption.makeSecretKey(handshake);
 
-        BrzPacket p = new BrzPacket(handshake, BrzPacket.BrzPacketType.CHAT_HANDSHAKE, "", false);
-
         for (String nodeId : chat.nodes) {
+            BrzPacket p = new BrzPacket(handshake, BrzPacket.BrzPacketType.CHAT_HANDSHAKE, "", false);
             if (nodeId.equals(hostNode.id))
                 continue;
             p.to = nodeId;
@@ -268,6 +267,7 @@ public class BreezeAPI extends Service {
 
     public boolean incomingHandshake(BrzChatHandshake handshake) {
         BrzChat chat = handshake.chat;
+        if (chat == null) return false;
         if (!chat.isGroup) {
             BrzNode n = BrzGraph.getInstance().getVertex(handshake.from);
             chat.name = n.name;
@@ -301,8 +301,8 @@ public class BreezeAPI extends Service {
         BrzChat c = this.state.getChat(chatId);
 
         // Send acceptance responses to all participants
-        BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.CHAT_RESPONSE, "", false);
         for (String nodeId : c.nodes) {
+            BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.CHAT_RESPONSE, "", false);
             if (!nodeId.equals(this.hostNode.id)) {
                 p.to = nodeId;
                 this.router.send(p);
@@ -331,8 +331,8 @@ public class BreezeAPI extends Service {
         BrzChat c = this.state.getChat(chatId);
 
         // Send rejection responses to all participants
-        BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.CHAT_RESPONSE, "", false);
         for (String nodeId : c.nodes) {
+            BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.CHAT_RESPONSE, "", false);
             if (!nodeId.equals(this.hostNode.id)) {
                 p.to = nodeId;
                 this.router.send(p);
@@ -359,11 +359,11 @@ public class BreezeAPI extends Service {
         this.encryption.encryptMessage(clone);
 
         // Build a packet
-        BrzPacket p = new BrzPacket(clone, BrzPacket.BrzPacketType.MESSAGE, "", false);
 
         // Send message to each recipient
         BrzChat chat = this.state.getChat(clone.chatId);
         for (String nodeId : chat.nodes) {
+            BrzPacket p = new BrzPacket(clone, BrzPacket.BrzPacketType.MESSAGE, "", false);
             if (nodeId.equals(hostNode.id))
                 continue;
             p.to = nodeId;
@@ -424,13 +424,14 @@ public class BreezeAPI extends Service {
             BrzMessage clone = new BrzMessage(message.toJSON());
             this.encryption.encryptMessage(clone);
 
-            // Build a packet
-            BrzPacket p = new BrzPacket(clone, BrzPacket.BrzPacketType.MESSAGE, "", false);
-            p.addStream(info);
 
             // Send message to each recipient
             BrzChat chat = this.state.getChat(clone.chatId);
             for (String nodeId : chat.nodes) {
+                // Build a packet
+                BrzPacket p = new BrzPacket(clone, BrzPacket.BrzPacketType.MESSAGE, "", false);
+                p.addStream(info);
+
                 if (nodeId.equals(hostNode.id))
                     continue;
                 p.to = nodeId;
