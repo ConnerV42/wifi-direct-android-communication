@@ -146,11 +146,16 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
         UserItemHolder holder = new UserItemHolder(user_list_item);
 
         // Make the item clickable!
-        user_list_item.setOnClickListener(e -> {
-            if (this.itemSelectedListener != null)
-                this.itemSelectedListener.accept(this.filteredNodes.get(holder.position));
-            holder.bind(filteredNodes.get(holder.position), holder.position, ctx, nodes);
-        });
+        try {
+            user_list_item.setOnClickListener(e -> {
+                if (this.itemSelectedListener != null)
+                    this.itemSelectedListener.accept(this.filteredNodes.get(holder.position));
+                holder.bind(filteredNodes.get(holder.position), holder.position, ctx, nodes);
+            });
+        } catch (ArrayIndexOutOfBoundsException e) {
+            Log.i("UserList.java - onCreateViewHolder", "User tried to click on a \"Connecting...\" node");
+        }
+
 
         return holder;
     }

@@ -164,8 +164,11 @@ public final class BrzEncryption {
     public byte[] symmetricEncrypt(final SecretKey secretKey, final byte[] messageBytes) {
         try {
             Cipher cipher = Cipher.getInstance(SYM_CIPHER);
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-
+            try {
+                cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            } catch (IllegalStateException e) {
+                Log.i("IllegalStateException", "Location: symmetricEncrypt in BrzEncryption");
+            }
             byte[] encryptedBytes = cipher.doFinal(messageBytes);
             byte[] initialVector = cipher.getIV();
 
@@ -214,7 +217,11 @@ public final class BrzEncryption {
             byteBuffer.get(encryptedBytes);
 
             Cipher cipher = Cipher.getInstance(SYM_CIPHER);
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, new GCMParameterSpec(128, initialVector));
+            try {
+                cipher.init(Cipher.DECRYPT_MODE, secretKey, new GCMParameterSpec(128, initialVector));
+            } catch (IllegalStateException e) {
+                Log.i("IllegalStateException", "Location: symmetricDecrypt in BrzEncryption");
+            }
 
             return cipher.doFinal(encryptedBytes);
         } catch (Exception e) {
