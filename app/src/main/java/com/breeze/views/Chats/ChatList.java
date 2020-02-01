@@ -48,7 +48,7 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
 
         public void bind(BrzChat chat, int position, Context ctx) {
 
-            if(chat.id == "PUBLIC_THREAD"){
+            if(chat.id.equals("PUBLIC_THREAD")){
                 return;
             }
             TextView chatName = this.v.findViewById(R.id.chat_name);
@@ -138,7 +138,7 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
             notifyDataSetChanged();
         };
 
-        this.chatListener.accept(api.state.getAllChats());
+        this.chatListener.accept(api.state.getAllChatsNoPublicThread());
         api.state.on("allChats", this.chatListener);
         api.state.on("messages", this.messageListener);
     }
