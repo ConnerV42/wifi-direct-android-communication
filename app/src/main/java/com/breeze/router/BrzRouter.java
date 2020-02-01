@@ -76,6 +76,11 @@ public class BrzRouter extends EventEmitter {
     private List<BrzRouterHandler> handlers = new ArrayList<>();
 
     private Map<String, String> endpointUUIDs = new HashMap<>();
+
+    public Map<String, String> getEndpointIDs() {
+        return endpointIDs;
+    }
+
     private Map<String, String> endpointIDs = new HashMap<>();
 
     public Map<Long, Payload> pendingFilePayloads = new HashMap<>();
@@ -389,6 +394,7 @@ public class BrzRouter extends EventEmitter {
                 Log.i("ENDPOINT", t.toString());
                 Log.i("ENDPOINT", "emmitting found endpoint ");
                 emit("endpointFound", endpointId);
+                emit("endpointAdded", "" + endpointIDs.values().size());
             }
         }
 

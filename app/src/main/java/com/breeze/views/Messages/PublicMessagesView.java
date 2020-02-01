@@ -28,6 +28,7 @@ import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
+import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;
@@ -35,6 +36,9 @@ import com.breeze.views.MainSettingsActivity;
 import com.breeze.views.ProfileActivity;
 
 import com.breeze.R.layout.*;
+
+import org.w3c.dom.Text;
+
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -45,6 +49,8 @@ public class PublicMessagesView extends AppCompatActivity {
     private Consumer<BrzChat> onChatUpdate;
 
     private Consumer<List<BrzMessage>> messageListener;
+
+    private Consumer<List<BrzNode>> endpointListener;
 
     public static Intent getIntent(Context ctx, String chatId) {
         Intent i = new Intent(ctx, PublicMessagesView.class);
@@ -81,6 +87,9 @@ public class PublicMessagesView extends AppCompatActivity {
             this.list = new MessageList(this, this.chat);
             RecyclerView msgView = findViewById(R.id.publicMessageList);
             msgView.setAdapter(this.list);
+
+            TextView numberOnline = findViewById(R.id.number_online);
+            numberOnline.setText("Online: " + api.router.getEndpointIDs().values().size());
 
             publicSwitch.setOnTouchListener((View v, MotionEvent e) -> {
                 switch(e.getAction()){
@@ -151,6 +160,13 @@ public class PublicMessagesView extends AppCompatActivity {
         };
         api.state.on("messages" + this.chat.id, messageListener);
 
+        this.endpointListener = endpoint -> {
+            if(endpoint != null){
+                TextView numberOnline = findViewById(R.id.number_online);
+                numberOnline.setText("Online: " + endpoint);
+            }
+        };
+        api.router.on("endpointAdded", this.endpointListener);
         //-------------------------------------------------------------------------------//
 
         LinearLayout messageEditor = findViewById(R.id.public_messages_editor);

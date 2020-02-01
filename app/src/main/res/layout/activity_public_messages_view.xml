@@ -11,6 +11,12 @@
     tools:context=".views.Messages.PublicMessagesView">
 
 
+    <TextView
+        android:id="@+id/number_online"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Online: 0" />
+
     <Switch
         android:id="@+id/PublicSwitch"
         android:layout_width="match_parent"
