@@ -109,6 +109,10 @@ public class BrzStateStore extends EventEmitter {
         return this.messages.get(chatId);
     }
 
+    public List<BrzMessage> getPublicMessages(){
+        return this.messages.get("PUBLIC_THREAD");
+    }
+
     public void addMessage(BrzMessage msg) {
         List<BrzMessage> messages = this.messages.get(msg.chatId);
         if (messages == null) {

@@ -130,8 +130,12 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
                 }
             }
         };
-
-        this.messageListener.accept(api.state.getMessages(chat.id));
+        if(this.chat.id.equals("PUBLIC_THREAD")){
+            this.messageListener.accept(api.state.getPublicMessages());
+        }
+        else {
+            this.messageListener.accept(api.state.getMessages(chat.id));
+        }
         api.state.on("messages" + chat.id, this.messageListener);
 
         this.receiptListener = msgId -> {
