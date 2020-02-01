@@ -8,10 +8,22 @@
         android:id="@+id/chatsView"
         android:name="com.breeze.views.Chats.ChatsView"
         android:label="fragment_chats_view"
-        tools:layout="@layout/fragment_chats_view" />
+        tools:layout="@layout/fragment_chats_view" >
+        <action
+            android:id="@+id/action_chatsView_to_userSelection"
+            app:destination="@id/userSelection" />
+        <action
+            android:id="@+id/action_chatsView_to_publicMessagesView"
+            app:destination="@id/publicMessages" />
+    </fragment>
     <fragment
         android:id="@+id/userSelection"
         android:name="com.breeze.views.UserSelection.UserSelection"
         android:label="activity_user_selection"
         tools:layout="@layout/fragment_user_selection" />
+    <fragment
+        android:id="@+id/publicMessages"
+        android:name="com.breeze.views.PublicMessages.PublicMessagesView"
+        android:label="fragment_public_messages_view"
+        tools:layout="@layout/fragment_public_messages_view" />
 </navigation>

@@ -20,7 +20,7 @@ import java.util.UUID;
 public class BrzPacket implements BrzSerializable {
 
     public enum BrzPacketType {
-        MESSAGE, MESSAGE_RECEIPT,
+        MESSAGE, PUBLIC_MESSAGE, MESSAGE_RECEIPT,
 
         GRAPH_QUERY, GRAPH_EVENT,
 

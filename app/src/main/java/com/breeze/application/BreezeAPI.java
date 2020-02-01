@@ -352,6 +352,13 @@ public class BreezeAPI extends Service {
     //
     //
 
+    public void sendPublicMessage(BrzMessage message) {
+        BrzMessage clone = new BrzMessage(message.toJSON());
+        BrzPacket p = new BrzPacket(clone, BrzPacket.BrzPacketType.PUBLIC_MESSAGE, "BROADCAST", true);
+        this.router.broadcast(p);
+        this.state.addPublicMessage(clone);
+    }
+
     public void sendMessage(BrzMessage message) {
         BrzMessage clone = new BrzMessage(message.toJSON());
 

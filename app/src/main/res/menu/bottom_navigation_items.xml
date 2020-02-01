@@ -9,7 +9,7 @@
         android:icon="@drawable/ic_add_black_24dp"
         android:title="New Chat" />
     <item
-        android:id="@+id/broadcasts"
+        android:id="@+id/publicMessages"
         android:icon="@drawable/ic_wifi_tethering_black_24dp"
         android:title="Public" />
     <item

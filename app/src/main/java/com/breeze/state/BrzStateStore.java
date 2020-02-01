@@ -10,6 +10,7 @@ import com.breeze.datatypes.BrzChat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -38,9 +39,11 @@ public class BrzStateStore extends EventEmitter {
     //
 
     private String currentChat = "";
+
     public String getCurrentChat() {
         return this.currentChat;
     }
+
     public void setCurrentChat(String chatId) {
         this.currentChat = chatId;
         this.emit("currentChat", chatId);
@@ -138,5 +141,25 @@ public class BrzStateStore extends EventEmitter {
         this.emit("messages");
     }
 
+    //
+    //  Public Messages
+    //
+
+    private List<BrzMessage> publicMessages = new LinkedList<>();
+    private final int PUBLIC_MESSAGES_MAX_SIZE = 1000;
+
+    public List<BrzMessage> getPublicMessages() {
+        return new LinkedList<>(this.publicMessages);
+    }
+
+    public void addPublicMessage(BrzMessage msg) {
+        if (publicMessages.size() >= PUBLIC_MESSAGES_MAX_SIZE) {
+            publicMessages.remove(0);
+        }
+
+        publicMessages.add(msg);
+
+        this.emit("publicMessages", getPublicMessages());
+    }
 
 }
