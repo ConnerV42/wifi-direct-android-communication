@@ -50,7 +50,7 @@ public class PublicMessagesView extends AppCompatActivity {
 
     private Consumer<List<BrzMessage>> messageListener;
 
-    private Consumer<List<BrzNode>> endpointListener;
+    private Consumer<String> endpointListener;
 
     public static Intent getIntent(Context ctx, String chatId) {
         Intent i = new Intent(ctx, PublicMessagesView.class);
