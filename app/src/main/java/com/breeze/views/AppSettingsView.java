@@ -53,7 +53,7 @@ public class AppSettingsView extends Fragment {
         ActionBar ab = activity.getSupportActionBar();
         if (ab == null) return;
         ab.setTitle("Settings");
-        
+
     }
 
     private void showWipeDatabaseDialog() {
