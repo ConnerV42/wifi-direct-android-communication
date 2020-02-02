@@ -13,7 +13,7 @@
         android:icon="@drawable/ic_wifi_tethering_black_24dp"
         android:title="Public" />
     <item
-        android:id="@+id/settings"
+        android:id="@+id/appSettings"
         android:icon="@drawable/ic_settings_black_24dp"
         android:title="Settings" />
 </menu>

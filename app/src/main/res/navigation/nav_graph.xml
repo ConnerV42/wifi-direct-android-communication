@@ -15,6 +15,9 @@
         <action
             android:id="@+id/action_chatsView_to_publicMessagesView"
             app:destination="@id/publicMessages" />
+        <action
+            android:id="@+id/action_chatsView_to_appSettings"
+            app:destination="@id/appSettings" />
     </fragment>
     <fragment
         android:id="@+id/userSelection"
@@ -26,4 +29,9 @@
         android:name="com.breeze.views.PublicMessages.PublicMessagesView"
         android:label="fragment_public_messages_view"
         tools:layout="@layout/fragment_public_messages_view" />
+    <fragment
+        android:id="@+id/appSettings"
+        android:name="com.breeze.views.AppSettingsView"
+        android:label="fragment_app_settings"
+        tools:layout="@layout/fragment_app_settings" />
 </navigation>

@@ -6,7 +6,6 @@
     <string name="action_find_nodes">Find Nodes</string>
     <string name="status_connected">connected</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_login">Set Profile</string>
     <string name="prompt_email">Email</string>
@@ -19,4 +18,13 @@
     <string name="login_failed">"Login failed"</string>
     <string name="instructions">Click to start a chat</string>
     <string name="name">name</string>
+
+    <string name="restart_service">Restart Service</string>
+    <string name="wipe_database">Wipe Database</string>
+    <string name="close_all_streams">Close All Streams</string>
+    <string name="start_mic_stream">Start Mic Stream</string>
+    <string name="stop_mic_stream">Stop Mic Stream</string>
+    <string name="start_mic_stream_2">Start Mic Stream 2</string>
+    <string name="stop_mic_stream_2">Stop Mic Stream 2</string>
+
 </resources>

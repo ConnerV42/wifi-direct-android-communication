@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
@@ -19,14 +18,11 @@ import android.widget.ImageButton;
 import android.widget.Switch;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.graph.BrzGraph;
-import com.breeze.packets.BrzPacket;
-import com.breeze.packets.BrzPacketBuilder;
 
 import java.util.function.Consumer;
 
