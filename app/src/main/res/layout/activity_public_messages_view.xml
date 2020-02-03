@@ -10,13 +10,26 @@
     android:orientation="vertical"
     tools:context=".views.Messages.PublicMessagesView">
 
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="2dp" />
 
     <TextView
         android:id="@+id/number_online"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Online: 0" />
+        android:layout_marginLeft="7dp"
+        android:text="Online: 0"
+        android:textStyle="bold|italic" />
 
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="2dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#66E0FF" />
     <Switch
         android:id="@+id/PublicSwitch"
         android:layout_width="match_parent"

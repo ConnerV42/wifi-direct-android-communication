@@ -1,5 +1,6 @@
 package com.breeze.state;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.breeze.EventEmitter;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class BrzStateStore extends EventEmitter {
 
@@ -72,6 +74,8 @@ public class BrzStateStore extends EventEmitter {
          }
         return privChats;
     }
+
+
     public BrzChat getChat(String chatId) {
         return this.chats.get(chatId);
     }
