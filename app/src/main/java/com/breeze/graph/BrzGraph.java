@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.breeze.EventEmitter;
+import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzSerializable;
 
@@ -109,6 +110,33 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
         adjList.remove(id);
         vertexList.remove(id);
         this.emit("deleteVertex", id);
+
+        // also remove vertices that are now out of direct reach
+        refreshGraph();
+    }
+
+    private void refreshGraph() {
+        Collection<BrzNode> potentiallyLostNodes = getNodeCollection();
+        BreezeAPI api = BreezeAPI.getInstance();
+        String hostNodeId = api.hostNode.id;
+
+        for (BrzNode node : potentiallyLostNodes) {
+            String id = node.id;
+            if (id == hostNodeId) {
+                continue;
+            }
+
+            List<String> path = bfs(hostNodeId, id);
+            if (path != null) { // a viable path was found
+                continue;
+            }
+
+            // viable path not found
+            adjList.values().forEach(e -> e.remove(id));
+            adjList.remove(id);
+            vertexList.remove(id);
+            this.emit("deleteVertex", id);
+        }
     }
 
     public void addEdge(String id1, String id2) {

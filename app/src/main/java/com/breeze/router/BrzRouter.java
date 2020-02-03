@@ -447,7 +447,6 @@ public class BrzRouter extends EventEmitter {
             if (hostNode != null && lostNode != null) {
                 String endpointUUID = endpointUUIDs.get(endpointId);
                 endpointIDs.remove(endpointUUID);
-                // graph.removeEdge(hostNode.id, endpointUUID);
 
                 // removes the vertex and any associated edges
                 graph.removeVertex(endpointUUID);
