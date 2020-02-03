@@ -65,7 +65,7 @@ public class BrzStateStore extends EventEmitter {
 
     public List<BrzChat> getAllChatsNoPublicThread()
     {
-         List<BrzChat> privChats = null;
+         List<BrzChat> privChats = new ArrayList<>();
          for(BrzChat c : this.chats.values())
          {
              if(!(c.id.equals("PUBLIC_THREAD"))) {
