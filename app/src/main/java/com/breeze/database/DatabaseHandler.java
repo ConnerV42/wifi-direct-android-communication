@@ -16,6 +16,7 @@ import com.breeze.datatypes.BrzNode;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
@@ -82,7 +83,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-//        this.onUpgrade(getWritableDatabase(), 0, 0);
         this.onCreate(getWritableDatabase());
     }
 
@@ -149,6 +149,41 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         c.close();
         db.close();
         return n;
+    }
+
+    public List<BrzNode> getAllNodes() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] args = {};
+
+        Cursor c = db.rawQuery("SELECT * FROM " + BRZNODE_TABLE_NAME + ";", args);
+
+        if (c == null) {
+            db.close();
+            return null;
+        } else if (c.getCount() < 1) {
+            c.close();
+            db.close();
+            return null;
+        }
+
+        c.moveToFirst();
+
+
+        List<BrzNode> nodes = new LinkedList<>();
+        for (int i = 0; i < c.getCount(); i++) {
+            BrzNode n = new BrzNode();
+            n.id = c.getString(c.getColumnIndex("id"));
+            n.endpointId = c.getString(c.getColumnIndex("endpointId"));
+            n.publicKey = c.getString(c.getColumnIndex("publicKey"));
+            n.name = c.getString(c.getColumnIndex("name"));
+            n.alias = c.getString(c.getColumnIndex("alias"));
+            nodes.add(n);
+            c.moveToNext();
+        }
+
+        c.close();
+        db.close();
+        return nodes;
     }
 
     /*
@@ -381,8 +416,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String[] args = {chatId, hostId};
         Cursor c = db.rawQuery(
                 "SELECT COUNT(*) as count FROM BrzMessage " +
-                    "natural join ( select * from BrzMessageReceipt where read == 0 ) " +
-                    "where chatId = ? and [from] != ?;"
+                        "natural join ( select * from BrzMessageReceipt where read == 0 ) " +
+                        "where chatId = ? and [from] != ?;"
                 , args);
 
         if (c == null) {

@@ -210,6 +210,14 @@ public class BreezeAPI extends Service {
         encryption.makeSecretKey(handshake);
 
         for (String nodeId : chat.nodes) {
+
+            // Also store all nodes that can be found in the db
+            BrzNode n = BrzGraph.getInstance().getVertex(nodeId);
+            if (n != null) {
+                db.setNode(n);
+                state.setNode(n);
+            }
+
             BrzPacket p = new BrzPacket(handshake, BrzPacket.BrzPacketType.CHAT_HANDSHAKE, "", false);
             if (nodeId.equals(hostNode.id))
                 continue;
@@ -302,6 +310,14 @@ public class BreezeAPI extends Service {
 
         // Send acceptance responses to all participants
         for (String nodeId : c.nodes) {
+
+            // Also store all nodes that can be found in the db
+            BrzNode n = BrzGraph.getInstance().getVertex(nodeId);
+            if (n != null) {
+                db.setNode(n);
+                state.setNode(n);
+            }
+
             BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.CHAT_RESPONSE, "", false);
             if (!nodeId.equals(this.hostNode.id)) {
                 p.to = nodeId;

@@ -27,14 +27,10 @@ import com.breeze.datatypes.BrzNode;
 import com.breeze.graph.BrzGraph;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
-import com.breeze.packets.ChatEvents.BrzChatHandshake;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class BreezeMetastateModule extends BreezeModule {
     BreezeMetastateModule(BreezeAPI api) {
@@ -67,6 +63,20 @@ public class BreezeMetastateModule extends BreezeModule {
                         Log.i("STATE", "Failed to find messages in chat " + c.id);
                     }
                 }
+            }
+        } catch (RuntimeException e) {
+            Log.e("BREEZE_API", "Trying to load chats", e);
+        }
+
+        // Get stored nodes
+        List<BrzNode> nodes;
+        try {
+            nodes = api.db.getAllNodes();
+            if (nodes != null) {
+                Log.i("STATE", "Found " + nodes.size() + " nodes in the database");
+                api.state.setNodes(nodes);
+            } else {
+                Log.i("STATE", "No stored chats found!");
             }
         } catch (RuntimeException e) {
             Log.e("BREEZE_API", "Trying to load chats", e);
@@ -153,7 +163,7 @@ public class BreezeMetastateModule extends BreezeModule {
         style.setConversationTitle(c.name);
 
         // Add the new message
-        BrzNode n = BrzGraph.getInstance().getVertex(message.from);
+        BrzNode n = api.state.getNode(message.from);
         style.addMessage(message.body, message.datestamp, getPerson(n));
         Notification notification = getMessageNotificationBuilder(notifId, style, message.chatId).build();
 
@@ -254,7 +264,7 @@ public class BreezeMetastateModule extends BreezeModule {
         NotificationCompat.Builder builder = getMessageNotificationBuilder(notifId, newMsgStyle, message.chatId);
 
         // Add the new message
-        BrzNode n = BrzGraph.getInstance().getVertex(message.from);
+        BrzNode n = api.state.getNode(message.from);
         newMsgStyle.addMessage(message.body, message.datestamp, getPerson(n));
 
         // Set the new style to the recovered builder.

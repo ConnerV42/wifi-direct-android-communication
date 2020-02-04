@@ -1,7 +1,5 @@
 package com.breeze.state;
 
-import android.util.Log;
-
 import com.breeze.EventEmitter;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.datatypes.BrzMessage;
@@ -13,7 +11,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 public class BrzStateStore extends EventEmitter {
 
@@ -21,17 +18,6 @@ public class BrzStateStore extends EventEmitter {
 
     public static BrzStateStore getStore() {
         return instance;
-    }
-
-    //
-    // Title
-    //
-
-    private String title = "";
-
-    public void setTitle(String title) {
-        this.title = title;
-        this.emit("title", this.title);
     }
 
     //
@@ -62,6 +48,30 @@ public class BrzStateStore extends EventEmitter {
     public void setHostNode(BrzNode hostNode) {
         this.hostNode = hostNode;
         this.emit("hostNode", this.hostNode);
+    }
+
+    //
+    // Nodes
+    //
+
+    private HashMap<String, BrzNode> nodes = new HashMap<>();
+
+    public List<BrzNode> getAllNodes() {
+        return new LinkedList<>(this.nodes.values());
+    }
+
+    public BrzNode getNode(String nodeId) {
+        return this.nodes.get(nodeId);
+    }
+
+    public void setNode(BrzNode node) {
+        if (node == null || node.id == null) return;
+        this.nodes.put(node.id, node);
+        this.emit("nodeSet", node);
+    }
+
+    public void setNodes(List<BrzNode> nodesToAdd) {
+        for (BrzNode node : nodesToAdd) setNode(node);
     }
 
     //

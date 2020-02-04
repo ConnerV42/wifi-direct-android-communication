@@ -79,17 +79,6 @@ public class ChatsView extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        BrzStateStore.getStore().setTitle("Breeze");
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-    }
-
-    @Override
     public void onDetach() {
         super.onDetach();
         this.list.cleanup();
