@@ -12,6 +12,10 @@ import com.breeze.packets.BrzSerializable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<BrzNode>  {
@@ -269,6 +273,51 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
             }
         } catch (Exception e) {
             Log.i("DESERIALIZATION ERROR", "err", e);
+        }
+    }
+
+    public String toString() {
+        BreezeAPI api = BreezeAPI.getInstance();
+        String graph = '\n' + api.hostNode.id;
+        for(BrzNode node : this.vertexList.values()) {
+            graph += "Node " + node.id + "'s Adjacent Nodes: ";
+            for(String adjacentNode : this.adjList.get(node.id)) {
+                graph += adjacentNode + ", ";
+            }
+            graph += '\n';
+        }
+        graph += '\n';
+        return graph;
+    }
+
+    public void logOnDevice() {
+        this.log("sdcard/log.file");;
+    }
+
+    private void log(String path) {
+        File logFile = new File(path);
+        if (!logFile.exists()) {
+            try
+            {
+                logFile.createNewFile();
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        try
+        {
+            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            buf.append(this.toString());
+            buf.newLine();
+            buf.close();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 }
