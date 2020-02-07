@@ -1,22 +1,18 @@
+import com.breeze.datatypes.BrzNode;
+
 import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 
-import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
-import com.breeze.graph.BrzGraph;
-import com.breeze.datatypes.BrzNode;
 
 import java.util.List;
 import java.util.Random;
 
-public class BrzGraphTest { // truth docs: https://truth.dev/api/1.0.1/
-    public BrzGraph graph;
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
-    @BeforeEach
-    public void init() {
-        this.graph = BrzGraph.getInstance();
-    }
+public class BrzGraphTest { // truth docs: https://truth.dev/api/1.0.1/
+
+    public TBrzGraph graph;
 
     @AfterEach
     public void log() {
@@ -33,6 +29,8 @@ public class BrzGraphTest { // truth docs: https://truth.dev/api/1.0.1/
 
     @Test
     public void BrzGraphAdd10Verticeswith9Edges_StraightLine() {
+        this.graph = TBrzGraph.getInstance();
+
         BrzNode startNode = null, endNode = null;
         Random r = new Random();
         int index1 = r.nextInt(14);
@@ -40,28 +38,36 @@ public class BrzGraphTest { // truth docs: https://truth.dev/api/1.0.1/
 
         do {
             index2 = r.nextInt(14);
-        } while (index1 != index2);
+        } while (index1 == index2);
 
         BrzNode prev = null;
         for(int i = 0; i < 13; i++) {
             BrzNode node = new BrzNode();
             node.generateID();
 
-            // mock out the emit() calls so it doesn't crash
             this.graph.addVertex(node);
 
             if (i != 0) {
+                System.out.println();
                 this.graph.addEdge(prev.id, node.id);
                 prev = node;
             } else {
                 prev = node;
             }
 
-            if (i == index1) startNode = node;
+            if (i == index1) {
+                startNode = node;
+                this.graph.hostNode = node;
+            }
             if (i == index2) endNode = node;
         }
 
+        System.out.println(
+                "Start Node: " + startNode.id + "\n" + "End Node: " + endNode.id);
         List<String> list = this.graph.bfs(startNode.id, endNode.id);
+        System.out.println(list + "\n\nTo String..." + this.graph.toString());
         assertThat(list).isNotNull();
+        assertThat(list.get(0)).isEqualTo(startNode.id);
+        assertThat(list.get(list.size() - 1)).isEqualTo(endNode.id);
     }
 }

@@ -33,7 +33,7 @@ public class BrzNode implements BrzSerializable {
     }
 
     public void generateID() {
-        this.id = UUID.randomUUID().toString();
+        this.id = UUID.randomUUID().toString().substring(0, 8);
     }
 
     @Override
