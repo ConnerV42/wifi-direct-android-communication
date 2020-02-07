@@ -186,7 +186,7 @@ public class MessagesView extends AppCompatActivity {
             TextView onlineIndicator = findViewById(R.id.online_indicator);
             TextView offlineIndicator = findViewById(R.id.offline_indicator);
 
-            BrzGraph graph = BrzGraph.getInstance();
+            BrzGraph graph = api.getGraph();
             this.onGraphUpdate = newNode -> {
                 if (!chat.isGroup && graph.getVertex(chat.otherPersonId()) != null) {
                     onlineIndicator.setVisibility(View.VISIBLE);
@@ -267,7 +267,7 @@ public class MessagesView extends AppCompatActivity {
         this.list.cleanup();
 
         // Set up event listeners
-        BrzGraph graph = BrzGraph.getInstance();
+        BrzGraph graph = api.getGraph();
         graph.off("addVertex", this.onGraphUpdate);
         graph.off("deleteVertex", this.onGraphUpdate);
         graph.off("setVertex", this.onGraphUpdate);

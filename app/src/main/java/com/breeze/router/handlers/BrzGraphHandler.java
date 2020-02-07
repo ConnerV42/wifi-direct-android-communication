@@ -14,7 +14,7 @@ import com.breeze.router.BrzRouter;
 public class BrzGraphHandler implements BrzRouterHandler {
 
     private BrzRouter router;
-    private BrzGraph graph = BrzGraph.getInstance();
+    private BreezeAPI api = BreezeAPI.getInstance();
 
     public BrzGraphHandler(BrzRouter router) {
         this.router = router;
@@ -25,6 +25,8 @@ public class BrzGraphHandler implements BrzRouterHandler {
         if (!this.handles(packet.type))
             throw new RuntimeException("This handler does not handle packets of type " + packet.type);
 
+        BrzGraph graph = api.getGraph();
+
         // Respond to graph queries
         if (packet.type == BrzPacket.BrzPacketType.GRAPH_QUERY) {
             BrzGraphQuery query = packet.graphQuery();
@@ -32,7 +34,7 @@ public class BrzGraphHandler implements BrzRouterHandler {
 
             // Respond to graph query
             if (query.type == BrzGraphQuery.BrzGQType.REQUEST) {
-                BrzPacket resPacket = BrzPacketBuilder.graphResponse(this.graph, router.hostNode, query.from);
+                BrzPacket resPacket = BrzPacketBuilder.graphResponse(graph, router.hostNode, query.from);
                 this.router.send(resPacket);
                 Log.i("ENDPOINT", "Responed to graph query");
             }
@@ -51,10 +53,10 @@ public class BrzGraphHandler implements BrzRouterHandler {
                 this.router.broadcast(BrzPacketBuilder.graphEvent(true, router.hostNode, hostNode));
 
                 // Merge their graph into ours
-                BrzGraph otherGraph = this.graph.mergeGraph(query.graph);
+                BrzGraph otherGraph = graph.mergeGraph(query.graph);
 
                 // Send a BrzProfileImageEvent packet to all newly merged nodes
-                BreezeAPI.getInstance().requestProfileImages(otherGraph);
+                api.requestProfileImages(otherGraph);
             }
         }
 

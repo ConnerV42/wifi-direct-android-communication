@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 
 import com.breeze.EventEmitter;
 import com.breeze.application.BreezeAPI;
-import com.breeze.datatypes.BrzFileInfo;
 import com.breeze.graph.BrzGraph;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
@@ -74,13 +73,16 @@ public class BrzRouter extends EventEmitter {
     private Map<String, String> endpointUUIDs = new HashMap<>();
     private Map<String, String> endpointIDs = new HashMap<>();
 
-    public BrzGraph graph;
+    private BreezeAPI api;
+    private BrzGraph graph;
     public BrzNode hostNode = null;
 
     private BrzRouter(ConnectionsClient cc, String pkgName) {
         this.connectionsClient = cc;
         this.pkgName = pkgName;
-        this.graph = BrzGraph.getInstance();
+
+        this.api = BreezeAPI.getInstance();
+        this.graph = api.getGraph();
 
         // Initalize handlers
         this.handlers.add(new BrzGraphHandler(this));
@@ -115,7 +117,6 @@ public class BrzRouter extends EventEmitter {
 
     public void send(BrzPacket packet) {
         // Encrypt the packet first
-        BreezeAPI api = BreezeAPI.getInstance();
         try {
             api.encryption.encryptPacket(packet);
             forwardPacket(packet, true);
@@ -308,7 +309,6 @@ public class BrzRouter extends EventEmitter {
 
             // Decrypt the packet unless it's not an encryptable type
             if (packet.type != BrzPacket.BrzPacketType.GRAPH_QUERY) {
-                BreezeAPI api = BreezeAPI.getInstance();
                 api.encryption.decryptPacket(packet);
             }
 
@@ -450,8 +450,8 @@ public class BrzRouter extends EventEmitter {
 
                 // removes the vertex and any associated edges
                 graph.removeVertex(endpointUUID);
-
-                BrzStateStore.getStore().removeChat(endpointUUID);
+                graph.removeDisconnected(api.hostNode.id);
+                api.state.removeChat(endpointUUID);
 
                 // Broadcast disconnect event
                 broadcast(BrzPacketBuilder.graphEvent(false, hostNode, lostNode));

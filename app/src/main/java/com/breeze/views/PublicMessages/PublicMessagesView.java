@@ -46,7 +46,7 @@ public class PublicMessagesView extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         BreezeAPI api = BreezeAPI.getInstance();
-        BrzGraph graph = BrzGraph.getInstance();
+        BrzGraph graph = api.getGraph();
 
         // Set up content
         RecyclerView msgView = view.findViewById(R.id.publicMessageList);
@@ -107,7 +107,7 @@ public class PublicMessagesView extends Fragment {
         if (ab == null) return;
         ab.setTitle("Public Feed");
 
-        BrzGraph graph = BrzGraph.getInstance();
+        BrzGraph graph = BreezeAPI.getInstance().getGraph();
         graph.on("addVertex", this.onlineListener);
         graph.on("deleteVertex", this.onlineListener);
         graph.on("setVertex", this.onlineListener);
@@ -116,7 +116,7 @@ public class PublicMessagesView extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        BrzGraph graph = BrzGraph.getInstance();
+        BrzGraph graph = BreezeAPI.getInstance().getGraph();
         graph.on("addVertex", this.onlineListener);
         graph.on("deleteVertex", this.onlineListener);
         graph.on("setVertex", this.onlineListener);

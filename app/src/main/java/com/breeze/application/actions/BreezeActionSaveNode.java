@@ -24,7 +24,7 @@ public class BreezeActionSaveNode extends BreezeAction {
     protected boolean doAction() {
         try {
             BreezeAPI api = BreezeAPI.getInstance();
-            BrzNode n = api.router.graph.getVertex(this.nodeId);
+            BrzNode n = api.getGraph().getVertex(this.nodeId);
 
             // If the target node was not found, return action failure
             if (n == null) throw new RuntimeException("The target node was not found");

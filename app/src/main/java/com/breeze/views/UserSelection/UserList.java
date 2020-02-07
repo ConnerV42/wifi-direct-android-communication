@@ -95,8 +95,8 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
     public UserList(Context ctx, List<String> nodes) {
         this.ctx = ctx;
         this.nodes = nodes;
-        BrzGraph graph = BrzGraph.getInstance();
         BreezeAPI api = BreezeAPI.getInstance();
+        BrzGraph graph = api.getGraph();
         BrzRouter router = api.router;
 
         this.graphListener = newNode -> {
@@ -213,8 +213,8 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
     }
 
     public void cleanup() {
-        BrzGraph graph = BrzGraph.getInstance();
         BreezeAPI api = BreezeAPI.getInstance();
+        BrzGraph graph = api.getGraph();
 
         graph.off("addVertex", this.graphListener);
         graph.off("deleteVertex", this.graphListener);

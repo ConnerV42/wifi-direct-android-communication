@@ -18,58 +18,38 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
-public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<BrzNode>  {
+public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<BrzNode> {
 
     private Map<String, Set<String>> adjList = new HashMap<>();
     private Map<String, BrzNode> vertexList = new HashMap<>();
 
-    private BrzGraph() {
-    }
-
-    // Singleton control
-
-    private static BrzGraph instance = new BrzGraph();
-
-    public static BrzGraph getInstance() {
-        return instance;
-    }
-
-    public static BrzGraph replaceInstance(String json) {
-        instance.fromJSON(json);
-        return instance;
-    }
-
     // Graph manipulation methods
 
-    public List<String> bfs(String currentUUID, String destinationUUID) {
-        Log.i("bfs path", currentUUID + " to " + destinationUUID);
-
-        HashMap<String, Boolean> nodeVisited = new HashMap<String, Boolean>();
-        vertexList.keySet().forEach(id -> nodeVisited.put(id, false));
+    public List<String> bfs(String startId, String destinationId) {
+        HashMap<String, Boolean> visited = new HashMap<>();
+        Queue<List<String>> queue = new LinkedList<>();
 
         // List that holds the path through which a node has been reached
-        List<String> pathToNode = new ArrayList<>();
-        pathToNode.add(currentUUID);
+        List<String> pathToNode = new LinkedList<>();
 
-        Queue<List<String>> queue = new LinkedList<>();
+        visited.put(startId, true);
         queue.add(pathToNode);
+        pathToNode.add(startId);
 
         while (!queue.isEmpty()) {
             pathToNode = queue.poll();
             String currId = pathToNode.get(pathToNode.size() - 1);
 
-            if (currId.equals(destinationUUID)) {
-                Log.i("bfs path", Arrays.toString(pathToNode.toArray()));
-                return pathToNode;
-            }
+            if (currId.equals(destinationId)) return pathToNode;
 
-            for (String neighbor : getNeighbors(currId)) {
-                Boolean visited = nodeVisited.get(neighbor);
-                if (!neighbor.equals(currId) && (visited == null || !visited)) {
-                    nodeVisited.put(neighbor, true);
+            List<String> neighbors = getNeighbors(currId);
+            if (neighbors == null) continue;
+            for (String neighbor : neighbors) {
+                if (visited.get(neighbor) == null) {
+                    visited.put(neighbor, true);
 
                     // Create new collection representing the path to the next node
-                    List<String> pathToNextNode = new ArrayList<>(pathToNode);
+                    List<String> pathToNextNode = new LinkedList<>(pathToNode);
                     pathToNextNode.add(neighbor);
                     queue.add(pathToNextNode);
                 }
@@ -78,10 +58,46 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
         return null;
     }
 
+    public HashMap<String, Boolean> getConnected(String startId) {
+        HashMap<String, Boolean> visited = new HashMap<>();
+        Queue<String> queue = new LinkedList<>();
+
+        visited.put(startId, true);
+        queue.add(startId);
+
+        while (!queue.isEmpty()) {
+            String currId = queue.poll();
+
+            List<String> neighbors = getNeighbors(currId);
+            if (neighbors == null) continue;
+
+            for (String neighbor : neighbors) {
+                if (visited.get(neighbor) == null) {
+                    visited.put(neighbor, true);
+                    queue.add(neighbor);
+                }
+            }
+        }
+        return visited;
+    }
+
+    public void removeDisconnected(String startId) {
+        HashMap<String, Boolean> connected = getConnected(startId);
+        for (String vertex : new LinkedList<>(this.adjList.keySet())) {
+            if (connected.get(vertex) == null) {
+                adjList.values().forEach(e -> e.remove(vertex));
+                adjList.remove(vertex);
+                vertexList.remove(vertex);
+                this.emit("deleteVertex", vertex);
+            }
+        }
+    }
+
+
     public String nextHop(String currentUUID, String destinationUUID) {
         List<String> path = this.bfs(currentUUID, destinationUUID);
         if (path == null) return null;
-        if(path.size() <= 2) return destinationUUID;
+        if (path.size() <= 2) return destinationUUID;
         return path.get(1);
     }
 
@@ -95,6 +111,14 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
 
     public Collection<BrzNode> getNodeCollection() {
         return this.vertexList.values();
+    }
+
+    public Set<String> getVertexIds() {
+        return this.vertexList.keySet();
+    }
+
+    public Set<String> getEdgeIds() {
+        return this.adjList.keySet();
     }
 
     public void addVertex(BrzNode node) {
@@ -114,33 +138,6 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
         adjList.remove(id);
         vertexList.remove(id);
         this.emit("deleteVertex", id);
-
-        // also remove vertices that are now out of direct reach
-        refreshGraph();
-    }
-
-    private void refreshGraph() {
-        Collection<BrzNode> potentiallyLostNodes = getNodeCollection();
-        BreezeAPI api = BreezeAPI.getInstance();
-        String hostNodeId = api.hostNode.id;
-
-        for (BrzNode node : potentiallyLostNodes) {
-            String id = node.id;
-            if (id == hostNodeId) {
-                continue;
-            }
-
-            List<String> path = bfs(hostNodeId, id);
-            if (path != null) { // a viable path was found
-                continue;
-            }
-
-            // viable path not found
-            adjList.values().forEach(e -> e.remove(id));
-            adjList.remove(id);
-            vertexList.remove(id);
-            this.emit("deleteVertex", id);
-        }
     }
 
     public void addEdge(String id1, String id2) {
@@ -158,7 +155,9 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
     }
 
     private List<String> getNeighbors(String id) {
-        return new ArrayList<>(adjList.get(id));
+        Set<String> neighbors = adjList.get(id);
+        if (neighbors == null) return null;
+        return new LinkedList<>(neighbors);
     }
 
     public BrzGraph mergeGraph(String graphJSON) {
@@ -167,45 +166,23 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
 
         // Merge vertex lists
         for (BrzNode n : otherGraph.vertexList.values()) {
-            BrzNode myVersion = this.vertexList.get(n.id);
-
-            // Merge only new information into our node
-            if (myVersion != null) {
-                if (
-                        (myVersion.endpointId == null || myVersion.endpointId.isEmpty()) &&
-                                (n.endpointId != null && !n.endpointId.isEmpty())
-                ) myVersion.endpointId = n.endpointId;
-
-                if (
-                        (myVersion.publicKey == null || myVersion.publicKey.isEmpty()) &&
-                                (n.publicKey != null && !n.publicKey.isEmpty())
-                ) myVersion.publicKey = n.publicKey;
-
-                if (
-                        (myVersion.name == null || myVersion.name.isEmpty()) &&
-                                (n.name != null && !n.name.isEmpty())
-                ) myVersion.name = n.name;
-
-                if (
-                        (myVersion.alias == null || myVersion.alias.isEmpty()) &&
-                                (n.alias != null && !n.alias.isEmpty())
-                ) myVersion.alias = n.alias;
-
-            } else {
-                this.addVertex(n);
-            }
+            this.addVertex(n);
         }
 
         // Add missing edges
         for (String nodeId : otherGraph.adjList.keySet()) {
-            adjList.putIfAbsent(nodeId, new HashSet<>());
-            for (String edgeStr : otherGraph.adjList.get(nodeId)) {
-                adjList.get(nodeId).add(edgeStr);
+            Set<String> currentNeighbors = adjList.get(nodeId);
+            if (currentNeighbors == null) {
+                currentNeighbors = new HashSet<>();
+                adjList.put(nodeId, currentNeighbors);
             }
+
+            List<String> neighbors = otherGraph.getNeighbors(nodeId);
+            if (neighbors == null) continue;
+            currentNeighbors.addAll(neighbors);
         }
 
         this.emit("graphMerge");
-
         return otherGraph;
     }
 
@@ -276,46 +253,43 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
         }
     }
 
+    @NonNull
     public String toString() {
-        BreezeAPI api = BreezeAPI.getInstance();
-        String graph = '\n' + api.hostNode.id;
-        for(BrzNode node : this.vertexList.values()) {
-            graph += "Node " + node.id + "'s Adjacent Nodes: ";
-            for(String adjacentNode : this.adjList.get(node.id)) {
-                graph += adjacentNode + ", ";
+        String graph = "";
+        for (String nodeId : getEdgeIds()) {
+            graph += "Node " + nodeId + "'s Adjacent Nodes: [";
+
+            List<String> neighbors = getNeighbors(nodeId);
+            if (neighbors == null) graph += "]\n";
+            else {
+                for (String n : neighbors) graph += n + ", ";
+                graph += "]\n";
             }
-            graph += '\n';
         }
-        graph += '\n';
         return graph;
     }
 
     public void logOnDevice() {
-        this.log("sdcard/log.file");;
+        this.log("sdcard/log.file");
+        ;
     }
 
     private void log(String path) {
         File logFile = new File(path);
         if (!logFile.exists()) {
-            try
-            {
+            try {
                 logFile.createNewFile();
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
-        try
-        {
+        try {
             BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
             buf.append(this.toString());
             buf.newLine();
             buf.close();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

@@ -57,7 +57,7 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
             onlineIndicator.setVisibility(View.GONE);
             offlineIndicator.setVisibility(View.GONE);
 
-            if (!chat.isGroup && BrzGraph.getInstance().getVertex(
+            if (!chat.isGroup && api.getGraph().getVertex(
                     chat.otherPersonId()) != null) {
                 onlineIndicator.setVisibility(View.VISIBLE);
             } else if (!chat.isGroup) {
@@ -122,7 +122,7 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
     public ChatList(Context ctx) {
         this.ctx = ctx;
         BreezeAPI api = BreezeAPI.getInstance();
-        BrzGraph graph = BrzGraph.getInstance();
+        BrzGraph graph = api.getGraph();
         this.chatListener = brzChats -> {
             if (brzChats != null) {
                 this.chats = brzChats;
@@ -159,7 +159,7 @@ public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
         api.meta.off("delivered", graphListener);
         api.meta.off("read", graphListener);
 
-        BrzGraph graph = BrzGraph.getInstance();
+        BrzGraph graph = api.getGraph();
         graph.off("addVertex", this.graphListener);
         graph.off("deleteVertex", this.graphListener);
         graph.off("setVertex", this.graphListener);

@@ -76,7 +76,7 @@ public class BreezeActionsModule extends BreezeModule {
         moduleListeners.put(actionName, moduleListener);
 
         if (a.getModule() == BreezeAction.BREEZE_MODULE.GRAPH) {
-            this.api.router.graph.on(a.getEventName(), moduleListener);
+            this.api.getGraph().on(a.getEventName(), moduleListener);
         } else if (a.getModule() == BreezeAction.BREEZE_MODULE.ROUTER) {
             this.api.router.on(a.getEventName(), moduleListener);
         } else if (a.getModule() == BreezeAction.BREEZE_MODULE.STATE) {

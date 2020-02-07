@@ -65,6 +65,7 @@ public class BreezeAPI extends Service {
 
     // Behavioral Modules
     public SharedPreferences preferences;
+    private BrzGraph graph = new BrzGraph();
 
     public BrzRouter router = null;
     public BrzStorage storage = null;
@@ -170,6 +171,10 @@ public class BreezeAPI extends Service {
         return (mode != Settings.Secure.LOCATION_MODE_OFF);
     }
 
+    public BrzGraph getGraph() {
+        return this.graph;
+    }
+
     //
     //
     // Host Node
@@ -247,7 +252,7 @@ public class BreezeAPI extends Service {
 
     public void incomingChatResponse(BrzChatResponse response) {
         BrzChat c = this.state.getChat(response.chatId);
-        BrzNode n = BrzGraph.getInstance().getVertex(response.from);
+        BrzNode n = graph.getVertex(response.from);
         if (c == null || n == null)
             return;
 
@@ -278,7 +283,7 @@ public class BreezeAPI extends Service {
         BrzChat chat = handshake.chat;
         if (chat == null) return false;
         if (!chat.isGroup) {
-            BrzNode n = BrzGraph.getInstance().getVertex(handshake.from);
+            BrzNode n = graph.getVertex(handshake.from);
             chat.name = n.name;
         }
 
@@ -489,7 +494,7 @@ public class BreezeAPI extends Service {
     }
 
     public void requestProfileImage(String nodeId) {
-        BrzNode node = router.graph.getVertex(nodeId);
+        BrzNode node = graph.getVertex(nodeId);
         if (node == null || storage.hasProfileImage(storage.PROFILE_DIR, node.id)) return;
 
         BrzProfileImageEvent profileRequest = new BrzProfileImageEvent(this.hostNode.id, nodeId, true);

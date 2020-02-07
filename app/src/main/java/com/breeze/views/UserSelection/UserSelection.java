@@ -52,6 +52,8 @@ public class UserSelection extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        BreezeAPI api = BreezeAPI.getInstance();
+
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         if (activity == null) return;
         ActionBar ab = activity.getSupportActionBar();
@@ -64,7 +66,7 @@ public class UserSelection extends Fragment {
         fab.setOnClickListener(e -> {
             if (nodes.size() == 1) {
                 String nodeId = nodes.get(0);
-                BrzNode n = BrzGraph.getInstance().getVertex(nodeId);
+                BrzNode n = api.getGraph().getVertex(nodeId);
                 BrzChat newChat = new BrzChat(n.name, nodeId);
                 BreezeAPI.getInstance().sendChatHandshakes(newChat);
             } else if (nodes.size() != 0) {
@@ -146,7 +148,7 @@ public class UserSelection extends Fragment {
         super.onStart();
 
         BreezeAPI api = BreezeAPI.getInstance();
-        BrzGraph graph = BrzGraph.getInstance();
+        BrzGraph graph = api.getGraph();
         this.graphListener = newNode -> {
             api.requestProfileImages(graph);
         };
@@ -161,7 +163,8 @@ public class UserSelection extends Fragment {
         super.onStop();
         list.cleanup();
 
-        BrzGraph graph = BrzGraph.getInstance();
+        BreezeAPI api = BreezeAPI.getInstance();
+        BrzGraph graph = api.getGraph();
         graph.off("addVertex", this.graphListener);
     }
 }

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+
 import com.breeze.graph.BrzGraph;
 import com.breeze.datatypes.BrzNode;
 
@@ -11,11 +12,11 @@ import java.util.List;
 import java.util.Random;
 
 public class BrzGraphTest { // truth docs: https://truth.dev/api/1.0.1/
-    public BrzGraph graph;
+    private BrzGraph graph = new BrzGraph();
 
     @BeforeEach
     public void init() {
-        this.graph = BrzGraph.getInstance();
+        this.graph = new BrzGraph();
     }
 
     @AfterEach
@@ -24,7 +25,7 @@ public class BrzGraphTest { // truth docs: https://truth.dev/api/1.0.1/
     }
 
     @Test
-    public void BrzGraphTestSuiteSetUpProperly() {
+    public void TestSuiteSetUpProperly() {
         String string = "awesome";
 
         assertThat(string).startsWith("awe");
@@ -32,36 +33,125 @@ public class BrzGraphTest { // truth docs: https://truth.dev/api/1.0.1/
     }
 
     @Test
-    public void BrzGraphAdd10Verticeswith9Edges_StraightLine() {
-        BrzNode startNode = null, endNode = null;
-        Random r = new Random();
-        int index1 = r.nextInt(14);
-        int index2;
-
-        do {
-            index2 = r.nextInt(14);
-        } while (index1 != index2);
-
+    public void Add10Verticeswith9Edges_StraightLine() {
         BrzNode prev = null;
-        for(int i = 0; i < 13; i++) {
+        for (int i = 0; i < 10; i++) {
             BrzNode node = new BrzNode();
-            node.generateID();
+            node.id = "" + i;
 
-            // mock out the emit() calls so it doesn't crash
             this.graph.addVertex(node);
-
-            if (i != 0) {
+            if (prev != null)
                 this.graph.addEdge(prev.id, node.id);
-                prev = node;
-            } else {
-                prev = node;
-            }
 
-            if (i == index1) startNode = node;
-            if (i == index2) endNode = node;
+            prev = node;
         }
 
-        List<String> list = this.graph.bfs(startNode.id, endNode.id);
+        List<String> list = this.graph.bfs("0", "9");
         assertThat(list).isNotNull();
+        assertThat(list).containsExactlyElementsIn(new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"});
+    }
+
+    @Test
+    public void Add10Vertices_StraigtLine_Remove5() {
+        BrzNode prev = null;
+        for (int i = 0; i < 10; i++) {
+            BrzNode node = new BrzNode();
+            node.id = "" + i;
+
+            this.graph.addVertex(node);
+            if (prev != null)
+                this.graph.addEdge(prev.id, node.id);
+
+            prev = node;
+        }
+
+        graph.removeVertex("5");
+        graph.removeDisconnected("0");
+
+        assertThat(graph.getSize()).isEqualTo(5);
+        assertThat(graph.getVertexIds()).containsExactlyElementsIn(new String[]{"0", "1", "2", "3", "4"});
+        assertThat(graph.getEdgeIds()).containsExactlyElementsIn(new String[]{"0", "1", "2", "3", "4"});
+
+        List<String> list = this.graph.bfs("0", "4");
+        assertThat(list).isNotNull();
+        assertThat(list).containsExactlyElementsIn(new String[]{"0", "1", "2", "3", "4"});
+
+        list = this.graph.bfs("0", "9");
+        assertThat(list).isNull();
+    }
+
+    @Test
+    public void Add5Vertices_Remove1() {
+        for (int i = 0; i < 5; i++) {
+            BrzNode node = new BrzNode();
+            node.id = "" + i;
+            graph.addVertex(node);
+        }
+
+        graph.addEdge("0", "1");
+        graph.addEdge("1", "4");
+
+        graph.addEdge("0", "2");
+        graph.addEdge("2", "3");
+        graph.addEdge("3", "4");
+
+        List<String> list = this.graph.bfs("0", "4");
+        assertThat(list).isNotNull();
+        assertThat(list).containsExactlyElementsIn(new String[]{"0", "1", "4"});
+
+        graph.removeVertex("1");
+        graph.removeDisconnected("0");
+
+        list = this.graph.bfs("0", "4");
+        assertThat(list).isNotNull();
+        assertThat(list).containsExactlyElementsIn(new String[]{"0", "2", "3", "4"});
+
+        assertThat(graph.getSize()).isEqualTo(4);
+        assertThat(graph.getVertexIds()).containsExactlyElementsIn(new String[]{"0", "2", "3", "4"});
+        assertThat(graph.getEdgeIds()).containsExactlyElementsIn(new String[]{"0", "2", "3", "4"});
+    }
+
+    @Test
+    public void Merge2Graphs_5VerticesEach() {
+        BrzGraph graph2 = new BrzGraph();
+
+        for (int i = 0; i < 5; i++) {
+            BrzNode node = new BrzNode();
+            node.id = "" + i;
+            graph.addVertex(node);
+        }
+
+        for (int i = 5; i < 10; i++) {
+            BrzNode node = new BrzNode();
+            node.id = "" + i;
+            graph2.addVertex(node);
+        }
+
+        graph.addEdge("0", "1");
+        graph.addEdge("0", "2");
+        graph.addEdge("1", "4");
+        graph.addEdge("2", "3");
+        graph.addEdge("3", "4");
+
+        graph2.addEdge("5", "6");
+        graph2.addEdge("5", "8");
+        graph2.addEdge("6", "7");
+        graph2.addEdge("7", "8");
+        graph2.addEdge("8", "9");
+
+        // Connect the graphs on 4 -> 5
+        graph2.addVertex(graph.getVertex("4"));
+        graph2.addEdge("4", "5");
+
+        // Merge graph2 into graph
+        graph.mergeGraph(graph2.toJSON());
+
+        assertThat(graph.getSize()).isEqualTo(10);
+        assertThat(graph.getVertexIds()).containsExactlyElementsIn(new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"});
+        assertThat(graph.getEdgeIds()).containsExactlyElementsIn(new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"});
+
+        List<String> list = this.graph.bfs("0", "9");
+        assertThat(list).isNotNull();
+        assertThat(list).containsExactlyElementsIn(new String[]{"0", "1", "4", "5", "8", "9"});
     }
 }

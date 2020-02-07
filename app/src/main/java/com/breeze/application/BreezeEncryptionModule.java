@@ -75,7 +75,7 @@ public class BreezeEncryptionModule extends BreezeModule {
 
     // Packet stuff
     public void encryptPacket(BrzPacket p) {
-        BrzNode destNode = BrzGraph.getInstance().getVertex(p.to);
+        BrzNode destNode = api.getGraph().getVertex(p.to);
         if (destNode == null) {
             throw new IllegalArgumentException("Could not find the packet's destination node");
         }
