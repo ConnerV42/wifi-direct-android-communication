@@ -31,6 +31,8 @@ import com.breeze.App;
 import com.breeze.EventEmitter;
 import com.breeze.MainActivity;
 import com.breeze.R;
+import com.breeze.application.actions.BreezeActionSaveNode;
+import com.breeze.application.actions.BreezeActionsModule;
 import com.breeze.database.DatabaseHandler;
 import com.breeze.datatypes.BrzFileInfo;
 import com.breeze.datatypes.BrzNode;
@@ -73,6 +75,7 @@ public class BreezeAPI extends Service {
 
     public BreezeMetastateModule meta = null;
     public BreezeEncryptionModule encryption = null;
+    public BreezeActionsModule actions = null;
 
     // Data members
 
@@ -150,6 +153,8 @@ public class BreezeAPI extends Service {
             this.encryption = new BreezeEncryptionModule(this);
         if (this.meta == null)
             this.meta = new BreezeMetastateModule(this);
+        if (this.actions == null)
+            this.actions = new BreezeActionsModule(this);
 
         // Initialize preferences
         if (this.preferences == null)
@@ -211,12 +216,8 @@ public class BreezeAPI extends Service {
 
         for (String nodeId : chat.nodes) {
 
-            // Also store all nodes that can be found in the db
-            BrzNode n = BrzGraph.getInstance().getVertex(nodeId);
-            if (n != null) {
-                db.setNode(n);
-                state.setNode(n);
-            }
+            // Add async actions to permanently save the nodes at some point
+            actions.addSaveNodeAction(nodeId);
 
             BrzPacket p = new BrzPacket(handshake, BrzPacket.BrzPacketType.CHAT_HANDSHAKE, "", false);
             if (nodeId.equals(hostNode.id))
@@ -290,7 +291,6 @@ public class BreezeAPI extends Service {
             }
         }
 
-
         chat.acceptedByHost = false;
         chat.acceptedByRecipient = false;
 
@@ -311,12 +311,8 @@ public class BreezeAPI extends Service {
         // Send acceptance responses to all participants
         for (String nodeId : c.nodes) {
 
-            // Also store all nodes that can be found in the db
-            BrzNode n = BrzGraph.getInstance().getVertex(nodeId);
-            if (n != null) {
-                db.setNode(n);
-                state.setNode(n);
-            }
+            // Add async actions to permanently save the nodes at some point
+            actions.addSaveNodeAction(nodeId);
 
             BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.CHAT_RESPONSE, "", false);
             if (!nodeId.equals(this.hostNode.id)) {

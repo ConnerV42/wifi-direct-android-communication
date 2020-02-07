@@ -9,13 +9,13 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.breeze.application.actions.BreezeAction;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzNode;
 
 import org.json.JSONArray;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,16 +24,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "breezetables";
     private static final int DATABASE_VERSION = 1;
 
-    private static final String[] tableNames = new String[]{
-            "BrzChat",
-            "BrzMessage",
-            "BrzNode"
-    };
-
     private static final String BRZCHAT_TABLE_NAME = "BrzChat";
     private static final String BRZMESSAGE_TABLE_NAME = "BrzMessage";
     private static final String BRZNODE_TABLE_NAME = "BrzNode";
     private static final String BRZRECEIPT_TABLE_NAME = "BrzMessageReceipt";
+    private static final String BRZACTIONS_TABLE_NAME = "BrzActions";
+    private static final String[] tableNames = new String[]{
+            BRZCHAT_TABLE_NAME,
+            BRZMESSAGE_TABLE_NAME,
+            BRZNODE_TABLE_NAME,
+            BRZRECEIPT_TABLE_NAME,
+            BRZACTIONS_TABLE_NAME,
+    };
 
     private static final String INIT_BRZCHAT_TABLE = "CREATE TABLE IF NOT EXISTS BrzChat (" +
             "'id' TEXT PRIMARY KEY, " +
@@ -81,6 +83,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             "FOREIGN KEY ('id') REFERENCES BrzMessage(id)" +
             ")";
 
+    private static final String INIT_BRZACTIONS_TABLE = "CREATE TABLE IF NOT EXISTS " + BRZACTIONS_TABLE_NAME + " (" +
+            "'id' TEXT PRIMARY KEY NOT NULL, " +
+            "'json' TEXT NOT NULL" +
+            ")";
+
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.onCreate(getWritableDatabase());
@@ -92,6 +99,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL(INIT_BRZMESSAGE_TABLE);
         db.execSQL(INIT_BRZNODE_TABLE);
         db.execSQL(INIT_BRZRECEIPT_TABLE);
+        db.execSQL(INIT_BRZACTIONS_TABLE);
         Log.i("DatabaseInfo", "SQLITE tables created successfully");
     }
 
@@ -230,7 +238,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         c.moveToFirst();
 
-        List<BrzChat> chats = new ArrayList<>();
+        List<BrzChat> chats = new LinkedList<>();
 
         for (int i = 0; i < c.getCount(); i++) {
             BrzChat n = new BrzChat();
@@ -314,7 +322,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         c.moveToFirst();
 
-        List<BrzChat> chats = new ArrayList<>();
+        List<BrzChat> chats = new LinkedList<>();
 
         for (int i = 0; i < c.getCount(); i++) {
             BrzChat n = new BrzChat();
@@ -342,6 +350,61 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         c.close();
         db.close();
         return chats;
+    }
+
+    /*
+     *
+     *      BrzActions table
+     *
+     */
+
+    public void addAction(@NonNull BreezeAction action) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Object[] args = {action.getId(), action.toJSON()};
+        try {
+            db.execSQL("INSERT OR REPLACE INTO " + BRZACTIONS_TABLE_NAME + " VALUES (?,?)", args);
+        } catch (Exception e) {
+            Log.i("Bad SQL Error", "Error with SQL Syntax");
+        }
+        db.close();
+    }
+
+    public void deleteAction(@NonNull String actionId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Object[] args = {actionId};
+        try {
+            db.execSQL("DELETE FROM " + BRZACTIONS_TABLE_NAME + " WHERE id = ?", args);
+        } catch (Exception e) {
+            Log.i("Bad SQL Error", "Error with SQL Syntax");
+        }
+        db.close();
+    }
+
+    public List<String> getActions() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] args = {};
+        Cursor c = db.rawQuery("SELECT * FROM " + BRZACTIONS_TABLE_NAME, args);
+
+        if (c == null) {
+            db.close();
+            return null;
+        } else if (c.getCount() < 1) {
+            c.close();
+            db.close();
+            return null;
+        }
+
+        c.moveToFirst();
+
+        List<String> actions = new LinkedList<>();
+        for (int i = 0; i < c.getCount(); i++) {
+            actions.add(c.getString(c.getColumnIndex("json")));
+            c.moveToNext();
+        }
+
+        c.close();
+        db.close();
+        return actions;
     }
 
     /*
@@ -384,7 +447,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             db.close();
             return null;
         }
-        ArrayList<BrzMessage> list = new ArrayList<>();
+        LinkedList<BrzMessage> list = new LinkedList<>();
         if (c.moveToFirst()) {
             while (!c.isAfterLast()) {
                 BrzMessage message = new BrzMessage();
