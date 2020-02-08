@@ -74,6 +74,7 @@ public class BreezeAPI extends Service {
     public BreezeMetastateModule meta = null;
     public BreezeEncryptionModule encryption = null;
     public BreezeLiveStreamModule streams = null;
+    public BreezePacketBufferModule packetBuffer = null;
     // Data members
 
     public BrzNode hostNode = null;
@@ -154,6 +155,9 @@ public class BreezeAPI extends Service {
             this.meta = new BreezeMetastateModule(this);
         if(this.streams == null)
             this.streams = new BreezeLiveStreamModule(this);
+        if(this.packetBuffer == null){
+            this.packetBuffer = new BreezePacketBufferModule(this);
+        }
         // Initialize preferences
         if (this.preferences == null)
             this.preferences = ctx.getSharedPreferences("Breeze", Context.MODE_PRIVATE);

@@ -124,6 +124,12 @@ public class BrzRouter extends EventEmitter {
         }
     }
 
+    public boolean checkIfEndpointExists(String endpointId){
+        String endpointUUID = endpointUUIDs.get(endpointId);
+        String endpoint = this.endpointIDs.get(endpointUUID);
+        return endpoint != null && endpoint instanceof String;
+    }
+
     public void sendAudioStream(String to, Payload p){
         connectionsClient.sendPayload(to, p);
     }
@@ -200,6 +206,9 @@ public class BrzRouter extends EventEmitter {
             // Get the next hop from the graph
             String nextHopUUID = graph.nextHop(this.hostNode.id, packet.to);
             if (nextHopUUID == null) {
+                BreezeAPI api = BreezeAPI.getInstance();
+                api.packetBuffer.addPacket(packet);
+
                 Log.i("ENDPOINT_ERR", "Failed to find path to " + packet.to);
                 return;
             }
