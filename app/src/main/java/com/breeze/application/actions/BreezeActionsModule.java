@@ -2,11 +2,15 @@ package com.breeze.application.actions;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.breeze.application.BreezeAPI;
 import com.breeze.application.BreezeModule;
+import com.breeze.packets.BrzPacket;
 
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,10 +31,12 @@ public class BreezeActionsModule extends BreezeModule {
         if (actionStrings == null) return;
         for (String as : actionStrings) {
             try {
-                String actionType = new JSONObject(as).getString("actionType");
+                BreezeAction a = new BreezeAction(as);
 
-                if (actionType.equalsIgnoreCase(BreezeAction.ACTION_TYPE.SAVE_NODE.name()))
+                if (a.getActionType() == BreezeAction.ACTION_TYPE.SAVE_NODE)
                     this.addAction(new BreezeActionSaveNode(as, true));
+                else if (a.getActionType() == BreezeAction.ACTION_TYPE.SEND_PACKET)
+                    this.addAction(new BreezeActionSendPacket(as));
 
             } catch (Exception e) {
                 Log.e("ACTIONS", "Failed to deserialize action in DB", e);
@@ -40,6 +46,16 @@ public class BreezeActionsModule extends BreezeModule {
 
     public void addSaveNodeAction(String nodeId) {
         BreezeActionSaveNode a = new BreezeActionSaveNode(nodeId);
+        addAction(a);
+    }
+
+    public void addSendPacketAction(@NonNull BrzPacket p) {
+        BreezeActionSendPacket a = new BreezeActionSendPacket(p);
+        addAction(a);
+    }
+
+    public void addSendPacketAction(@NonNull BrzPacket p, @NonNull File streamFile) {
+        BreezeActionSendPacket a = new BreezeActionSendPacket(p, streamFile);
         addAction(a);
     }
 

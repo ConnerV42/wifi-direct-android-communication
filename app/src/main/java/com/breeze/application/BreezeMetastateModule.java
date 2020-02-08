@@ -101,12 +101,12 @@ public class BreezeMetastateModule extends BreezeModule {
 
     public void sendDeliveryReceipt(BrzMessage m) {
         BrzPacket p = BrzPacketBuilder.messageReceipt(m.from, m.chatId, m.id, true);
-        api.router.send(p);
+        api.actions.addSendPacketAction(p);
     }
 
     public void sendReadReceipt(BrzMessage m) {
         BrzPacket p = BrzPacketBuilder.messageReceipt(m.from, m.chatId, m.id, false);
-        api.router.send(p);
+        api.actions.addSendPacketAction(p);
         this.setRead(m.id);
     }
 

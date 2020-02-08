@@ -228,7 +228,8 @@ public class BreezeAPI extends Service {
             if (nodeId.equals(hostNode.id))
                 continue;
             p.to = nodeId;
-            this.router.send(p);
+
+            this.actions.addSendPacketAction(p);
         }
 
         this.updateChat(chat);
@@ -322,7 +323,7 @@ public class BreezeAPI extends Service {
             BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.CHAT_RESPONSE, "", false);
             if (!nodeId.equals(this.hostNode.id)) {
                 p.to = nodeId;
-                this.router.send(p);
+                this.actions.addSendPacketAction(p);
             }
         }
 
@@ -352,7 +353,7 @@ public class BreezeAPI extends Service {
             BrzPacket p = new BrzPacket(response, BrzPacket.BrzPacketType.CHAT_RESPONSE, "", false);
             if (!nodeId.equals(this.hostNode.id)) {
                 p.to = nodeId;
-                this.router.send(p);
+                this.actions.addSendPacketAction(p);
             }
         }
 
@@ -391,7 +392,7 @@ public class BreezeAPI extends Service {
             if (nodeId.equals(hostNode.id))
                 continue;
             p.to = nodeId;
-            this.router.send(p);
+            this.actions.addSendPacketAction(p);
         }
 
         this.addMessage(message);
@@ -438,7 +439,6 @@ public class BreezeAPI extends Service {
             message.body = "File: " + info.fileName;
         }
 
-
         try {
             // Save the file to a local dir
             storage.saveMessageFileSync(message, res.openInputStream(fileUri));
@@ -460,14 +460,34 @@ public class BreezeAPI extends Service {
                     continue;
                 p.to = nodeId;
 
-                // Open and encrypt the file stream
-                InputStream fileStream = res.openInputStream(fileUri);
-                InputStream encryptedStream = this.encryption.encryptStream(chat.id, p.stream, fileStream);
-                this.router.sendStream(p, encryptedStream);
+                this.actions.addSendPacketAction(p, storage.getMessageFile(message));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void sendStreamPacket(BrzPacket packet, Uri fileUri) {
+        ContentResolver res = getContentResolver();
+        InputStream stream = null;
+        try {
+            stream = res.openInputStream(fileUri);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (stream == null) return;
+
+        String chatId = null;
+        try {
+            chatId = packet.message().chatId;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (chatId != null) stream = this.encryption.encryptStream(chatId, packet.stream, stream);
+
+        this.router.sendStream(packet, stream);
     }
 
     public void addMessage(BrzMessage message) {
