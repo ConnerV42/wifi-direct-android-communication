@@ -125,8 +125,7 @@ public class BrzRouter extends EventEmitter {
     }
 
     public boolean checkIfEndpointExists(String endpointId){
-        String endpointUUID = endpointUUIDs.get(endpointId);
-        String endpoint = this.endpointIDs.get(endpointUUID);
+        String endpoint = this.endpointIDs.get(endpointId);
         return endpoint != null && endpoint instanceof String;
     }
 
@@ -138,6 +137,11 @@ public class BrzRouter extends EventEmitter {
         // Encrypt the packet first
         BreezeAPI api = BreezeAPI.getInstance();
         try {
+            if(!checkIfEndpointExists(packet.to)){
+                api.packetBuffer.addPacket(packet);
+                Log.i("ENDPOINT", "Endpoint was disconnected before sending this, adding to packet buffer");
+                return;
+            }
             api.encryption.encryptPacket(packet);
             forwardPacket(packet, true);
         } catch (Exception e) {
@@ -206,9 +210,6 @@ public class BrzRouter extends EventEmitter {
             // Get the next hop from the graph
             String nextHopUUID = graph.nextHop(this.hostNode.id, packet.to);
             if (nextHopUUID == null) {
-                BreezeAPI api = BreezeAPI.getInstance();
-                api.packetBuffer.addPacket(packet);
-
                 Log.i("ENDPOINT_ERR", "Failed to find path to " + packet.to);
                 return;
             }
