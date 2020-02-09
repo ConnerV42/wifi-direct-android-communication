@@ -18,12 +18,20 @@
         <action
             android:id="@+id/action_chatsView_to_appSettings"
             app:destination="@id/appSettings" />
+        <action
+            android:id="@+id/action_chatsView_to_editProfileView"
+            app:destination="@id/profileSettings" />
     </fragment>
     <fragment
         android:id="@+id/userSelection"
         android:name="com.breeze.views.UserSelection.UserSelection"
         android:label="activity_user_selection"
         tools:layout="@layout/fragment_user_selection" />
+    <fragment
+        android:id="@+id/profileSettings"
+        android:name="com.breeze.views.EditProfileActivity"
+        android:label="fragment_edit_profile_view"
+        tools:layout="@layout/fragment_edit_profile_view" />
     <fragment
         android:id="@+id/publicMessages"
         android:name="com.breeze.views.PublicMessages.PublicMessagesView"
