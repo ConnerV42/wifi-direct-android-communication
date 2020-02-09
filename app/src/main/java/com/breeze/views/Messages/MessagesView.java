@@ -16,6 +16,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.text.Editable;
@@ -56,6 +57,7 @@ public class MessagesView extends AppCompatActivity {
     private MessageList list;
     private Consumer<BrzChat> onChatUpdate;
     private Consumer<Object> onGraphUpdate;
+    private Handler mHandler = new Handler();
 
     public static Intent getIntent(Context ctx, String chatId) {
         Intent i = new Intent(ctx, MessagesView.class);
@@ -119,28 +121,25 @@ public class MessagesView extends AppCompatActivity {
         // Set up message sending listener
         sendMessage.setOnClickListener(this::sendStringMessage);
 
+        // Added in slight delay for making humans more enticed and addicted to our app
+        // with flashy animations that give them positive visual feedback
+        int delayMillis = 350;
+
         // Bring up the option to select media to send from external storage
         sendPhoto.setOnClickListener(view1 -> {
-            Intent intent = new Intent(Intent.ACTION_PICK,
-                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(intent, PHOTO_REQUEST_CODE);
+            mHandler.postDelayed(delayPhotoIntent, delayMillis);
         });
 
         sendVideo.setOnClickListener(view1 -> {
-            Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(intent, VIDEO_REQUEST_CODE);
+            mHandler.postDelayed(delayVideoIntent, delayMillis);
         });
 
         sendAudio.setOnClickListener(view1 -> {
-            Intent intent = new Intent(Intent.ACTION_PICK,
-                    android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(intent, AUDIO_REQUEST_CODE);
+            mHandler.postDelayed(delayAudioIntent, delayMillis);
         });
 
         sendFile.setOnClickListener(view1 -> {
-            Intent intent = new Intent(Intent.ACTION_PICK);
-            intent.setType("*/*");
-            startActivityForResult(intent, FILE_REQUEST_CODE);
+            mHandler.postDelayed(delayFileIntent, delayMillis);
         });
     }
 
@@ -318,4 +317,37 @@ public class MessagesView extends AppCompatActivity {
         }
 
     }
+
+    private Runnable delayPhotoIntent = new Runnable() {
+        @Override
+        public void run() {
+            Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, PHOTO_REQUEST_CODE);
+        }
+    };
+
+    private Runnable delayVideoIntent = new Runnable() {
+        @Override
+        public void run() {
+            Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, VIDEO_REQUEST_CODE);
+        }
+    };
+
+    private Runnable delayAudioIntent = new Runnable() {
+        @Override
+        public void run() {
+            Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, AUDIO_REQUEST_CODE);
+        }
+    };
+
+    private Runnable delayFileIntent = new Runnable() {
+        @Override
+        public void run() {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("*/*");
+            startActivityForResult(intent, FILE_REQUEST_CODE);
+        }
+    };
 }

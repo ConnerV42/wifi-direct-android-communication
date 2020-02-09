@@ -115,42 +115,81 @@
                 android:paddingStart="20dp" />
 
 
-            <ImageButton
-                android:id="@+id/sendPhoto"
+            <!-- sendPhoto -->
+            <com.andexert.library.RippleView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:background="@android:color/transparent"
-                android:padding="5dp"
-                android:src="@drawable/ic_camera_alt_black_24dp" />
+                app:rv_centered="true"
+                app:rv_alpha="0"
+                app:rv_zoom="true"
+                app:rv_zoomScale="1.25">
+                <ImageButton
+                    android:id="@+id/sendPhoto"
+                    android:layout_margin="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:padding="3dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_camera_alt_black_24dp"/>
+            </com.andexert.library.RippleView>
 
-            <ImageButton
-                android:id="@+id/sendVideo"
+            <!-- sendVideo -->
+            <com.andexert.library.RippleView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:background="@android:color/transparent"
-                android:padding="5dp"
-                android:src="@drawable/ic_videocam_24px" />
+                app:rv_centered="true"
+                app:rv_alpha="0"
+                app:rv_zoom="true"
+                app:rv_zoomScale="1.25">
+                <ImageButton
+                    android:id="@+id/sendVideo"
+                    android:layout_margin="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:padding="3dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_videocam_24px" />
+            </com.andexert.library.RippleView>
 
-            <ImageButton
-                android:id="@+id/sendAudio"
+            <!-- sendAudio -->
+            <com.andexert.library.RippleView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:background="@android:color/transparent"
-                android:padding="5dp"
-                android:src="@drawable/ic_audiotrack_24px" />
+                app:rv_centered="true"
+                app:rv_alpha="0"
+                app:rv_zoom="true"
+                app:rv_zoomScale="1.25">
+                <ImageButton
+                    android:id="@+id/sendAudio"
+                    android:layout_margin="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:padding="3dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_audiotrack_24px" />
+            </com.andexert.library.RippleView>
 
-            <ImageButton
-                android:id="@+id/sendFile"
+            <!-- sendFile -->
+            <com.andexert.library.RippleView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:layout_marginEnd="10dp"
-                android:background="@android:color/transparent"
-                android:padding="5dp"
-                android:src="@drawable/ic_description_black_24dp" />
+                app:rv_centered="true"
+                app:rv_alpha="0"
+                app:rv_zoom="true"
+                app:rv_zoomScale="1.25">
+                <ImageButton
+                    android:id="@+id/sendFile"
+                    android:layout_margin="3dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:padding="5dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_description_black_24dp" />
+            </com.andexert.library.RippleView>
 
             <ImageButton
                 android:id="@+id/sendMessage"

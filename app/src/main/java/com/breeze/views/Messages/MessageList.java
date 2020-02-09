@@ -38,6 +38,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Consumer;
 
+import static java.lang.Thread.sleep;
+
 public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder> {
 
     static class MessageHolder extends RecyclerView.ViewHolder {
