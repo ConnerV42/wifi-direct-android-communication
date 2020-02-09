@@ -16,4 +16,8 @@
         android:id="@+id/appSettings"
         android:icon="@drawable/ic_settings_black_24dp"
         android:title="Settings" />
+    <item
+        android:id="@+id/profileSettings"
+        android:icon="@drawable/ic_stat_name"
+        android:title="Profile" />
 </menu>
