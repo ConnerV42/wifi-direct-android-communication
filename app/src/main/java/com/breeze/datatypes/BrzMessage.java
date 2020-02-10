@@ -18,6 +18,7 @@ public class BrzMessage implements BrzSerializable {
 
     public boolean isStatus = false;
     public Long datestamp = (long) 0;
+    public boolean inBuffer = false;
 
     public BrzMessage() {}
     public BrzMessage(String json) {

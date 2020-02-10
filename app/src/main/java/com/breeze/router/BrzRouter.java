@@ -48,10 +48,12 @@ import org.bouncycastle.jcajce.provider.asymmetric.ec.KeyFactorySpi;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class BrzRouter extends EventEmitter {
 
@@ -72,6 +74,7 @@ public class BrzRouter extends EventEmitter {
     // --------------------------------------------------------------------------//
 
     private static final Strategy STRATEGY = Strategy.P2P_CLUSTER;
+    private static final int ENDPOINT_ID_MAX_LENGTH = 16;
     private ConnectionsClient connectionsClient;
     private String pkgName;
 
@@ -125,8 +128,13 @@ public class BrzRouter extends EventEmitter {
     }
 
     public boolean checkIfEndpointExists(String endpointId){
-        String endpoint = this.endpointIDs.get(endpointId);
-        return endpoint != null && endpoint instanceof String;
+        Collection<BrzNode> nodes = graph.getNodeCollection();
+        for(BrzNode n : nodes){
+            if(n.id.equals(endpointId)){
+                return true;
+            }
+        }
+        return false;
     }
 
     public void sendAudioStream(String to, Payload p){
@@ -137,11 +145,6 @@ public class BrzRouter extends EventEmitter {
         // Encrypt the packet first
         BreezeAPI api = BreezeAPI.getInstance();
         try {
-            if(!checkIfEndpointExists(packet.to)){
-                api.packetBuffer.addPacket(packet);
-                Log.i("ENDPOINT", "Endpoint was disconnected before sending this, adding to packet buffer");
-                return;
-            }
             api.encryption.encryptPacket(packet);
             forwardPacket(packet, true);
         } catch (Exception e) {

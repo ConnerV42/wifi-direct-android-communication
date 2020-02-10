@@ -133,6 +133,7 @@ public class BreezeAPI extends Service {
 
     @Override
     public void onDestroy() {
+        this.packetBuffer.stopCheckingGraph();
         router.stop();
         super.onDestroy();
     }
@@ -374,9 +375,13 @@ public class BreezeAPI extends Service {
             if (nodeId.equals(hostNode.id))
                 continue;
             p.to = nodeId;
+            if(!this.router.checkIfEndpointExists(p.to)){
+                this.packetBuffer.addPacket(p);
+                this.state.addBufferedMessage(message);
+                return;
+            }
             this.router.send(p);
         }
-
         this.addMessage(message);
     }
 

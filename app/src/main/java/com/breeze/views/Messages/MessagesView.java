@@ -139,22 +139,6 @@ public class MessagesView extends AppCompatActivity {
             intent.setType("*/*");
             startActivityForResult(intent, FILE_REQUEST_CODE);
         });
-
-//        ImageButton liveStreamAudio = findViewById(R.id.streamAudio);
-//        liveStreamAudio.setOnClickListener(v -> {
-//            if(this.chat.isGroup){
-//                Toast.makeText(this, "Cannot start a live audio stream with a group yet", Toast.LENGTH_SHORT).show();
-//            }
-//            String otherNode = "";
-//            for(String n : this.chat.nodes){
-//                if(!n.equals(api.hostNode.id)){
-//                    otherNode = n;
-//                    break;
-//                }
-//            }
-//            if(otherNode != "")
-//               api.streams.sendBrzLiveConnectionRequest(otherNode);
-//        });
     }
 
     @Override

@@ -104,6 +104,9 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
                     statusIcon = R.drawable.ic_done_all_black_24dp;
                 else if (api.db.isDelivered(msg.id))
                     statusIcon = R.drawable.ic_done_black_24dp;
+                else if (msg.inBuffer){
+                    statusIcon = R.drawable.ic_message_buffered;
+                }
                 messageStatus.setImageBitmap(api.storage.bitmapFromVector(api, statusIcon));
             } else if (messageStatus != null) {
                 messageStatus.setVisibility(View.GONE);
@@ -197,6 +200,8 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
 
     private Consumer<List<BrzMessage>> messageListener;
     private Consumer receiptListener;
+    private Consumer<BrzMessage> bufferedMessageListener;
+
 
     MessageList(Context ctx, BrzChat chat) {
         this.ctx = ctx;
@@ -221,15 +226,24 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
             }
         };
 
+        this.bufferedMessageListener = message ->  message.inBuffer = true;
+
+
         this.messageListener.accept(api.state.getMessages(chat.id));
         api.state.on("messages" + chat.id, this.messageListener);
 
         this.receiptListener = msgId -> {
+            for(BrzMessage message : this.messages){
+                if(message.id.equals(msgId)){
+                    message.inBuffer = false;
+                }
+            }
             notifyDataSetChanged();
         };
 
         api.meta.on("delivered", receiptListener);
         api.meta.on("read", receiptListener);
+        api.state.on("messageBuffered", bufferedMessageListener);
     }
 
     public void cleanup() {

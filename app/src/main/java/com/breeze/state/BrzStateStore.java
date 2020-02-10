@@ -116,9 +116,13 @@ public class BrzStateStore extends EventEmitter {
             this.messages.put(msg.chatId, messages);
         }
         messages.add(msg);
-
         this.emit("messages" + msg.chatId, this.getMessages(msg.chatId));
         this.emit("messages");
+    }
+
+    public void addBufferedMessage(BrzMessage msg){
+        this.addMessage(msg);
+        this.emit("messageBuffered", msg);
     }
 
     public void addAllMessages(List<BrzMessage> newMessages) {
