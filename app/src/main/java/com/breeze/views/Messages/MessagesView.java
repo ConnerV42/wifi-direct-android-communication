@@ -121,9 +121,7 @@ public class MessagesView extends AppCompatActivity {
         // Set up message sending listener
         sendMessage.setOnClickListener(this::sendStringMessage);
 
-        // Added in slight delay for making humans more enticed and addicted to our app
-        // with flashy animations that give them positive visual feedback
-        int delayMillis = 350;
+        int delayMillis = 333;
 
         // Bring up the option to select media to send from external storage
         sendPhoto.setOnClickListener(view1 -> {

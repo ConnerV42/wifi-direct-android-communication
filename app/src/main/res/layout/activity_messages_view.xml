@@ -122,7 +122,7 @@
                 app:rv_centered="true"
                 app:rv_alpha="0"
                 app:rv_zoom="true"
-                app:rv_zoomScale="1.25">
+                app:rv_zoomScale="1.35">
                 <ImageButton
                     android:id="@+id/sendPhoto"
                     android:layout_margin="5dp"
@@ -141,7 +141,7 @@
                 app:rv_centered="true"
                 app:rv_alpha="0"
                 app:rv_zoom="true"
-                app:rv_zoomScale="1.25">
+                app:rv_zoomScale="1.35">
                 <ImageButton
                     android:id="@+id/sendVideo"
                     android:layout_margin="5dp"
@@ -160,7 +160,7 @@
                 app:rv_centered="true"
                 app:rv_alpha="0"
                 app:rv_zoom="true"
-                app:rv_zoomScale="1.25">
+                app:rv_zoomScale="1.35">
                 <ImageButton
                     android:id="@+id/sendAudio"
                     android:layout_margin="5dp"
@@ -179,7 +179,7 @@
                 app:rv_centered="true"
                 app:rv_alpha="0"
                 app:rv_zoom="true"
-                app:rv_zoomScale="1.25">
+                app:rv_zoomScale="1.35">
                 <ImageButton
                     android:id="@+id/sendFile"
                     android:layout_margin="3dp"
