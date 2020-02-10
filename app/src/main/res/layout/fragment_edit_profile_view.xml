@@ -9,13 +9,130 @@
     tools:context=".views.EditProfileActivity">
 
     <de.hdodenhof.circleimageview.CircleImageView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/profile_image"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:id="@+id/profile_image_edit"
+        android:layout_width="366dp"
+        android:layout_height="159dp"
         android:minHeight="200dp"
         android:src="@drawable/ic_person_black_24dp"
-        app:civ_border_width="2dp"
-        app:civ_border_color="#000"/>
+        app:civ_border_color="#000"
+        android:layout_gravity="center"
+        app:civ_border_width="2dp" />
+    <Button
+        android:id="@+id/edit_image_button"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="37dp"
+        android:layout_gravity="center"
+
+
+        android:layout_marginTop="4dp"
+        android:layout_weight="0"
+        android:text="Edit Image" />
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="25dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="79dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/edit_user_name"
+
+                android:layout_width="56dp"
+                android:layout_height="35dp"
+                android:ems="11"
+                android:text="Name:"
+                android:textColor="#000000"
+                android:textSize="17dp" />
+
+            <TextView
+                android:id="@+id/user_name"
+
+                android:layout_width="102dp"
+                android:layout_height="35dp"
+                android:layout_weight="1"
+                android:ems="11"
+                android:text="Name"
+                android:textColor="#000000"
+                android:textSize="17dp" />
+
+            <Button
+                android:id="@+id/edit_user_button"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="57dp"
+                android:layout_height="37dp"
+                android:layout_marginTop="0dp"
+
+                android:gravity="center"
+                android:text="Edit"
+                android:textAlignment="center" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/edit_alias_name"
+
+                android:layout_width="56dp"
+                android:layout_height="35dp"
+                android:ems="11"
+                android:text="Alias:"
+                android:textColor="#000000"
+                android:textSize="17dp" />
+
+            <TextView
+                android:id="@+id/alias_name"
+
+                android:layout_width="102dp"
+                android:layout_height="35dp"
+                android:layout_weight="1"
+                android:ems="11"
+                android:text=""
+                android:textColor="#000000"
+                android:textSize="17dp" />
+
+            <Button
+                android:id="@+id/edit_alias_button"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="57dp"
+                android:layout_height="37dp"
+                android:layout_marginTop="0dp"
+
+                android:gravity="center"
+                android:text="Edit"
+                android:textAlignment="center" />
+        </LinearLayout>
+
+    </LinearLayout>
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+
+    <Button
+        android:id="@+id/edit_save_button"
+
+
+        android:layout_width="129dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:gravity="center"
+        android:text="Save"
+
+        android:textColor="#ffffff"
+        android:textAlignment="center" />
 
 </LinearLayout>
