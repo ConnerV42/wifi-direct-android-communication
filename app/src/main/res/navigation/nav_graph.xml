@@ -22,6 +22,7 @@
             android:id="@+id/action_chatsView_to_editProfileView"
             app:destination="@id/profileSettings" />
     </fragment>
+
     <fragment
         android:id="@+id/userSelection"
         android:name="com.breeze.views.UserSelection.UserSelection"
