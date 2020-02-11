@@ -2,6 +2,8 @@ package com.breeze.views;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -39,6 +41,8 @@ import com.breeze.graph.BrzGraph;
 public class EditProfileActivity extends Fragment
 {
     private static final int READ_REQUEST_CODE = 42;
+    private BrzNode node = BreezeAPI.getInstance().state.getHostNode();
+
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -96,10 +100,25 @@ public class EditProfileActivity extends Fragment
         Button editPicture = getView().findViewById(R.id.edit_image_button);
 
         editPicture.setOnClickListener(e -> {
-            saveButton.setVisibility (View.VISIBLE);
+
             Intent intent = new Intent(Intent.ACTION_PICK,
                     android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(intent, READ_REQUEST_CODE);
+            //saveButton.setVisibility (View.VISIBLE);
+            new AlertDialog.Builder(getContext())
+                    .setTitle("Edit Photo")
+                    .setMessage("Save new photo?")
+                    .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            Toast.makeText(getActivity(), api.hostNode.name, Toast.LENGTH_LONG).show();
+
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                        }
+                    })
+                    .show();
         });
 
         //edit username dialog pop up and save
@@ -154,6 +173,35 @@ public class EditProfileActivity extends Fragment
 
         //using save button save changes to the state
     }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            try {
+                Uri imageUri = data.getData();
+
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inSampleSize = 10;
+                Bitmap bitmap = BitmapFactory.decodeStream(getActivity().getApplicationContext().getContentResolver().openInputStream(imageUri), null, options);
+
+                // Set image for ui
+                ImageView profileImage = getView().findViewById(R.id.profile_image);
+                profileImage.setImageBitmap(bitmap);
+
+                // Set user profileImage
+                BreezeAPI api = BreezeAPI.getInstance();
+                api.storage.saveProfileImage(api.storage.PROFILE_DIR, node.id, bitmap);
+
+            } catch (Exception e) {
+                Log.e("FILE_ACCESS", "Failure ", e);
+            }
+        }
+    }
+
+
+
     public void updateNewUsername(String newUsername)
     {
         BreezeAPI.getInstance().state.getHostNode().name = newUsername;
@@ -161,9 +209,11 @@ public class EditProfileActivity extends Fragment
 
     public void updateNewAlias(String newAlias)
     {
+
         String newA = "";
         newA += "@" + newAlias;
         BreezeAPI.getInstance().state.getHostNode().alias = newA;
+
     }
     @Override
     public void onStart()
