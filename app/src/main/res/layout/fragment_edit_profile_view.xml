@@ -60,7 +60,7 @@
                 android:layout_height="35dp"
                 android:layout_weight="1"
                 android:ems="11"
-                android:text="Name"
+                android:text=""
                 android:textColor="#000000"
                 android:textSize="17dp" />
 
