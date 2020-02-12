@@ -136,6 +136,7 @@ public class EditProfileActivity extends Fragment
                         public void onClick(DialogInterface dialog, int whichButton) {
                             String newName = txtNewName.getText().toString();
                             updateNewUsername(newName);
+                            userName.setText(api.hostNode.name);
                         }
                     })
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -161,6 +162,7 @@ public class EditProfileActivity extends Fragment
                         public void onClick(DialogInterface dialog, int whichButton) {
                             String newAlias = txtNewAlias.getText().toString();
                             updateNewAlias(newAlias);
+                            aliasName.setText(api.hostNode.alias);
                         }
                     })
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -204,7 +206,10 @@ public class EditProfileActivity extends Fragment
 
     public void updateNewUsername(String newUsername)
     {
-        BreezeAPI.getInstance().state.getHostNode().name = newUsername;
+        node = BreezeAPI.getInstance().state.getHostNode();
+        node.name = newUsername;
+        BreezeAPI.getInstance().setHostNode(node);
+
     }
 
     public void updateNewAlias(String newAlias)
@@ -212,7 +217,9 @@ public class EditProfileActivity extends Fragment
 
         String newA = "";
         newA += "@" + newAlias;
-        BreezeAPI.getInstance().state.getHostNode().alias = newA;
+        node = BreezeAPI.getInstance().state.getHostNode();
+        node.alias = newA;
+        BreezeAPI.getInstance().setHostNode(node);
 
     }
     @Override
