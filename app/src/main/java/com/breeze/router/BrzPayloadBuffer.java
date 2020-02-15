@@ -71,7 +71,7 @@ public class BrzPayloadBuffer {
         this.incoming.remove(payloadId);
     }
 
-    public Boolean isIncomming(Long payloadId) {
+    public Boolean isIncoming(Long payloadId) {
         return this.incoming.get(payloadId) != null;
     }
 
