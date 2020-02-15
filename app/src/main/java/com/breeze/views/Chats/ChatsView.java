@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,7 +81,11 @@ public class ChatsView extends Fragment {
 
     @Override
     public void onDetach() {
+        try {
+            this.list.cleanup();
+        }catch(Exception e){
+            Log.e("CHATSVIEWERROR", "Cleanup on null reference");
+        }
         super.onDetach();
-        this.list.cleanup();
     }
 }
