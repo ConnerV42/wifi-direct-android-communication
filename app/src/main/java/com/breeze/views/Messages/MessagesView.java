@@ -20,6 +20,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Environment;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
@@ -49,10 +50,15 @@ import com.breeze.state.BrzStateStore;
 import com.google.android.gms.nearby.connection.Payload;
 import com.breeze.views.ChatSettingsActivity;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class MessagesView extends AppCompatActivity {
@@ -60,6 +66,7 @@ public class MessagesView extends AppCompatActivity {
     private static final int VIDEO_REQUEST_CODE = 70;
     private static final int AUDIO_REQUEST_CODE = 71;
     private static final int FILE_REQUEST_CODE = 72;
+    private static final int CAMERA_REQUEST_CODE = 73;
     private BrzChat chat;
     private MessageList list;
     private Consumer<BrzChat> onChatUpdate;
@@ -164,6 +171,11 @@ public class MessagesView extends AppCompatActivity {
             mHandler.postDelayed(delayPhotoIntent, delayMillis);
         });
 
+        sendPhoto.setOnLongClickListener(view1 -> {
+            mHandler.postDelayed(delayCameraIntent, delayMillis);
+            return false;
+        });
+
         sendVideo.setOnClickListener(view1 -> {
             mHandler.postDelayed(delayVideoIntent, delayMillis);
         });
@@ -188,13 +200,33 @@ public class MessagesView extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+
         if (resultCode == Activity.RESULT_OK && data != null) {
             Uri fileUri = data.getData();
+            if (requestCode == CAMERA_REQUEST_CODE) {
+                Bitmap bmp = (Bitmap)data.getExtras().get("data");
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                byte[] byteArray = stream.toByteArray(); // convert camera photo to byte array
+                FileOutputStream fo = null;
+                try {
+                    File f = new File(Environment.getExternalStorageDirectory() + "/ " + UUID.randomUUID() + "_camera.png");
+                    fo = new FileOutputStream(f);
+                    fo.write(byteArray);
+                    fo.flush();
+                    fo.close();
+                    fileUri = Uri.fromFile(f);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
             if (fileUri == null) return;
-
             BreezeAPI api = BreezeAPI.getInstance();
             String bodyFortype = "";
             if (requestCode == PHOTO_REQUEST_CODE) bodyFortype = "Image";
+            else if (requestCode == CAMERA_REQUEST_CODE) bodyFortype = "Image";
             else if (requestCode == VIDEO_REQUEST_CODE) bodyFortype = "Video";
             else if (requestCode == AUDIO_REQUEST_CODE) bodyFortype = "Audio";
             else if (requestCode == FILE_REQUEST_CODE) bodyFortype = "File";
@@ -364,6 +396,16 @@ public class MessagesView extends AppCompatActivity {
         public void run() {
             Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(intent, PHOTO_REQUEST_CODE);
+        }
+    };
+
+    private Runnable delayCameraIntent = new Runnable() {
+        @Override
+        public void run() {
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                startActivityForResult(takePictureIntent, CAMERA_REQUEST_CODE);
+            }
         }
     };
 
