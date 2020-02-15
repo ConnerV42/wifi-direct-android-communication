@@ -1,8 +1,12 @@
 package com.breeze.views.Messages;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.net.Uri;
@@ -45,7 +49,10 @@ import com.breeze.state.BrzStateStore;
 import com.google.android.gms.nearby.connection.Payload;
 import com.breeze.views.ChatSettingsActivity;
 
+import java.io.File;
+import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Consumer;
 
 public class MessagesView extends AppCompatActivity {
@@ -87,6 +94,35 @@ public class MessagesView extends AppCompatActivity {
         LinearLayoutManager msgLayout = new LinearLayoutManager(this);
 
         this.list = new MessageList(this, msgView, this.chat);
+
+        this.list.setMessageClickListener((selectedMessage) -> {
+                AlertDialog.Builder builder = new AlertDialog.Builder(msgView.getContext());
+                builder.setMessage(R.string.saveImage)
+                        .setTitle(R.string.dialog_title);
+
+                builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (selectedMessage.body == "Image") {
+                            Bitmap bitmap = api.storage.getMessageFileAsBitmap(selectedMessage);
+                            ContentResolver cr = getContentResolver();
+                            byte[] array = new byte[7];
+                            new Random().nextBytes(array);
+                            MediaStore.Images.Media.insertImage(cr, bitmap, new String(array, Charset.forName("UTF-8")), "Breeze Image");
+                        }
+                    }
+                });
+
+                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+        });
 
         ImageButton sendPhoto = findViewById(R.id.sendPhoto);
         ImageButton sendVideo = findViewById(R.id.sendVideo);
