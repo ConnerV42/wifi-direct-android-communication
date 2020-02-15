@@ -41,6 +41,7 @@ import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
+import com.breeze.views.EditChatActivity;
 import com.google.android.gms.nearby.connection.Payload;
 import com.breeze.views.ChatSettingsActivity;
 
@@ -239,9 +240,17 @@ public class MessagesView extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (this.chat.isGroup) getMenuInflater().inflate(R.menu.menu_messages_view, menu);
+        if (this.chat.isGroup) getMenuInflater().inflate(R.menu.menu_chat_messages_view, menu);
         return true;
     }
+
+    public void ChatSettingsOnClick()
+    {
+        Intent intent = new Intent(MessagesView.this, EditChatActivity.class);
+        //put extra things needed
+        startActivity(intent);
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -257,6 +266,9 @@ public class MessagesView extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
+
 
     @Override
     protected void onStop() {

@@ -78,6 +78,8 @@ public class ChatsView extends Fragment {
         });
     }
 
+
+
     @Override
     public void onDetach() {
         super.onDetach();

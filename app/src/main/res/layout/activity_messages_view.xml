@@ -15,6 +15,7 @@
         android:background="@color/colorPrimary"
         android:elevation="4dp">
 
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="55dp"
@@ -58,6 +59,11 @@
                 android:text="@string/name"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
                 android:textColor="@android:color/white" />
+
+
+
+
+
         </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 

@@ -93,8 +93,8 @@ public class EditProfileActivity extends Fragment
             aliasName.setText(api.hostNode.alias);
         }
         //set save button
-        Button saveButton = getView().findViewById(R.id.edit_save_button);
-        saveButton.setVisibility (View.INVISIBLE);
+        //Button saveButton = getView().findViewById(R.id.edit_save_button);
+        //saveButton.setVisibility (View.INVISIBLE);
 
         //edit picture dialog pop up and save
         Button editPicture = getView().findViewById(R.id.edit_image_button);
