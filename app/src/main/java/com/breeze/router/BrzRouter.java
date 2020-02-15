@@ -14,6 +14,7 @@ import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.router.handlers.BrzFileInfoPktHandler;
 import com.breeze.router.handlers.BrzGraphHandler;
 import com.breeze.router.handlers.BrzHandshakeHandler;
+import com.breeze.router.handlers.BrzLiveAudioHandler;
 import com.breeze.router.handlers.BrzMessageHandler;
 import com.breeze.router.handlers.BrzMessageReceiptHandler;
 import com.breeze.router.handlers.BrzProfileHandler;
@@ -92,6 +93,8 @@ public class BrzRouter extends EventEmitter {
         this.handlers.add(new BrzMessageReceiptHandler());
         this.handlers.add(new BrzProfileHandler(this));
         this.handlers.add(new BrzPublicMessageHandler(this));
+
+        this.handlers.add(new BrzLiveAudioHandler());
     }
 
     //
@@ -167,6 +170,32 @@ public class BrzRouter extends EventEmitter {
             connectionsClient.sendPayload(nextHopNode.endpointId, BrzPayloadBuffer.getStreamPayload(packet.toJSON()));
             connectionsClient.sendPayload(nextHopNode.endpointId, streamPayload);
             this.streamBuffer.removeStream(payloadId);
+        }
+    }
+
+    public void sendStream(BrzPacket packet, Payload streamPayload) {
+        packet.stream.filePayloadId = streamPayload.getId();
+
+        // If the host is connected directly with the destination, shortcut it
+        String endpointID = endpointIDs.get(packet.to);
+        if (endpointID != null) {
+            connectionsClient.sendPayload(endpointID, BrzPayloadBuffer.getStreamPayload(packet.toJSON()));
+            connectionsClient.sendPayload(endpointID, streamPayload);
+            return;
+        }
+
+        // Get the next hop from the graph
+        String nextHopUUID = graph.nextHop(this.hostNode.id, packet.to);
+        if (nextHopUUID == null) {
+            Log.i("ENDPOINT_ERR", "Failed to find path to " + packet.to);
+            return;
+        }
+        BrzNode nextHopNode = this.graph.getVertex(nextHopUUID);
+
+        if (nextHopNode != null && !nextHopNode.endpointId.equals("")
+                && endpointIDs.values().contains(nextHopNode.endpointId)) {
+            connectionsClient.sendPayload(nextHopNode.endpointId, BrzPayloadBuffer.getStreamPayload(packet.toJSON()));
+            connectionsClient.sendPayload(nextHopNode.endpointId, streamPayload);
         }
     }
 
@@ -365,8 +394,8 @@ public class BrzRouter extends EventEmitter {
 //
 //            Long payloadId = update.getPayloadId();
 
-//            // Incomming packet was a success!
-//            if (payloadBuffer.isIncomming(payloadId)) {
+//            // Incoming packet was a success!
+//            if (payloadBuffer.isIncoming(payloadId)) {
 //                Log.i("ENDPOINT", "Received a payload");
 //                Payload payload = payloadBuffer.popIncoming(payloadId);
 //

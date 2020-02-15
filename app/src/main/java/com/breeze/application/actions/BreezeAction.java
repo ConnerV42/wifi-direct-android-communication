@@ -8,14 +8,19 @@ import org.json.JSONObject;
 
 import java.util.UUID;
 
-public abstract class BreezeAction implements BrzSerializable {
+public class BreezeAction implements BrzSerializable {
     enum BREEZE_MODULE {ROUTER, STATE, GRAPH}
-    enum ACTION_TYPE {SAVE_NODE}
+
+    enum ACTION_TYPE {SAVE_NODE, SEND_PACKET}
 
     private String id;
     private BREEZE_MODULE module;
     private ACTION_TYPE actionType;
     private String eventName;
+
+    BreezeAction(String json) {
+        this.fromJSON(json);
+    }
 
     BreezeAction(BREEZE_MODULE module, ACTION_TYPE actionType, String eventName) {
         this.module = module;

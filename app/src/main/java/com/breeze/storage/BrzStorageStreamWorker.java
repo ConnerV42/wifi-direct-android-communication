@@ -24,14 +24,13 @@ public class BrzStorageStreamWorker extends AsyncTask<String, Integer, String> {
 
     @Override
     protected String doInBackground(String[] arguments) {
+        OutputStream out = null;
         try {
-            OutputStream out = new FileOutputStream(outputFile);
+            out = new FileOutputStream(outputFile);
             byte[] buf = new byte[1000];
             int len;
-            int size = 0;
             while ((len = data.read(buf)) > 0) {
                 out.write(buf, 0, len);
-                size += len;
                 if (isCancelled()) break;
             }
             out.flush();
@@ -39,6 +38,14 @@ public class BrzStorageStreamWorker extends AsyncTask<String, Integer, String> {
             data.close();
         } catch (Exception e) {
             Log.e("STORAGE", "Failed to output stream to the file " + outputFile.getAbsolutePath(), e);
+        } finally {
+
+            try {
+                if (out != null) out.close();
+                data.close();
+            } catch (Exception e) {
+            }
+
         }
 
         return fileKey;

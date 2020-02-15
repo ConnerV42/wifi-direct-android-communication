@@ -11,19 +11,20 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/messagesToolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="55dp"
         android:background="@color/colorPrimary"
         android:elevation="4dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="55dp"
+            android:layout_height="match_parent"
             android:gravity="center_vertical">
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/chat_image"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="20dp"
                 android:src="@drawable/ic_person_black_24dp"
@@ -51,13 +52,24 @@
 
             <TextView
                 android:id="@+id/chat_name"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_toLeftOf="@id/menu_call_button"
                 android:layout_toRightOf="@id/chat_image"
                 android:gravity="center_vertical"
                 android:text="@string/name"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
                 android:textColor="@android:color/white" />
+
+            <ImageButton
+                android:id="@+id/menu_call_button"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:background="@android:color/transparent"
+                android:padding="16dp"
+                android:tint="@android:color/white"
+                app:srcCompat="@drawable/ic_local_phone_black_24dp" />
         </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 
