@@ -1,5 +1,6 @@
 package com.breeze.views.PublicMessages;
 
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -18,7 +19,9 @@ import android.widget.ImageButton;
 import android.widget.Switch;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toolbar;
 
+import com.breeze.MainActivity;
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzMessage;
@@ -29,7 +32,7 @@ import java.util.function.Consumer;
 
 public class PublicMessagesView extends Fragment {
 
-    private PublicMessageList list;
+    public PublicMessageList list;
     private Consumer<Object> onlineListener;
 
     @Override
@@ -48,7 +51,10 @@ public class PublicMessagesView extends Fragment {
         BreezeAPI api = BreezeAPI.getInstance();
         BrzGraph graph = api.getGraph();
 
+
+
         // Set up content
+
         RecyclerView msgView = view.findViewById(R.id.publicMessageList);
         this.list = new PublicMessageList(this.getActivity(), msgView);
         msgView.setAdapter(this.list);
@@ -56,6 +62,8 @@ public class PublicMessagesView extends Fragment {
         LinearLayoutManager msgLayout = new LinearLayoutManager(this.getActivity());
         msgLayout.setStackFromEnd(true);
         msgView.setLayoutManager(msgLayout);
+
+
 
         Switch publicSwitch = view.findViewById(R.id.PublicSwitch);
         publicSwitch.setChecked(true);
@@ -76,13 +84,18 @@ public class PublicMessagesView extends Fragment {
             return false;
         });
 
+
         this.onlineListener = (o) -> {
             TextView numberOnline = view.findViewById(R.id.number_online);
+            numberOnline.setTextColor(Color.parseColor("#66E0FF"));
+            //numberOnline.setVisibility(View.VISIBLE);
             numberOnline.setText("Online: " + (graph.getSize() - 1));
+
         };
         onlineListener.accept(null);
 
         EditText messageBox = view.findViewById(R.id.editText);
+
         ImageButton sendMessage = view.findViewById(R.id.sendMessage);
 
         // Set up message sending listener

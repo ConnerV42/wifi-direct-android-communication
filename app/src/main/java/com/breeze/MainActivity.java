@@ -8,7 +8,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -22,12 +24,14 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
 import com.breeze.application.BreezeAPI;
+import com.breeze.views.PublicMessages.PublicMessagesView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
+
 
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
     private static final String[] REQUIRED_PERMISSIONS =
@@ -78,6 +82,8 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
+        TextView tvOnline = getTextView();
+        tvOnline.setVisibility(View.INVISIBLE);
 
         // Enable the sync button
         ImageButton scanButton = findViewById(R.id.scanButton);
@@ -119,7 +125,12 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+    public TextView getTextView()
+    {
 
+        TextView txtView = (TextView)findViewById(R.id.number_online);
+        return txtView;
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == REQUEST_CODE_REQUIRED_PERMISSIONS) {

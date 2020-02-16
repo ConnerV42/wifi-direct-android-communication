@@ -24,6 +24,15 @@
             android:background="?attr/colorPrimary"
             app:popupTheme="@style/AppTheme.PopupOverlay">
 
+            <TextView
+                android:id="@+id/number_online"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="2dp"
+                android:text="Online: 0"
+                android:textStyle="bold|italic" />
+
             <ImageButton
                 android:id="@+id/scanButton"
                 android:layout_width="wrap_content"

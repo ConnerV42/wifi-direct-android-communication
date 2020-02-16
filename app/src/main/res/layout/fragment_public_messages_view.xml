@@ -8,41 +8,48 @@
     android:orientation="vertical"
     tools:context=".views.PublicMessages.PublicMessagesView">
 
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="2dp" />
-
-    <TextView
-        android:id="@+id/number_online"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="7dp"
-        android:text="Online: 0"
-        android:textStyle="bold|italic" />
-
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="2dp" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:background="#66E0FF" />
-
-    <Switch
-        android:id="@+id/PublicSwitch"
+        android:background="#000000"/>
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/cardview_dark_background">
 
-        android:textColor="#66E0FF"
-        android:textStyle="bold|italic"
-        android:text="  Feed On/Off" />
+
+        <TextView
+            android:id="@+id/number_online"
+            android:layout_width="108dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="7dp"
+            android:paddingLeft="5dp"
+            android:text="Online: 0"
+            android:textStyle="bold|italic" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_weight="1" />
+
+        <Switch
+            android:id="@+id/PublicSwitch"
+            android:layout_width="146dp"
+            android:layout_height="wrap_content"
+            android:paddingRight="10dp"
+            android:textColor="#66E0FF"
+            android:text="  Feed On/Off"
+
+            android:textStyle="bold|italic" />
+    </LinearLayout>
 
 
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:background="#66E0FF" />
+        android:background="#000000"/>
 
 
     <Space
