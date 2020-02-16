@@ -230,6 +230,7 @@ public class EditProfileActivity extends Fragment
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         if (activity == null) return;
         ActionBar ab = activity.getSupportActionBar();
+
         if (ab == null) return;
         ab.setTitle("Edit Profile");
 

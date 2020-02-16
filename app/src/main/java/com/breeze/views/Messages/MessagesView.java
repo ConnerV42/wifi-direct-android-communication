@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.net.Uri;
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -16,12 +15,9 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.ParcelFileDescriptor;
-import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,17 +31,11 @@ import android.widget.TextView;
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
-import com.breeze.datatypes.BrzMessage;
 import com.breeze.graph.BrzGraph;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
-import com.breeze.router.BrzRouter;
-import com.breeze.state.BrzStateStore;
-import com.breeze.views.EditChatActivity;
-import com.google.android.gms.nearby.connection.Payload;
 import com.breeze.views.ChatSettingsActivity;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 public class MessagesView extends AppCompatActivity {
@@ -240,16 +230,11 @@ public class MessagesView extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (this.chat.isGroup) getMenuInflater().inflate(R.menu.menu_chat_messages_view, menu);
+        if (this.chat.isGroup) getMenuInflater().inflate(R.menu.menu_messages_view, menu);
         return true;
     }
 
-    public void ChatSettingsOnClick()
-    {
-        Intent intent = new Intent(MessagesView.this, EditChatActivity.class);
-        //put extra things needed
-        startActivity(intent);
-    }
+
 
 
     @Override
