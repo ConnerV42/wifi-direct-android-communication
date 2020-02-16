@@ -76,7 +76,7 @@ public class EditProfileActivity extends Fragment
 
         //set username
         TextView userName = getView().findViewById(R.id.user_name);
-        if(api.hostNode.name == null)
+        if(api.hostNode.name.equals(""))
         {
             String s1 = "[no username entered]";
             userName.setTextColor(Color.RED);
@@ -89,7 +89,8 @@ public class EditProfileActivity extends Fragment
 
         //set alias name
         TextView aliasName = getView().findViewById(R.id.alias_name);
-        if(api.hostNode.id.isEmpty())
+
+        if(api.hostNode.alias.equals("@"))
         {
             String s = "[no alias entered]";
             aliasName.setTextColor(Color.RED);
@@ -131,6 +132,7 @@ public class EditProfileActivity extends Fragment
                         public void onClick(DialogInterface dialog, int whichButton) {
                             String newName = txtNewName.getText().toString();
                             updateNewUsername(newName);
+                            userName.setTextColor(Color.BLACK);
                             userName.setText(api.hostNode.name);
                         }
                     })
@@ -157,6 +159,7 @@ public class EditProfileActivity extends Fragment
                         public void onClick(DialogInterface dialog, int whichButton) {
                             String newAlias = txtNewAlias.getText().toString();
                             updateNewAlias(newAlias);
+                            aliasName.setTextColor(Color.BLACK);
                             aliasName.setText(api.hostNode.alias);
                         }
                     })
