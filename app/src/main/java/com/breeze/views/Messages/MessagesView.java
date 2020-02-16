@@ -103,6 +103,7 @@ public class MessagesView extends AppCompatActivity {
         this.list = new MessageList(this, msgView, this.chat);
 
         this.list.setMessageClickListener((selectedMessage) -> {
+            if (selectedMessage.body == "Image") {
                 AlertDialog.Builder builder = new AlertDialog.Builder(msgView.getContext());
                 builder.setMessage(R.string.saveImage)
                         .setTitle(R.string.dialog_title);
@@ -110,13 +111,11 @@ public class MessagesView extends AppCompatActivity {
                 builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (selectedMessage.body == "Image") {
-                            Bitmap bitmap = api.storage.getMessageFileAsBitmap(selectedMessage);
-                            ContentResolver cr = getContentResolver();
-                            byte[] array = new byte[7];
-                            new Random().nextBytes(array);
-                            MediaStore.Images.Media.insertImage(cr, bitmap, new String(array, Charset.forName("UTF-8")), "Breeze Image");
-                        }
+                        Bitmap bitmap = api.storage.getMessageFileAsBitmap(selectedMessage);
+                        ContentResolver cr = getContentResolver();
+                        byte[] array = new byte[7];
+                        new Random().nextBytes(array);
+                        MediaStore.Images.Media.insertImage(cr, bitmap, new String(array, Charset.forName("UTF-8")), "Breeze Image");
                     }
                 });
 
@@ -129,6 +128,7 @@ public class MessagesView extends AppCompatActivity {
 
                 AlertDialog dialog = builder.create();
                 dialog.show();
+            }
         });
 
         ImageButton sendPhoto = findViewById(R.id.sendPhoto);
