@@ -103,7 +103,7 @@ public class MessagesView extends AppCompatActivity {
         this.list = new MessageList(this, msgView, this.chat);
 
         this.list.setMessageClickListener((selectedMessage) -> {
-            if (selectedMessage.body == "Image") {
+            if (selectedMessage.body.equals("Image")) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(msgView.getContext());
                 builder.setMessage(R.string.saveImage)
                         .setTitle(R.string.dialog_title);
