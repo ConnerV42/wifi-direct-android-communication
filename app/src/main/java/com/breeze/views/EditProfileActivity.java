@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,12 +18,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import androidx.annotation.Nullable;
 import android.widget.TextView;
 
 import android.os.Bundle;
 import android.widget.Toast;
+import android.widget.Toolbar;
+
+import com.breeze.MainActivity;
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzNode;
@@ -52,6 +57,7 @@ public class EditProfileActivity extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
+
         return inflater.inflate(R.layout.fragment_edit_profile_view, container, false);
     }
 
@@ -60,8 +66,9 @@ public class EditProfileActivity extends Fragment
         super.onViewCreated(view, savedInstanceState);
         BreezeAPI api = BreezeAPI.getInstance();
         //Toast.makeText(getActivity(), api.hostNode.name, Toast.LENGTH_LONG).show();
-
-        boolean editClicked = false;
+//        MainActivity ma = new MainActivity();
+//        ImageButton scanButt = ma.findViewById(R.id.scanButton);
+//        scanButt.setVisibility(View.INVISIBLE);
 
         //set image
         ImageView profileImage = getView().findViewById(R.id.profile_image_edit);
@@ -223,6 +230,8 @@ public class EditProfileActivity extends Fragment
         BreezeAPI.getInstance().setHostNode(node);
 
     }
+
+
     @Override
     public void onStart()
     {
@@ -230,9 +239,12 @@ public class EditProfileActivity extends Fragment
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         if (activity == null) return;
         ActionBar ab = activity.getSupportActionBar();
-
+        ImageButton ac = activity.findViewById(R.id.scanButton);
+        ac.setVisibility(View.INVISIBLE);
         if (ab == null) return;
         ab.setTitle("Edit Profile");
+
+
 
 
     }
