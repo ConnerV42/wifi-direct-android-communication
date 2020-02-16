@@ -31,6 +31,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -101,6 +102,11 @@ public class MessagesView extends AppCompatActivity {
         LinearLayoutManager msgLayout = new LinearLayoutManager(this);
 
         this.list = new MessageList(this, msgView, this.chat);
+
+        if(this.chat.nodes.size() > 1){
+            ImageButton b = findViewById(R.id.menu_call_button);
+            b.setVisibility(View.INVISIBLE);
+        }
 
         this.list.setMessageClickListener((selectedMessage) -> {
             if (selectedMessage.body.equals("Image")) {
