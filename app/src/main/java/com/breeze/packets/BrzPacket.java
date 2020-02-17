@@ -28,11 +28,7 @@ public class BrzPacket implements BrzSerializable {
 
         PROFILE_REQUEST, PROFILE_RESPONSE,
 
-        UPDATE_PROFILE_IMAGE, UPDATE_PROFILE_NAME,
 
-        UPDATE_PROFILE_ALIAS, UPDATE_CHAT_IMAGE,
-
-        UPDATE_CHAT_NAME,
     }
 
     public String id = UUID.randomUUID().toString();
@@ -72,6 +68,7 @@ public class BrzPacket implements BrzSerializable {
     public BrzMessage message() {
         return new BrzMessage(this.body);
     }
+
 
     public BrzGraphQuery graphQuery() {
         return new BrzGraphQuery(this.body);

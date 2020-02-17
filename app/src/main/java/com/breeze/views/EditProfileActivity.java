@@ -41,6 +41,7 @@ import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.graph.BrzGraph;
+import com.breeze.packets.ProfileEvents.BrzProfileImageEvent;
 
 
 public class EditProfileActivity extends Fragment
@@ -171,7 +172,14 @@ public class EditProfileActivity extends Fragment
 
         });
 
-        //using save button save changes to the state
+
+        //send out new updates through profile event
+//        BrzProfileImageEvent sendNewStuff = new BrzProfileImageEvent(node.name, node.id, true);
+//
+//        Bitmap bm = api.storage.getProfileImage(api.storage.PROFILE_DIR, node.id);
+//        api.sendProfileUpdates(sendNewStuff, bm);
+
+
     }
 
 

@@ -1,14 +1,11 @@
 package com.breeze.packets;
 
-import com.breeze.datatypes.BrzFileInfo;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.graph.BrzGraph;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.GraphEvents.BrzGraphEvent;
 import com.breeze.packets.GraphEvents.BrzGraphQuery;
-
-import java.io.File;
 
 import com.breeze.packets.MessageEvents.BrzMessageReceipt;
 
