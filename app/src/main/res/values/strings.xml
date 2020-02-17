@@ -27,9 +27,10 @@
     <string name="start_mic_stream_2">Start Mic Stream 2</string>
     <string name="stop_mic_stream_2">Stop Mic Stream 2</string>
     <string name="title_activity_call">CallActivity</string>
-    <string name="saveImage">Save Image to Photo Library?</string>
-    <string name="dialog_title">Save Image</string>
+    <string name="saveImage">Save image to photo library?</string>
+    <string name="saveImageTitle">Save Image</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
-
+    <string name="saveVideo">Save video to video library?</string>
+    <string name="saveVideoTitle">Save Video</string>
 </resources>

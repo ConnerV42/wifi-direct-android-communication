@@ -112,7 +112,7 @@ public class MessagesView extends AppCompatActivity {
             if (selectedMessage.body.equals("Image")) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(msgView.getContext());
                 builder.setMessage(R.string.saveImage)
-                        .setTitle(R.string.dialog_title);
+                        .setTitle(R.string.saveImageTitle);
 
                 builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
                     @Override
@@ -122,6 +122,31 @@ public class MessagesView extends AppCompatActivity {
                         byte[] array = new byte[7];
                         new Random().nextBytes(array);
                         MediaStore.Images.Media.insertImage(cr, bitmap, new String(array, Charset.forName("UTF-8")), "Breeze Image");
+                    }
+                });
+
+                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            } else if (selectedMessage.body.equals("Video")) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(msgView.getContext());
+                builder.setMessage(R.string.saveVideo)
+                        .setTitle(R.string.saveVideoTitle);
+
+                builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Bitmap bitmap = api.storage.getMessageFileAsBitmap(selectedMessage);
+                        ContentResolver cr = getContentResolver();
+                        byte[] array = new byte[7];
+                        new Random().nextBytes(array);
+                        MediaStore.Images.Media.insertImage(cr, bitmap, new String(array, Charset.forName("UTF-8")), "Breeze Video");
                     }
                 });
 
