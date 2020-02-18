@@ -103,11 +103,6 @@ public class MessagesView extends AppCompatActivity {
 
         this.list = new MessageList(this, msgView, this.chat);
 
-        if(this.chat.nodes.size() > 1){
-            ImageButton b = findViewById(R.id.menu_call_button);
-            b.setVisibility(View.INVISIBLE);
-        }
-
         this.list.setMessageClickListener((selectedMessage) -> {
             if (selectedMessage.body.equals("Image")) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(msgView.getContext());
@@ -222,6 +217,7 @@ public class MessagesView extends AppCompatActivity {
 
         // Live audio call
         ImageButton menu_call_button = findViewById(R.id.menu_call_button);
+        menu_call_button.setVisibility(chat.isGroup ? View.GONE : View.VISIBLE);
         menu_call_button.setOnClickListener(v -> {
             api.streams.sendLiveAudioRequest(chat.otherPersonId());
         });
@@ -230,31 +226,10 @@ public class MessagesView extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
+        BreezeAPI api = BreezeAPI.getInstance();
 
         if (resultCode == Activity.RESULT_OK && data != null) {
-            Uri fileUri = data.getData();
-            if (requestCode == CAMERA_REQUEST_CODE) {
-                Bitmap bmp = (Bitmap)data.getExtras().get("data");
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                byte[] byteArray = stream.toByteArray(); // convert camera photo to byte array
-                FileOutputStream fo = null;
-                try {
-                    File f = new File(Environment.getExternalStorageDirectory() + "/ " + UUID.randomUUID() + "_camera.png");
-                    fo = new FileOutputStream(f);
-                    fo.write(byteArray);
-                    fo.flush();
-                    fo.close();
-                    fileUri = Uri.fromFile(f);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (fileUri == null) return;
-            BreezeAPI api = BreezeAPI.getInstance();
+
             String bodyFortype = "";
             if (requestCode == PHOTO_REQUEST_CODE) bodyFortype = "Image";
             else if (requestCode == CAMERA_REQUEST_CODE) bodyFortype = "Image";
@@ -262,8 +237,19 @@ public class MessagesView extends AppCompatActivity {
             else if (requestCode == AUDIO_REQUEST_CODE) bodyFortype = "Audio";
             else if (requestCode == FILE_REQUEST_CODE) bodyFortype = "File";
             else return;
-
             BrzPacket p = BrzPacketBuilder.message(api.hostNode.id, "", bodyFortype, chat.id, false);
+            Uri fileUri = null;
+
+            if (requestCode == CAMERA_REQUEST_CODE && data.getExtras() != null) {
+                Bitmap bmp = (Bitmap) data.getExtras().get("data");
+                File messageFile = api.storage.getMessageFile(p.message());
+                api.storage.saveBitmapToFile(messageFile, bmp);
+                fileUri = Uri.fromFile(messageFile);
+            } else {
+                fileUri = data.getData();
+                if (fileUri == null) return;
+            }
+
             api.sendFileMessage(p.message(), fileUri);
         }
     }
