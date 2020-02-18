@@ -52,10 +52,6 @@
         android:background="#000000"/>
 
 
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="2dp" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/publicMessageList"
         android:layout_width="match_parent"

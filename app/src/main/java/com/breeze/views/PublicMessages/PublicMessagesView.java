@@ -19,6 +19,7 @@ import android.widget.ImageButton;
 import android.widget.Switch;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.breeze.MainActivity;
@@ -50,34 +51,48 @@ public class PublicMessagesView extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         BreezeAPI api = BreezeAPI.getInstance();
         BrzGraph graph = api.getGraph();
-
-
-
-        // Set up content
-
-        RecyclerView msgView = view.findViewById(R.id.publicMessageList);
-        this.list = new PublicMessageList(this.getActivity(), msgView);
-        msgView.setAdapter(this.list);
-
-        LinearLayoutManager msgLayout = new LinearLayoutManager(this.getActivity());
-        msgLayout.setStackFromEnd(true);
-        msgView.setLayoutManager(msgLayout);
-
-
-
+        //setup content
         Switch publicSwitch = view.findViewById(R.id.PublicSwitch);
-        publicSwitch.setChecked(true);
+        publicSwitch.setChecked(false);
         publicSwitch.setOnTouchListener((v, e) -> {
             switch(e.getAction()){
                 case MotionEvent.ACTION_UP:
                     if(publicSwitch.isChecked()){
+
+                        Toast.makeText(getActivity(), "Thread activity: OFF", Toast.LENGTH_LONG).show();
                         publicSwitch.setChecked(false);
-                        msgView.setAdapter(null);
                         return true;
+
                     }
-                    else {
-                        publicSwitch.setChecked(true);
+                    else{
+
+                        //msgView.setAdapter(this.list);
+
+                        RecyclerView msgView = view.findViewById(R.id.publicMessageList);
+                        this.list = new PublicMessageList(this.getActivity(), msgView);
                         msgView.setAdapter(this.list);
+
+                        LinearLayoutManager msgLayout = new LinearLayoutManager(this.getActivity());
+                        msgLayout.setStackFromEnd(true);
+                        msgView.setLayoutManager(msgLayout);
+
+
+
+                        EditText messageBox = view.findViewById(R.id.editText);
+                        ImageButton sendMessage = view.findViewById(R.id.sendMessage);
+                        // Set up message sending listener
+                        sendMessage.setOnClickListener(vw -> {
+                            String messageBoxText = messageBox.getText().toString();
+
+                            // Reset message box
+                            messageBox.setText("");
+
+                            BrzMessage msg = new BrzMessage(api.hostNode.id, "", messageBoxText, System.currentTimeMillis(), false);
+                            api.sendPublicMessage(msg);
+                        });
+
+                        Toast.makeText(getActivity(), "Thread activity: ON", Toast.LENGTH_LONG).show();
+                        publicSwitch.setChecked(true);
                         return true;
                     }
             }
@@ -94,20 +109,8 @@ public class PublicMessagesView extends Fragment {
         };
         onlineListener.accept(null);
 
-        EditText messageBox = view.findViewById(R.id.editText);
 
-        ImageButton sendMessage = view.findViewById(R.id.sendMessage);
 
-        // Set up message sending listener
-        sendMessage.setOnClickListener(v -> {
-            String messageBoxText = messageBox.getText().toString();
-
-            // Reset message box
-            messageBox.setText("");
-
-            BrzMessage msg = new BrzMessage(api.hostNode.id, "", messageBoxText, System.currentTimeMillis(), false);
-            api.sendPublicMessage(msg);
-        });
     }
 
     @Override
