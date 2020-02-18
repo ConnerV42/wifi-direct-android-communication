@@ -208,12 +208,12 @@ public class BrzStorage extends EventEmitter {
     }
 
     public File getMessageFile(BrzMessage message) {
-        if (messageFileExists(message)) {
+//        if (messageFileExists(message)) {
             File messagesDir = api.getExternalFilesDir(FILE_MESSAGES_DIR);
             File chatDir = new File(messagesDir, message.chatId);
             return new File(chatDir, message.id);
-        }
-        return null;
+//        }
+//        return null;
     }
 
     public Bitmap getMessageFileAsBitmap(BrzMessage message) {

@@ -213,8 +213,7 @@ public class MessagesView extends AppCompatActivity {
         sendFile.setOnClickListener(view1 -> {
             mHandler.postDelayed(delayFileIntent, delayMillis);
         });
-
-
+        
         // Live audio call
         ImageButton menu_call_button = findViewById(R.id.menu_call_button);
         menu_call_button.setVisibility(chat.isGroup ? View.GONE : View.VISIBLE);

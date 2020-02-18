@@ -15,38 +15,35 @@ import java.util.function.Consumer;
 
 public class BrzStreamBuffer {
 
-    private HashMap<Long, BrzPacket> packetPayloads = new HashMap<>();
-    private HashMap<Long, Payload> streamPayloads = new HashMap<>();
+    private HashMap<Long, BrzPacket> packetMap = new HashMap<>();
+    private HashMap<Long, InputStream> streamMap = new HashMap<>();
 
-    public void addPacketPayload(BrzPacket packet) {
+    public BrzPacket getPacket(long payloadId) {
+        return packetMap.get(payloadId);
+    }
+
+    public InputStream getStream(long payloadId) {
+        return streamMap.get(payloadId);
+    }
+
+    public void addPacket(BrzPacket packet) {
         if (!packet.hasStream()) throw new RuntimeException("Packet does not have stream info");
-
         long payloadId = packet.stream.filePayloadId;
-        packetPayloads.put(payloadId, packet);
+        packetMap.put(payloadId, packet);
     }
 
-    public BrzPacket getPacketPayload(long payloadId) {
-        return this.packetPayloads.get(payloadId);
-    }
-
-    public void addStreamPayload(Payload payload) {
+    public void addStream(Payload payload) {
         if (!this.isStreamPayload(payload.getId()))
             throw new RuntimeException("There is no packet to go with this stream");
-
-        streamPayloads.put(payload.getId(), payload);
-    }
-
-    public Payload getStreamPayload(long payloadId) {
-        return this.streamPayloads.get(payloadId);
+        streamMap.put(payload.getId(), payload.asStream().asInputStream());
     }
 
     public boolean isStreamPayload(long payloadId) {
-        return packetPayloads.get(payloadId) != null;
+        return packetMap.get(payloadId) != null;
     }
 
     public void removeStream(long payloadId) {
-        this.streamPayloads.remove(payloadId);
-        this.packetPayloads.remove(payloadId);
+        streamMap.remove(payloadId);
+        packetMap.remove(payloadId);
     }
-
 }
