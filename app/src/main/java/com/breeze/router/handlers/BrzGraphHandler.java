@@ -50,7 +50,7 @@ public class BrzGraphHandler implements BrzRouterHandler {
                 graph.addEdge(this.router.hostNode.id, hostNode.id);
 
                 // Broadcast connect event
-                this.router.broadcast(BrzPacketBuilder.graphEvent(true, router.hostNode, hostNode));
+                this.router.broadcast(BrzPacketBuilder.graphEvent(true, router.hostNode, hostNode), fromEndpointId);
 
                 // Merge their graph into ours
                 BrzGraph otherGraph = graph.mergeGraph(query.graph);
@@ -78,6 +78,7 @@ public class BrzGraphHandler implements BrzRouterHandler {
                 // If it's a disconnect
             } else {
                 graph.removeEdge(ge.node1.id, ge.node2.id);
+                graph.removeDisconnected(router.hostNode.id);
             }
 
         }

@@ -40,8 +40,11 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.function.Consumer;
 
 public class BrzRouter extends EventEmitter {
@@ -280,6 +283,7 @@ public class BrzRouter extends EventEmitter {
             isDiscovering = true;
         }).addOnFailureListener(e -> {
             Log.i("ENDPOINT", "Discovering failed!", e);
+            isDiscovering = false;
         });
     }
 
@@ -288,6 +292,26 @@ public class BrzRouter extends EventEmitter {
         isDiscovering = false;
         Log.i("ENDPOINT", "Stopped discovering successfully!");
     }
+
+    private LinkedList<String> discoveredEndpoints = new LinkedList<>();
+    public void scan() {
+        if(isDiscovering) return;
+
+        startDiscovery();
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                stopDiscovery();
+
+                // Initiate connection with the endpoints discovered during the scan
+                for (String endpointId : discoveredEndpoints) {
+                    connectionsClient.requestConnection(hostNode.id, endpointId, connectionLifecycleCallback);
+                }
+                discoveredEndpoints = new LinkedList<>();
+            }
+        }, 10 * 1000);
+    }
+
 
     private void handlePacket(BrzPacket packet, String fromEndpointId) {
         Log.i("ENDPOINT", "Got a packet " + packet.type);
@@ -377,8 +401,13 @@ public class BrzRouter extends EventEmitter {
         public void onEndpointFound(@NonNull String endpointId, DiscoveredEndpointInfo info) {
             if (info.getServiceId().equals(pkgName)) {
                 Log.i("ENDPOINT", "Endpoint found");
-                connectionsClient.requestConnection(hostNode.id, endpointId, connectionLifecycleCallback);
-                emit("endpointFound", endpointId);
+
+                // If the endpoint is not already connected, initiate a connection
+                if (endpointUUIDs.get(endpointId) == null) {
+                    discoveredEndpoints.add(endpointId);
+                    emit("endpointFound", endpointId);
+                }
+
             }
         }
 
@@ -386,15 +415,16 @@ public class BrzRouter extends EventEmitter {
         public void onEndpointLost(@NonNull String endpointId) {
             Log.i("ENDPOINT", "Endpoint lost callback fired");
             emit("endpointDisconnected", endpointId);
+            discoveredEndpoints.remove(endpointId);
         }
     };
 
     // Callbacks for connections to other devices
     private final ConnectionLifecycleCallback connectionLifecycleCallback = new ConnectionLifecycleCallback() {
+
         @Override
         public void onConnectionInitiated(@NonNull String endpointId, ConnectionInfo connectionInfo) {
             Log.i("ENDPOINT", "Endpoint initiated connection");
-
             endpointUUIDs.put(endpointId, connectionInfo.getEndpointName());
             connectionsClient.acceptConnection(endpointId, payloadCallback);
         }
@@ -405,6 +435,7 @@ public class BrzRouter extends EventEmitter {
                 Log.i("ENDPOINT", "Endpoint connected");
                 emit("endpointConnected", endpointId);
 
+                // Update uuid -> endpoinId map
                 String endpointUUID = endpointUUIDs.get(endpointId);
                 endpointIDs.put(endpointUUID, endpointId);
 
@@ -419,18 +450,18 @@ public class BrzRouter extends EventEmitter {
             Log.i("ENDPOINT", "Endpoint disconnected!");
             emit("endpointDisconnected", endpointId);
 
-            BrzNode lostNode = graph.getVertex(endpointUUIDs.get(endpointId));
-            if (hostNode != null && lostNode != null) {
-                String endpointUUID = endpointUUIDs.get(endpointId);
-                endpointIDs.remove(endpointUUID);
+            String endpointUUID = endpointUUIDs.get(endpointId);
+            endpointUUIDs.remove(endpointId);
+            endpointIDs.remove(endpointUUID);
 
+            BrzNode lostNode = graph.getVertex(endpointUUID);
+            if (hostNode != null && lostNode != null) {
                 // removes the vertex and any associated edges
-                graph.removeVertex(endpointUUID);
+                graph.removeEdge(endpointUUID, hostNode.id);
                 graph.removeDisconnected(api.hostNode.id);
-                api.state.removeChat(endpointUUID);
 
                 // Broadcast disconnect event
-                broadcast(BrzPacketBuilder.graphEvent(false, hostNode, lostNode));
+                broadcast(BrzPacketBuilder.graphEvent(false, hostNode, lostNode), endpointId);
             }
         }
     };
