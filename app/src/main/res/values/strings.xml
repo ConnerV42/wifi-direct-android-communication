@@ -33,4 +33,8 @@
     <string name="save">Save</string>
     <string name="saveVideo">Save video to video library?</string>
     <string name="saveVideoTitle">Save Video</string>
+    <string name="publicMessageDialog">Warning: The public thread allows you, or anyone else in your area to broadcast messages quickly to the entire Breeze network. Click accept to be a part of the conversation, or deny to opt out of this feature.</string>
+    <string name="publicMessageTitle">Notice</string>
+    <string name="accept">Accept</string>
+    <string name="deny">Deny</string>
 </resources>

@@ -1,5 +1,8 @@
 package com.breeze.views.PublicMessages;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -51,23 +54,55 @@ public class PublicMessagesView extends Fragment {
         // Set up content
         RecyclerView msgView = view.findViewById(R.id.publicMessageList);
         this.list = new PublicMessageList(this.getActivity(), msgView);
-        msgView.setAdapter(this.list);
 
         LinearLayoutManager msgLayout = new LinearLayoutManager(this.getActivity());
         msgLayout.setStackFromEnd(true);
         msgView.setLayoutManager(msgLayout);
 
         Switch publicSwitch = view.findViewById(R.id.PublicSwitch);
-        publicSwitch.setChecked(true);
+
+        boolean dialogShown = api.preferences.getBoolean("dialogShown", false);
+        if (!dialogShown) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(msgView.getContext());
+            builder.setMessage(R.string.publicMessageDialog)
+                    .setTitle(R.string.publicMessageTitle);
+
+            builder.setPositiveButton(R.string.accept, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    api.preferences.edit().putBoolean("optIn", true).apply();
+                    publicSwitch.setChecked(true);
+                    msgView.setAdapter(list);
+                }
+            });
+
+            builder.setNegativeButton(R.string.deny, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    api.preferences.edit().putBoolean("optIn", false).apply();
+                    publicSwitch.setChecked(false);
+                    dialog.cancel();
+                }
+            });
+
+            AlertDialog dialog = builder.create();
+            api.preferences.edit().putBoolean("dialogShown", true).apply();
+            dialog.show();
+        } else {
+            boolean optIn = api.preferences.getBoolean("optIn", false);
+            publicSwitch.setChecked(optIn);
+        }
         publicSwitch.setOnTouchListener((v, e) -> {
             switch(e.getAction()){
                 case MotionEvent.ACTION_UP:
                     if(publicSwitch.isChecked()){
+                        api.preferences.edit().putBoolean("optIn", false).apply();
                         publicSwitch.setChecked(false);
                         msgView.setAdapter(null);
                         return true;
                     }
                     else {
+                        api.preferences.edit().putBoolean("optIn", true).apply();
                         publicSwitch.setChecked(true);
                         msgView.setAdapter(this.list);
                         return true;
