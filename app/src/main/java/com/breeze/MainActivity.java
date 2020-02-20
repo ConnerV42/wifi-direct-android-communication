@@ -83,13 +83,7 @@ public class MainActivity extends AppCompatActivity {
         // Enable the sync button
         ImageButton scanButton = findViewById(R.id.scanButton);
         scanButton.setOnClickListener((l) -> {
-            api.router.startDiscovery();
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    api.router.stopDiscovery();
-                }
-            }, 10 * 1000);
+            api.router.scan();
         });
 
         // Check if location is on
