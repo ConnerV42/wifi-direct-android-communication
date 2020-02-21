@@ -14,6 +14,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
@@ -36,11 +38,15 @@ public class AppSettingsView extends Fragment {
 
         Button bWipeDB = view.findViewById(R.id.wipeDatabase);
         Button bRestartService = view.findViewById(R.id.restartService);
+        Button bShowBlacklist = view.findViewById(R.id.showBlacklist);
         bWipeDB.setOnClickListener((View v) -> {
             this.showWipeDatabaseDialog();
         });
         bRestartService.setOnClickListener((View v) -> {
             this.showRestartServiceDialog();
+        });
+        bShowBlacklist.setOnClickListener((View v) -> {
+            this.showBlacklistView();
         });
     }
 
@@ -83,5 +89,10 @@ public class AppSettingsView extends Fragment {
                 .setNegativeButton(android.R.string.no, null)
                 .show();
     }
+    private void showBlacklistView(){
+        NavController nav = Navigation.findNavController(this.getView());
+        nav.navigate(R.id.blacklistView);
+    }
+
 }
 

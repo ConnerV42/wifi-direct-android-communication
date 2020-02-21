@@ -33,5 +33,15 @@
         android:id="@+id/appSettings"
         android:name="com.breeze.views.AppSettingsView"
         android:label="fragment_app_settings"
-        tools:layout="@layout/fragment_app_settings" />
+        tools:layout="@layout/fragment_app_settings">
+        <action
+            android:id="@+id/action_appSettings_to_blacklistView"
+            app:destination="@id/blacklistView" />
+    </fragment>
+    <fragment
+        android:id="@+id/blacklistView"
+        android:name="com.breeze.views.Settings.BlackListView"
+        android:label="fragment_app_settings_blacklist"
+        tools:layout="@layout/fragment_blacklist_view">
+    </fragment>
 </navigation>

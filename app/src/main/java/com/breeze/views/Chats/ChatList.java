@@ -1,39 +1,22 @@
 package com.breeze.views.Chats;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.breeze.MainActivity;
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
-import com.breeze.datatypes.BrzMessage;
-import com.breeze.datatypes.BrzNode;
 import com.breeze.graph.BrzGraph;
-import com.breeze.state.BrzStateStore;
-import com.breeze.storage.BrzStorage;
-import com.breeze.views.Messages.MessagesView;
-import com.breeze.views.UserSelection.UserList;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 
 public class ChatList extends RecyclerView.Adapter<ChatList.ChatHolder> {
 
