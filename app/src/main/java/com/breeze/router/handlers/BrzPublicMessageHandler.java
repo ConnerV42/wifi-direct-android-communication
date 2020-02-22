@@ -20,8 +20,9 @@ public class BrzPublicMessageHandler implements BrzRouterHandler{
 
         // Add the message to our store
         BreezeAPI api = BreezeAPI.getInstance();
-        api.state.addPublicMessage(packet.message());
-
+        if(api.state.isPublicThreadOn()){
+            api.state.addPublicMessage(packet.message());
+        }
         // Set "handled" to false so the message continues broadcasting
         return false;
     }

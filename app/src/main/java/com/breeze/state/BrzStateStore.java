@@ -14,6 +14,16 @@ import java.util.Set;
 
 public class BrzStateStore extends EventEmitter {
 
+    public boolean isPublicThreadOn() {
+        return isPublicThreadOn;
+    }
+
+    public void setPublicThreadOn(boolean publicThreadOn) {
+        isPublicThreadOn = publicThreadOn;
+    }
+
+    private boolean isPublicThreadOn;
+
     private static BrzStateStore instance = new BrzStateStore();
 
     public static BrzStateStore getStore() {

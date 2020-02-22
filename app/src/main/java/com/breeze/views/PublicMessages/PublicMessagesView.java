@@ -36,8 +36,6 @@ public class PublicMessagesView extends Fragment {
 
     public PublicMessageList list;
     private Consumer<Object> onlineListener;
-    private boolean isFeedOn = true;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,7 +59,7 @@ public class PublicMessagesView extends Fragment {
             switch(e.getAction()){
                 case MotionEvent.ACTION_UP:
                     if(publicSwitch.isChecked()){
-
+                        api.state.setPublicThreadOn(false);
                         Toast.makeText(getActivity(), "Thread activity: OFF", Toast.LENGTH_LONG).show();
                         publicSwitch.setChecked(false);
                         return true;
@@ -99,6 +97,7 @@ public class PublicMessagesView extends Fragment {
 
                         Toast.makeText(getActivity(), "Thread activity: ON", Toast.LENGTH_LONG).show();
                         publicSwitch.setChecked(true);
+                        api.state.setPublicThreadOn(true);
                         return true;
                     }
             }
