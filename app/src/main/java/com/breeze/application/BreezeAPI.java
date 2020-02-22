@@ -504,13 +504,13 @@ public class BreezeAPI extends Service {
         router.broadcast(p);
     }
 //
-//    public void sendProfileUpdates(BrzProfileImageEvent newProfile, Bitmap bm)
-//    {
-//        BrzPacket newInfoPack = new BrzPacket(newProfile);
-//        InputStream stream = BrzStorage.bitmapToInputStream(bm, 45);
-//        router.sendStream(newInfoPack, stream);
-//
-//    }
+    public void sendProfileUpdates(BrzProfileImageEvent newProfile, Bitmap bm)
+    {
+        BrzPacket newInfoPack = new BrzPacket(newProfile);
+        InputStream stream = BrzStorage.bitmapToInputStream(bm, 45);
+        router.sendStream(newInfoPack, stream);
+
+    }
     public void sendProfileResponse(BrzPacket packet, Bitmap bm) {
         // Fuck the quality :)
         InputStream stream = BrzStorage.bitmapToInputStream(bm, 45);

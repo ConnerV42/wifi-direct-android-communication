@@ -35,6 +35,8 @@ public class PublicMessagesView extends Fragment {
 
     public PublicMessageList list;
     private Consumer<Object> onlineListener;
+    private boolean isFeedOn = true;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -82,6 +84,9 @@ public class PublicMessagesView extends Fragment {
                         ImageButton sendMessage = view.findViewById(R.id.sendMessage);
                         // Set up message sending listener
                         sendMessage.setOnClickListener(vw -> {
+                            if(!publicSwitch.isChecked()) {
+                                return;
+                            }
                             String messageBoxText = messageBox.getText().toString();
 
                             // Reset message box

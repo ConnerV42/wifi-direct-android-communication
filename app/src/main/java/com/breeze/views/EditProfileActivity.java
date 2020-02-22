@@ -174,10 +174,10 @@ public class EditProfileActivity extends Fragment
 
 
         //send out new updates through profile event
-//        BrzProfileImageEvent sendNewStuff = new BrzProfileImageEvent(node.name, node.id, true);
-//
-//        Bitmap bm = api.storage.getProfileImage(api.storage.PROFILE_DIR, node.id);
-//        api.sendProfileUpdates(sendNewStuff, bm);
+        BrzProfileImageEvent sendNewStuff = new BrzProfileImageEvent(node.name, node.id, true);
+
+        Bitmap bm = api.storage.getProfileImage(api.storage.PROFILE_DIR, node.id);
+        api.sendProfileUpdates(sendNewStuff, bm);
 
 
     }
