@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
@@ -141,7 +142,11 @@ public class PublicMessagesView extends Fragment {
         graph.on("addVertex", this.onlineListener);
         graph.on("deleteVertex", this.onlineListener);
         graph.on("setVertex", this.onlineListener);
-        this.list.cleanup();
+        try {
+            this.list.cleanup();
+        } catch(Exception e){
+            Log.i("PUBLICMESSAGESVIEW", "Error while cleaning up");
+        }
     }
 
 }
