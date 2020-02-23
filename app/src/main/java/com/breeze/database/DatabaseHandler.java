@@ -29,6 +29,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String BRZNODE_TABLE_NAME = "BrzNode";
     private static final String BRZRECEIPT_TABLE_NAME = "BrzMessageReceipt";
     private static final String BRZACTIONS_TABLE_NAME = "BrzActions";
+    private static final String BLOCKED_BRZNODES_TABLE_NAME = "BlockedBrzNodes";
+
     private static final String[] tableNames = new String[]{
             BRZCHAT_TABLE_NAME,
             BRZMESSAGE_TABLE_NAME,
@@ -64,18 +66,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             "'name' TEXT NOT NULL, " +
             "'alias' TEXT NOT NULL)";
 
-
-    /**
-     * TODO:
-     * In order to connect BrzNodes to their respective chats in the database, I'm creating a
-     * table that links them (BrzNode and BrzChat) together because it'll be a many to many relationship
-     */
-    private static final String INIT_CHAT_HAS_BRZNODE_TABLE = "CREATE TABLE IF NOT EXISTS BrzChatHasBrzNode ('id' INTEGER PRIMARY KEY AUTOINCREMENT, " +
-            "'brzNodeId' TEXT NOT NULL," +
-            "'brzChatId' TEXT NOT NULL," +
-            "FOREIGN KEY ('brzNodeId') REFERENCES BrzNode(id)," +
-            "FOREIGN KEY ('brzChatId') REFERENCES BrzChat(id))";
-
     private static final String INIT_BRZRECEIPT_TABLE = "CREATE TABLE IF NOT EXISTS " + BRZRECEIPT_TABLE_NAME + " (" +
             "'id' TEXT PRIMARY KEY NOT NULL, " +
             "'delivered' BOOLEAN NOT NULL, " +
@@ -87,6 +77,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             "'id' TEXT PRIMARY KEY NOT NULL, " +
             "'json' TEXT NOT NULL" +
             ")";
+
+    private static final String INIT_BLOCKED_BRZNODES_TABLE = "CREATE TABLE IF NOT EXISTS " + BLOCKED_BRZNODES_TABLE_NAME + "( " +
+            "'endpointId' TEXT PRIMARY KEY NOT NULL, " +
+            "'alias' TEXT NOT NULL)";
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -100,6 +94,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL(INIT_BRZNODE_TABLE);
         db.execSQL(INIT_BRZRECEIPT_TABLE);
         db.execSQL(INIT_BRZACTIONS_TABLE);
+        db.execSQL(INIT_BLOCKED_BRZNODES_TABLE);
         Log.i("DatabaseInfo", "SQLITE tables created successfully");
     }
 
@@ -192,6 +187,46 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         c.close();
         db.close();
         return nodes;
+    }
+
+    /*
+     *      Blocked Brz Nodes table
+     */
+
+    public List<String> getBlockedNodeEndpointIds(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] args = {};
+        Cursor c = db.rawQuery("SELECT * FROM " + BRZNODE_TABLE_NAME + ";", args);
+        if (c == null) {
+            db.close();
+            return null;
+        } else if (c.getCount() < 1) {
+            c.close();
+            db.close();
+            return null;
+        }
+        c.moveToFirst();
+        List<String> blockedNode = new LinkedList<>();
+        for (int i = 0; i < c.getCount(); i++) {
+            String endpointId = c.getString(c.getColumnIndex("endpointId"));
+            blockedNode.add(endpointId);
+            c.moveToNext();
+        }
+        c.close();
+        db.close();
+        return blockedNode;
+    }
+
+    public String getBlockedNodeAlias(String endpointId){
+        return null;
+    }
+
+    public void setBlockedNode(BrzNode node){
+
+    }
+
+    public void removeBlockedNode(String endpointId){
+
     }
 
     /*

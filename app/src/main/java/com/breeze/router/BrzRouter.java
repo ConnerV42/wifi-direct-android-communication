@@ -365,7 +365,13 @@ public class BrzRouter extends EventEmitter {
         @Override
         public void onPayloadReceived(@NonNull String endpointId, @NonNull Payload payload) {
             Log.i("ENDPOINT", "Received a payload");
-
+            List<BrzNode> blockedNodes = BreezeAPI.getInstance().state.getAllBlockedNodes();
+            for(BrzNode node : blockedNodes){
+                if(node.endpointId.equals(endpointId)){
+                    Log.i("ENDPOINT", "Received a payload from a blocked node, not opening");
+                    return;
+                }
+            }
             // This is a raw stream, not a packet
             if (streamBuffer.isStreamPayload(payload.getId())) {
                 streamBuffer.addStream(payload);
