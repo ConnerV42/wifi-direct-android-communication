@@ -36,7 +36,12 @@
         tools:layout="@layout/fragment_app_settings">
         <action
             android:id="@+id/action_appSettings_to_blacklistView"
-            app:destination="@id/blacklistView" />
+            app:destination="@id/blacklistView"
+            app:enterAnim="@anim/slide_from_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_from_left"
+            app:popExitAnim="@anim/slide_out_right"
+            />
     </fragment>
     <fragment
         android:id="@+id/blacklistView"
