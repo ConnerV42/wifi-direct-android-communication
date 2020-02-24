@@ -86,6 +86,8 @@ public class PublicMessagesView extends Fragment {
             });
 
             AlertDialog dialog = builder.create();
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
             api.preferences.edit().putBoolean("dialogShown", true).apply();
             dialog.show();
         } else {
