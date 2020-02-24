@@ -171,15 +171,6 @@ public class EditProfileActivity extends Fragment
                     .show();
 
         });
-
-
-        //send out new updates through profile event
-        BrzProfileImageEvent sendNewStuff = new BrzProfileImageEvent(node.name, node.id, true);
-
-        Bitmap bm = api.storage.getProfileImage(api.storage.PROFILE_DIR, node.id);
-        api.sendProfileUpdates(sendNewStuff, bm);
-
-
     }
 
 
@@ -203,6 +194,12 @@ public class EditProfileActivity extends Fragment
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 ImageView profileImage = getView().findViewById(R.id.profile_image_edit);
                                 profileImage.setImageBitmap(bitmap);
+                                //send out new updates through profile event
+                                BrzProfileImageEvent sendNewStuff = new BrzProfileImageEvent(node.name, node.id, true);
+                                BreezeAPI api = BreezeAPI.getInstance();
+
+                                Bitmap bm = api.storage.getProfileImage(api.storage.PROFILE_DIR, node.id);
+                                api.sendProfileUpdates(sendNewStuff, bm);
 
                             }
                         })
