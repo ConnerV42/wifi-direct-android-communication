@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,6 +59,8 @@ public class AppSettingsView extends Fragment {
 
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         if (activity == null) return;
+        ImageButton ac = activity.findViewById(R.id.scanButton);
+        ac.setVisibility(View.INVISIBLE);
         ActionBar ab = activity.getSupportActionBar();
         if (ab == null) return;
         ab.setTitle("Settings");
