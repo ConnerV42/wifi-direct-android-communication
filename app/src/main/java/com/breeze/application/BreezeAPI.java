@@ -43,6 +43,7 @@ import com.breeze.views.ProfileActivity;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 
 public class BreezeAPI extends Service {
@@ -502,16 +503,23 @@ public class BreezeAPI extends Service {
         if(this.graph.getNodeCollection().size() == 0) return;
         BrzPacket newInfoPack = new BrzPacket(newProfile);
 
-        //Uri fileUri = this.storage.getProfileImage(this.storage.PROFILE_DIR,this.hostNode.id);
+        Collection<BrzNode> nodes = this.graph.getNodeCollection();
 
-        BrzFileInfo info = new BrzFileInfo();
-        info.fileName = this.storage.getHostNodeImageAsFile().toString();
-        newInfoPack.addStream(info);
-        InputStream stream = BrzStorage.bitmapToInputStream(bm, 45);
-        router.sendStream(newInfoPack, stream);
+        for (BrzNode node : nodes) {
+            if (node.id.equals(this.hostNode.id))
+                continue;
 
+            BrzPacket clone = newInfoPack;
+            clone.to = node.id;
+            BrzFileInfo info = new BrzFileInfo();
+            info.fileName = this.storage.getHostNodeImageAsFile().toString();
+            clone.addStream(info);
 
+            InputStream stream = BrzStorage.bitmapToInputStream(bm, 45);
+            router.sendStream(clone, stream);
+        }
     }
+
     public void sendProfileResponse(BrzPacket packet, Bitmap bm) {
         // Fuck the quality :)
         InputStream stream = BrzStorage.bitmapToInputStream(bm, 45);
