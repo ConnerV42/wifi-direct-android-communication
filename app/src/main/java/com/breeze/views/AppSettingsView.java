@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -36,9 +37,9 @@ public class AppSettingsView extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Button bWipeDB = view.findViewById(R.id.wipeDatabase);
-        Button bRestartService = view.findViewById(R.id.restartService);
-        Button bShowBlacklist = view.findViewById(R.id.showBlacklist);
+        TextView bWipeDB = view.findViewById(R.id.wipe_database);
+        TextView bRestartService = view.findViewById(R.id.restart_service);
+        TextView bShowBlacklist = view.findViewById(R.id.block_users);
         bWipeDB.setOnClickListener((View v) -> {
             this.showWipeDatabaseDialog();
         });
