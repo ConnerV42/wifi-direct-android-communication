@@ -60,7 +60,7 @@ public class PublicMessagesView extends Fragment {
                 case MotionEvent.ACTION_UP:
                     if(publicSwitch.isChecked()){
                         api.state.setPublicThreadOn(false);
-                        Toast.makeText(getActivity(), "Thread activity: OFF", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(getActivity(), "Thread activity: OFF", Toast.LENGTH_LONG).show();
                         publicSwitch.setChecked(false);
                         return true;
 
@@ -72,13 +72,9 @@ public class PublicMessagesView extends Fragment {
                         RecyclerView msgView = view.findViewById(R.id.publicMessageList);
                         this.list = new PublicMessageList(this.getActivity(), msgView);
                         msgView.setAdapter(this.list);
-
                         LinearLayoutManager msgLayout = new LinearLayoutManager(this.getActivity());
                         msgLayout.setStackFromEnd(true);
                         msgView.setLayoutManager(msgLayout);
-
-
-
                         EditText messageBox = view.findViewById(R.id.editText);
                         ImageButton sendMessage = view.findViewById(R.id.sendMessage);
                         // Set up message sending listener
@@ -95,7 +91,7 @@ public class PublicMessagesView extends Fragment {
                             api.sendPublicMessage(msg);
                         });
 
-                        Toast.makeText(getActivity(), "Thread activity: ON", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(getActivity(), "Thread activity: ON", Toast.LENGTH_LONG).show();
                         publicSwitch.setChecked(true);
                         api.state.setPublicThreadOn(true);
                         return true;

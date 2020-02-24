@@ -150,6 +150,10 @@ public class BrzStorage extends EventEmitter {
         saveStreamToFile(fileName, profileImageFile, stream);
     }
 
+    public File getHostNodeImageAsFile() {
+        File profileImageFile = new File(api.getExternalFilesDir(PROFILE_DIR), this.api.hostNode.id);
+        return profileImageFile;
+    }
     public void saveProfileImage(String directory, String fileName, Bitmap bm) {
         File profileImageFile = new File(api.getExternalFilesDir(directory), fileName);
         saveBitmapToFile(profileImageFile, bm);

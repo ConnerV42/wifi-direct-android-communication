@@ -42,6 +42,7 @@ import com.breeze.views.ProfileActivity;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.List;
 
 public class BreezeAPI extends Service {
@@ -498,9 +499,17 @@ public class BreezeAPI extends Service {
 //
     public void sendProfileUpdates(BrzProfileImageEvent newProfile, Bitmap bm)
     {
+        if(this.graph.getNodeCollection().size() == 0) return;
         BrzPacket newInfoPack = new BrzPacket(newProfile);
+
+        //Uri fileUri = this.storage.getProfileImage(this.storage.PROFILE_DIR,this.hostNode.id);
+
+        BrzFileInfo info = new BrzFileInfo();
+        info.fileName = this.storage.getHostNodeImageAsFile().toString();
+        newInfoPack.addStream(info);
         InputStream stream = BrzStorage.bitmapToInputStream(bm, 45);
         router.sendStream(newInfoPack, stream);
+
 
     }
     public void sendProfileResponse(BrzPacket packet, Bitmap bm) {
