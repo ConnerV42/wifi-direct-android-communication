@@ -335,7 +335,13 @@ public class BrzRouter extends EventEmitter {
         // If the packet is not a valid broadcast
         // and it is for the host node
         else if (packet.to.equals(this.hostNode.id)) {
-
+            List<BrzNode> blockedNodes = BreezeAPI.getInstance().state.getAllBlockedNodes();
+            for(BrzNode node : blockedNodes){
+                if(node.endpointId.equals(fromEndpointId)){
+                    Log.i("ENDPOINT", "Received a payload from a blocked node, not opening");
+                    return;
+                }
+            }
             // Decrypt the packet unless it's not an encryptable type
             if (packet.type != BrzPacket.BrzPacketType.GRAPH_QUERY) {
                 api.encryption.decryptPacket(packet);
@@ -365,13 +371,6 @@ public class BrzRouter extends EventEmitter {
         @Override
         public void onPayloadReceived(@NonNull String endpointId, @NonNull Payload payload) {
             Log.i("ENDPOINT", "Received a payload");
-            List<BrzNode> blockedNodes = BreezeAPI.getInstance().state.getAllBlockedNodes();
-            for(BrzNode node : blockedNodes){
-                if(node.endpointId.equals(endpointId)){
-                    Log.i("ENDPOINT", "Received a payload from a blocked node, not opening");
-                    return;
-                }
-            }
             // This is a raw stream, not a packet
             if (streamBuffer.isStreamPayload(payload.getId())) {
                 streamBuffer.addStream(payload);
