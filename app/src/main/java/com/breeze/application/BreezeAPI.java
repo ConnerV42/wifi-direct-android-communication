@@ -511,6 +511,7 @@ public class BreezeAPI extends Service {
 
             BrzPacket clone = newInfoPack;
             clone.to = node.id;
+            clone.type = BrzPacket.BrzPacketType.PROFILE_RESPONSE;
             BrzFileInfo info = new BrzFileInfo();
             info.fileName = this.storage.getHostNodeImageAsFile().toString();
             clone.addStream(info);
