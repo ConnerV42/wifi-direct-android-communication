@@ -278,7 +278,11 @@ public class BreezeAPI extends Service {
         if (chat == null) return false;
         if (!chat.isGroup) {
             BrzNode n = graph.getVertex(handshake.from);
-            chat.name = n.name;
+            if (n != null) {
+                chat.name = n.name;
+            } else {
+                return false;
+            }
         }
 
         // Check to make sure multiple pending chats with the same participants are ignored
