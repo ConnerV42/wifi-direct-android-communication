@@ -17,9 +17,9 @@ public class BrzPacketBuilder {
         return new BrzPacket(body, BrzPacket.BrzPacketType.MESSAGE, msgTo, false);
     }
 
-    public static BrzPacket graphQuery(String to, String from) {
+    public static BrzPacket graphQuery(String from) {
         BrzGraphQuery body = new BrzGraphQuery(true, from);
-        return new BrzPacket(body, BrzPacket.BrzPacketType.GRAPH_QUERY, to, false);
+        return new BrzPacket(body, BrzPacket.BrzPacketType.GRAPH_QUERY, "BROADCAST", true);
     }
 
     public static BrzPacket aliasAndNameEvent(String to, String from, String name, String alias) {

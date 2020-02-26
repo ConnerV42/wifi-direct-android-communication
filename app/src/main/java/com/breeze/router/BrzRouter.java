@@ -11,6 +11,7 @@ import com.breeze.graph.BrzGraph;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
+import com.breeze.router.handlers.BrzAliasNameUpdateHandler;
 import com.breeze.router.handlers.BrzFileInfoPktHandler;
 import com.breeze.router.handlers.BrzGraphHandler;
 import com.breeze.router.handlers.BrzHandshakeHandler;
@@ -92,6 +93,7 @@ public class BrzRouter extends EventEmitter {
         this.handlers.add(new BrzMessageReceiptHandler());
         this.handlers.add(new BrzProfileHandler(this));
         this.handlers.add(new BrzPublicMessageHandler(this));
+        this.handlers.add(new BrzAliasNameUpdateHandler(this));
     }
 
     //

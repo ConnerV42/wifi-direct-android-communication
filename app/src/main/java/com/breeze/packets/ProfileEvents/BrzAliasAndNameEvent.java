@@ -12,7 +12,7 @@ public class BrzAliasAndNameEvent implements BrzSerializable{
     public String name = "";
     public String alias = "";
 
-    public BrzAliasAndNameEvent ( String from, String name, String alias) {
+    public BrzAliasAndNameEvent (String from, String name, String alias) {
         this.from = from;
         this.name = name;
         this.alias = alias;
