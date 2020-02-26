@@ -11,6 +11,7 @@ import com.breeze.packets.ChatEvents.BrzChatResponse;
 import com.breeze.packets.GraphEvents.BrzGraphEvent;
 import com.breeze.packets.GraphEvents.BrzGraphQuery;
 import com.breeze.packets.MessageEvents.BrzMessageReceipt;
+import com.breeze.packets.ProfileEvents.BrzAliasAndNameEvent;
 import com.breeze.packets.ProfileEvents.BrzProfileImageEvent;
 
 import org.json.JSONObject;
@@ -27,6 +28,8 @@ public class BrzPacket implements BrzSerializable {
         CHAT_HANDSHAKE, CHAT_RESPONSE,
 
         PROFILE_REQUEST, PROFILE_RESPONSE,
+
+        ALIAS_AND_NAME_UPDATE,
 
 
     }
@@ -69,9 +72,12 @@ public class BrzPacket implements BrzSerializable {
         return new BrzMessage(this.body);
     }
 
-
     public BrzGraphQuery graphQuery() {
         return new BrzGraphQuery(this.body);
+    }
+
+    public BrzAliasAndNameEvent aliasAndNameEvent() {
+        return new BrzAliasAndNameEvent(this.body);
     }
 
     public BrzGraphEvent graphEvent() {

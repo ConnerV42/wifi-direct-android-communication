@@ -8,6 +8,7 @@ import com.breeze.packets.GraphEvents.BrzGraphEvent;
 import com.breeze.packets.GraphEvents.BrzGraphQuery;
 
 import com.breeze.packets.MessageEvents.BrzMessageReceipt;
+import com.breeze.packets.ProfileEvents.BrzAliasAndNameEvent;
 
 public class BrzPacketBuilder {
 
@@ -19,6 +20,11 @@ public class BrzPacketBuilder {
     public static BrzPacket graphQuery(String to, String from) {
         BrzGraphQuery body = new BrzGraphQuery(true, from);
         return new BrzPacket(body, BrzPacket.BrzPacketType.GRAPH_QUERY, to, false);
+    }
+
+    public static BrzPacket aliasAndNameEvent(String to, String from, String name, String alias) {
+        BrzAliasAndNameEvent body = new BrzAliasAndNameEvent(from, name, alias);
+        return new BrzPacket(body, BrzPacket.BrzPacketType.ALIAS_AND_NAME_UPDATE, to, false);
     }
 
     public static BrzPacket graphResponse(BrzGraph graph, BrzNode hostNode, String to) {
