@@ -34,15 +34,17 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
         View v;
         int position = 0;
         boolean blacklist = false;
-        BreezeAPI api = BreezeAPI.getInstance();
+        BreezeAPI api;
         public UserItemHolder(View v) {
             super(v);
             this.v = v;
+            this.api = BreezeAPI.getInstance();
         }
         public UserItemHolder(View v, boolean blacklist) {
             super(v);
             this.v = v;
             this.blacklist = blacklist;
+            this.api = BreezeAPI.getInstance();
         }
         public void bind(BrzNode node, int position, Context ctx, List<String> nodes) {
             boolean nodeIsInBlacklist = false;

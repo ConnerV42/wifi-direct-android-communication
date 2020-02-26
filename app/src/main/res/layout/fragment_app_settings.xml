@@ -76,6 +76,26 @@
             android:textSize="24sp"
             android:typeface="normal" />
 
+        <TextView
+            android:id="@+id/aboutButton"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:background="@drawable/settingsclicked"
+            android:clickable="true"
+            android:focusable="true"
+            android:longClickable="true"
+            android:paddingStart="5dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="5dp"
+            android:paddingBottom="5dp"
+            android:layout_marginTop="2dp"
+            android:shadowColor="@color/colorAccent"
+            android:text="@string/About"
+            android:textAlignment="textStart"
+            android:textColor="@color/common_google_signin_btn_text_dark_default"
+            android:textSize="24sp"
+            android:typeface="normal" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

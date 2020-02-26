@@ -37,4 +37,5 @@
     <string name="wipe_database">\tWipe Database</string>
     <string name="restart_service">\tRestart Service</string>
     <string name="block_users">\tBlock Users</string>
+    <string name="About">\tAbout</string>
 </resources>

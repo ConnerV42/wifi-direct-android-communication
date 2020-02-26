@@ -2,6 +2,8 @@ package com.breeze.views;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.NavOptions;
@@ -42,6 +45,13 @@ public class AppSettingsView extends Fragment {
         TextView bWipeDB = view.findViewById(R.id.wipe_database);
         TextView bRestartService = view.findViewById(R.id.restart_service);
         TextView bShowBlacklist = view.findViewById(R.id.block_users);
+        TextView bAboutMenu = view.findViewById(R.id.aboutButton);
+
+        setColorStateList(bAboutMenu);
+        setColorStateList(bRestartService);
+        setColorStateList(bShowBlacklist);
+        setColorStateList(bWipeDB);
+
         bWipeDB.setOnClickListener((View v) -> {
             this.showWipeDatabaseDialog();
         });
@@ -51,6 +61,10 @@ public class AppSettingsView extends Fragment {
         bShowBlacklist.setOnClickListener((View v) -> {
             this.showBlacklistView();
         });
+        bAboutMenu.setOnClickListener((View v) -> {
+            this.showAboutMenu();
+        });
+
     }
 
     @Override
@@ -104,6 +118,32 @@ public class AppSettingsView extends Fragment {
                 .build();
         nav.navigate(R.id.blacklistView,null, options);
     }
+    private void showAboutMenu(){
+        new AlertDialog.Builder(getActivity())
+                .setTitle("About Breeze")
+                .setMessage("Breeze v0.1 By: Zach Sanders, Conner  Verret, Pavel Chernichenko, Jake Stevens")
+                .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        return;
+                    }
+                })
+                .show();
+    }
+    private void setColorStateList(TextView view) {
+        int[][] states = new int[][] {
+                new int[] { android.R.attr.state_pressed}, // pressed
+                new int[] { android.R.attr.state_focused}, // focused
+                new int[] { android.R.attr.state_enabled}  // enabled
+        };
+        int[] colors = new int[] {
+                ContextCompat.getColor(this.getContext(), R.color.colorAccent),
+                ContextCompat.getColor(this.getContext(), R.color.colorAccent),
+                ContextCompat.getColor(this.getContext(), R.color.design_default_color_on_primary),
+        };
+        ColorStateList list = new ColorStateList(states, colors);
+        view.setTextColor(list);
+    }
+
 
 }
 
