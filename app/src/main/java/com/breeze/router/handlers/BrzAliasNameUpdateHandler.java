@@ -44,7 +44,7 @@ public class BrzAliasNameUpdateHandler implements  BrzRouterHandler{
         }
         return true;
     }
-    
+
     @Override
     public boolean handles(BrzPacket.BrzPacketType type) {
         return type == BrzPacket.BrzPacketType.ALIAS_AND_NAME_UPDATE;

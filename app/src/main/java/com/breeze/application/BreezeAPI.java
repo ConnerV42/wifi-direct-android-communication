@@ -34,6 +34,7 @@ import com.breeze.graph.BrzGraph;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.ChatEvents.BrzChatHandshake;
 import com.breeze.packets.ChatEvents.BrzChatResponse;
+import com.breeze.packets.ProfileEvents.BrzAliasAndNameEvent;
 import com.breeze.packets.ProfileEvents.BrzProfileImageEvent;
 import com.breeze.router.BrzRouter;
 import com.breeze.state.BrzStateStore;
@@ -501,8 +502,25 @@ public class BreezeAPI extends Service {
         p.to = node.id;
         router.broadcast(p);
     }
-//
-    public void sendProfileUpdates(BrzProfileImageEvent newProfile, Bitmap bm)
+
+    public void sendProfileNameAndAliasUpdates(BrzAliasAndNameEvent newProfNames)
+    {
+        if(this.graph.getNodeCollection().size() == 0) return;
+        BrzPacket newPak = new BrzPacket(newProfNames);
+
+        Collection<BrzNode> nodes = this.graph.getNodeCollection();
+
+        for (BrzNode node : nodes) {
+            if (node.id.equals(this.hostNode.id))
+                continue;
+            BrzPacket clone = newPak;
+            clone.to = node.id;
+            clone.type = BrzPacket.BrzPacketType.ALIAS_AND_NAME_UPDATE;
+            router.broadcast(clone);
+        }
+
+    }
+    public void sendProfileImageUpdates(BrzProfileImageEvent newProfile, Bitmap bm)
     {
         if(this.graph.getNodeCollection().size() == 0) return;
         BrzPacket newInfoPack = new BrzPacket(newProfile);

@@ -41,6 +41,8 @@ import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.graph.BrzGraph;
+import com.breeze.packets.BrzPacket;
+import com.breeze.packets.ProfileEvents.BrzAliasAndNameEvent;
 import com.breeze.packets.ProfileEvents.BrzProfileImageEvent;
 
 
@@ -135,6 +137,11 @@ public class EditProfileActivity extends Fragment
                             updateNewUsername(newName);
                             userName.setTextColor(Color.BLACK);
                             userName.setText(api.hostNode.name);
+                            BrzAliasAndNameEvent sendNewStuff = new BrzAliasAndNameEvent(node.name, node.name, node.alias);
+                            BreezeAPI api = BreezeAPI.getInstance();
+                            api.sendProfileNameAndAliasUpdates(sendNewStuff);
+
+
                         }
                     })
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -162,6 +169,10 @@ public class EditProfileActivity extends Fragment
                             updateNewAlias(newAlias);
                             aliasName.setTextColor(Color.BLACK);
                             aliasName.setText(api.hostNode.alias);
+                            BrzAliasAndNameEvent sendNewStuff = new BrzAliasAndNameEvent(node.name, node.name, node.alias);
+                            BreezeAPI api = BreezeAPI.getInstance();
+                            api.sendProfileNameAndAliasUpdates(sendNewStuff);
+
                         }
                     })
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -199,7 +210,7 @@ public class EditProfileActivity extends Fragment
                                 BreezeAPI api = BreezeAPI.getInstance();
 
                                 Bitmap bm = api.storage.getProfileImage(api.storage.PROFILE_DIR, node.id);
-                                api.sendProfileUpdates(sendNewStuff, bm);
+                                api.sendProfileImageUpdates(sendNewStuff, bm);
 
                             }
                         })
