@@ -25,6 +25,13 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
 
     // Graph manipulation methods
 
+    public BrzGraph() {
+    }
+
+    public BrzGraph(String json) {
+        this.fromJSON(json);
+    }
+
     public List<String> bfs(String startId, String destinationId) {
         HashMap<String, Boolean> visited = new HashMap<>();
         Queue<List<String>> queue = new LinkedList<>();
@@ -93,7 +100,6 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
         }
     }
 
-
     public String nextHop(String currentUUID, String destinationUUID) {
         List<String> path = this.bfs(currentUUID, destinationUUID);
         if (path == null) return null;
@@ -160,10 +166,42 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
         return new LinkedList<>(neighbors);
     }
 
-    public BrzGraph mergeGraph(String graphJSON) {
+    public BrzGraph diff(String graphJSON) {
         BrzGraph otherGraph = new BrzGraph();
-        otherGraph.fromJSON(graphJSON);
+        return diff(otherGraph);
+    }
 
+    public BrzGraph diff(BrzGraph otherGraph) {
+        // First clone the other graph
+        BrzGraph g = new BrzGraph(otherGraph.toJSON());
+
+        // Remove nodes we already know about
+        for (BrzNode n : vertexList.values()) {
+            g.removeVertex(n.id);
+        }
+
+        // Return only the new stuff
+        return g;
+    }
+
+    // A version that ensures a particular edge also exists on the diff
+    public BrzGraph diff(BrzGraph otherGraph, BrzNode hostNode, BrzNode otherNode) {
+        BrzGraph diff = this.diff(otherGraph);
+        diff.setVertex(hostNode);
+        diff.setVertex(otherNode);
+        diff.addEdge(hostNode.id, otherNode.id);
+
+        diff.removeDisconnected(hostNode.id);
+
+        return diff;
+    }
+
+    public void mergeGraph(String graphJSON) {
+        BrzGraph otherGraph = new BrzGraph(graphJSON);
+        this.mergeGraph(otherGraph);
+    }
+
+    public void mergeGraph(BrzGraph otherGraph) {
         // Merge vertex lists
         for (BrzNode n : otherGraph.vertexList.values()) {
             this.addVertex(n);
@@ -183,7 +221,6 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
         }
 
         this.emit("graphMerge");
-        return otherGraph;
     }
 
     @NonNull
@@ -280,7 +317,6 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
             try {
                 logFile.createNewFile();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -290,7 +326,6 @@ public class BrzGraph extends EventEmitter implements BrzSerializable, Iterable<
             buf.newLine();
             buf.close();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

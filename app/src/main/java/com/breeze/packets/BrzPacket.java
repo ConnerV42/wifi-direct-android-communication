@@ -10,6 +10,7 @@ import com.breeze.packets.ChatEvents.BrzChatHandshake;
 import com.breeze.packets.ChatEvents.BrzChatResponse;
 import com.breeze.packets.GraphEvents.BrzGraphEvent;
 import com.breeze.packets.GraphEvents.BrzGraphQuery;
+import com.breeze.packets.GraphEvents.BrzGraphUpdateBroadcast;
 import com.breeze.packets.LiveAudio.BrzLiveAudioEvent;
 import com.breeze.packets.MessageEvents.BrzMessageReceipt;
 import com.breeze.packets.ProfileEvents.BrzProfileImageEvent;
@@ -23,7 +24,7 @@ public class BrzPacket implements BrzSerializable {
     public enum BrzPacketType {
         MESSAGE, PUBLIC_MESSAGE, MESSAGE_RECEIPT,
 
-        GRAPH_QUERY, GRAPH_EVENT,
+        GRAPH_QUERY, GRAPH_EVENT, GRAPH_UPDATE,
 
         CHAT_HANDSHAKE, CHAT_RESPONSE,
 
@@ -77,6 +78,8 @@ public class BrzPacket implements BrzSerializable {
     public BrzGraphEvent graphEvent() {
         return new BrzGraphEvent(this.body);
     }
+
+    public BrzGraphUpdateBroadcast graphUpdate() { return new BrzGraphUpdateBroadcast(this.body); }
 
     public BrzChatHandshake chatHandshake() {
         return new BrzChatHandshake(this.body);

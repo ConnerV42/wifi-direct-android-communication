@@ -9,6 +9,7 @@ import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.packets.GraphEvents.BrzGraphEvent;
 import com.breeze.packets.GraphEvents.BrzGraphQuery;
+import com.breeze.packets.GraphEvents.BrzGraphUpdateBroadcast;
 import com.breeze.router.BrzRouter;
 
 public class BrzGraphHandler implements BrzRouterHandler {
@@ -44,23 +45,23 @@ public class BrzGraphHandler implements BrzRouterHandler {
                 Log.i("ENDPOINT", "Merging graph information");
 
                 // Add the newly connected node
-                BrzNode hostNode = new BrzNode(query.hostNode);
-                hostNode.endpointId = fromEndpointId;
-                graph.setVertex(hostNode);
-                graph.addEdge(this.router.hostNode.id, hostNode.id);
+                BrzNode connectingNode = new BrzNode(query.hostNode);
+                connectingNode.endpointId = fromEndpointId;
+                graph.setVertex(connectingNode);
+                graph.addEdge(router.hostNode.id, connectingNode.id);
 
-                // Broadcast connect event
-                this.router.broadcast(BrzPacketBuilder.graphEvent(true, router.hostNode, hostNode), fromEndpointId);
+                // Generate a difference graph
+                BrzGraph diff = graph.diff(new BrzGraph(query.graph), router.hostNode, connectingNode);
 
-                // Merge their graph into ours
-                BrzGraph otherGraph = graph.mergeGraph(query.graph);
+                // Load our graph with new information from the other node
+                graph.mergeGraph(query.graph);
 
-                // Send a BrzProfileImageEvent packet to all newly merged nodes
-                api.requestProfileImages(otherGraph);
+                // Finally, broadcast the diff to previously connected nodes
+                router.broadcast(BrzPacketBuilder.graphUpdateBroadcast(diff));
             }
         }
 
-        // Respond to graph queries
+
         if (packet.type == BrzPacket.BrzPacketType.GRAPH_EVENT) {
 
             BrzGraphEvent ge = packet.graphEvent();
@@ -81,12 +82,23 @@ public class BrzGraphHandler implements BrzRouterHandler {
                 graph.removeDisconnected(router.hostNode.id);
             }
 
+            // Continue broadcasting
+            return false;
         }
+
+        if (packet.type == BrzPacket.BrzPacketType.GRAPH_UPDATE) {
+            BrzGraphUpdateBroadcast gu = packet.graphUpdate();
+            graph.mergeGraph(gu.diff);
+
+            // Continue broadcasting
+            return false;
+        }
+
         return true;
     }
 
     public boolean handles(BrzPacket.BrzPacketType type) {
-        return type == BrzPacket.BrzPacketType.GRAPH_EVENT || type == BrzPacket.BrzPacketType.GRAPH_QUERY;
+        return type == BrzPacket.BrzPacketType.GRAPH_EVENT || type == BrzPacket.BrzPacketType.GRAPH_QUERY || type == BrzPacket.BrzPacketType.GRAPH_UPDATE;
     }
 
 }

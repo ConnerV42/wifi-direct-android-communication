@@ -10,6 +10,7 @@ import com.breeze.packets.GraphEvents.BrzGraphQuery;
 
 import java.io.File;
 
+import com.breeze.packets.GraphEvents.BrzGraphUpdateBroadcast;
 import com.breeze.packets.MessageEvents.BrzMessageReceipt;
 
 public class BrzPacketBuilder {
@@ -33,6 +34,11 @@ public class BrzPacketBuilder {
     public static BrzPacket graphEvent(Boolean connection, BrzNode node1, BrzNode node2) {
         BrzGraphEvent body = new BrzGraphEvent(connection, node1, node2);
         return new BrzPacket(body, BrzPacket.BrzPacketType.GRAPH_EVENT, "BROADCAST", true);
+    }
+
+    public static BrzPacket graphUpdateBroadcast(BrzGraph diff) {
+        BrzSerializable body = new BrzGraphUpdateBroadcast(diff);
+        return new BrzPacket(body, BrzPacket.BrzPacketType.GRAPH_UPDATE, "BROADCAST", true);
     }
 
     public static BrzPacket messageReceipt(String to, String chatId, String messageId, boolean delivered) {
