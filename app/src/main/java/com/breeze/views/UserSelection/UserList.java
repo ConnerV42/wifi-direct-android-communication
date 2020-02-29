@@ -85,6 +85,9 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
             TextView user_name = v.findViewById(R.id.user_name);
             user_name.setText("Connecting...");
 
+            ImageView user_image = v.findViewById(R.id.user_image);
+            user_image.setImageBitmap(api.storage.getVectorAsBitmap(R.drawable.ic_person_black_24dp));
+
             TextView user_alias = v.findViewById(R.id.user_alias);
             user_alias.setVisibility(View.GONE);
 
