@@ -50,7 +50,7 @@ public class BlackListView extends Fragment {
         if (activity == null) return;
         ActionBar ab = activity.getSupportActionBar();
         if (ab == null) return;
-        ab.setTitle("Connected Nodes");
+        ab.setTitle("Block Connected Nodes");
         this.list = new UserList(activity, this.nodes);
         this.list.blacklist = true;
 
@@ -110,7 +110,7 @@ public class BlackListView extends Fragment {
     private void showConfirmBlockDialog(BrzNode node) {
         new AlertDialog.Builder(this.getContext())
                 .setTitle("Block User")
-                .setMessage("Blocking " + node.alias + " from your device will result in ALL data from their device not being processed by your device, and you will not be able to start chats with the user")
+                .setMessage("Blocking " + node.alias + " from your device will result in data directly sent to you from their device not being processed by your device, and you will not be able to start chats with the user. Note that for graph performance, packets from the blocked user to be relayed to other devices will still be processed")
                 .setPositiveButton("I understand", null)
                 .show();
     }

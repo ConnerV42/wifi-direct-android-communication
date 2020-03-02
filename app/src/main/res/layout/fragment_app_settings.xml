@@ -14,87 +14,159 @@
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
 
-        <TextView
-            android:id="@+id/wipe_database"
+        <LinearLayout
+            android:id="@+id/restart_service_layout"
             android:layout_width="match_parent"
             android:layout_height="42dp"
             android:layout_marginBottom="2dp"
-            android:background="@drawable/settingsclicked"
-            android:clickable="true"
-            android:focusable="true"
-            android:longClickable="true"
-            android:paddingStart="5dp"
-            android:paddingTop="5dp"
-            android:paddingEnd="5dp"
-            android:paddingBottom="5dp"
-            android:shadowColor="@color/colorAccent"
-            android:text="@string/wipe_database"
-            android:textAlignment="textStart"
-            android:textColor="@color/common_google_signin_btn_text_dark_default"
-            android:textSize="24sp"
-            android:typeface="normal" />
+            android:background="@color/colorPrimary"
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/restart_service"
+            <TextView
+                android:id="@+id/restart_service"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="2dp"
+                android:layout_weight="7"
+                android:background="@drawable/settingsclicked"
+                android:clickable="true"
+                android:focusable="true"
+                android:longClickable="true"
+                android:paddingStart="5dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="5dp"
+                android:paddingBottom="5dp"
+                android:shadowColor="@color/colorAccent"
+                android:text="@string/restart_service"
+                android:textAlignment="textStart"
+                android:textColor="@color/common_google_signin_btn_text_dark_default"
+                android:textSize="24sp"
+                android:typeface="normal" />
+
+            <ImageView
+                android:id="@+id/wipe_database_icon"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/colorPrimary"
+                app:srcCompat="@android:drawable/ic_menu_revert" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/block_users_layout"
             android:layout_width="match_parent"
             android:layout_height="42dp"
             android:layout_marginBottom="2dp"
-            android:background="@drawable/settingsclicked"
-            android:clickable="true"
-            android:focusable="true"
-            android:longClickable="true"
-            android:paddingStart="5dp"
-            android:paddingTop="5dp"
-            android:paddingEnd="5dp"
-            android:paddingBottom="5dp"
-            android:shadowColor="@color/colorAccent"
-            android:text="@string/restart_service"
-            android:textAlignment="textStart"
-            android:textColor="@color/common_google_signin_btn_text_dark_default"
-            android:textSize="24sp"
-            android:typeface="normal" />
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/block_users"
+            <TextView
+                android:id="@+id/block_users"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="7"
+                android:background="@drawable/settingsclicked"
+                android:clickable="true"
+                android:focusable="true"
+                android:longClickable="true"
+                android:paddingStart="5dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="5dp"
+                android:paddingBottom="5dp"
+                android:shadowColor="@color/colorAccent"
+                android:text="@string/block_users"
+                android:textAlignment="textStart"
+                android:textColor="@color/common_google_signin_btn_text_dark_default"
+                android:textSize="24sp"
+                android:typeface="normal" />
+
+            <ImageView
+                android:id="@+id/wipe_database_icon2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/colorPrimary"
+                app:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/about_layout"
+            android:layout_width="match_parent"
+            android:layout_height="42dp "
+            android:layout_marginBottom="2dp "
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/aboutButton"
+                android:layout_width="0dp"
+                android:layout_height="42dp"
+                android:layout_weight="7"
+                android:background="@drawable/settingsclicked"
+                android:clickable="true"
+                android:focusable="true"
+                android:longClickable="true"
+                android:paddingStart="5dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="5dp"
+                android:paddingBottom="5dp"
+                android:shadowColor="@color/colorAccent"
+                android:text="@string/About"
+                android:textAlignment="textStart"
+                android:textColor="@color/common_google_signin_btn_text_dark_default"
+                android:textSize="24sp"
+                android:typeface="normal" />
+
+            <ImageView
+                android:id="@+id/wipe_database_icon3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/colorPrimary"
+                app:srcCompat="@android:drawable/ic_menu_info_details" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/wipe_db_layout"
             android:layout_width="match_parent"
             android:layout_height="42dp"
-            android:background="@drawable/settingsclicked"
-            android:clickable="true"
-            android:focusable="true"
-            android:longClickable="true"
-            android:paddingStart="5dp"
-            android:paddingTop="5dp"
-            android:paddingEnd="5dp"
-            android:paddingBottom="5dp"
-            android:shadowColor="@color/colorAccent"
-            android:text="@string/block_users"
-            android:textAlignment="textStart"
-            android:textColor="@color/common_google_signin_btn_text_dark_default"
-            android:textSize="24sp"
-            android:typeface="normal" />
+            android:layout_marginBottom="2dp"
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/aboutButton"
-            android:layout_width="match_parent"
-            android:layout_height="42dp"
-            android:background="@drawable/settingsclicked"
-            android:clickable="true"
-            android:focusable="true"
-            android:longClickable="true"
-            android:paddingStart="5dp"
-            android:paddingTop="5dp"
-            android:paddingEnd="5dp"
-            android:paddingBottom="5dp"
-            android:layout_marginTop="2dp"
-            android:shadowColor="@color/colorAccent"
-            android:text="@string/About"
-            android:textAlignment="textStart"
-            android:textColor="@color/common_google_signin_btn_text_dark_default"
-            android:textSize="24sp"
-            android:typeface="normal" />
+            <TextView
+                android:id="@+id/wipe_database"
+                android:layout_width="0dp"
+                android:layout_height="42dp"
+                android:layout_marginBottom="2dp"
+                android:layout_weight="7"
+                android:background="@drawable/settingsclicked"
+                android:clickable="true"
+                android:focusable="true"
+                android:longClickable="true"
+                android:paddingStart="5dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="5dp"
+                android:paddingBottom="5dp"
+                android:shadowColor="@color/colorAccent"
+                android:text="@string/wipe_database"
+                android:textAlignment="textStart"
+                android:textColor="@color/common_google_signin_btn_text_dark_default"
+                android:textSize="24sp"
+                android:typeface="normal" />
+
+            <ImageView
+                android:id="@+id/wipe_database_icon4"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/colorPrimary"
+                app:srcCompat="@android:drawable/ic_menu_delete" />
+        </LinearLayout>
 
     </LinearLayout>
 

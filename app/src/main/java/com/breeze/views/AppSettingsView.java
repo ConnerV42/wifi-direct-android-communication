@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,10 +48,28 @@ public class AppSettingsView extends Fragment {
         TextView bShowBlacklist = view.findViewById(R.id.block_users);
         TextView bAboutMenu = view.findViewById(R.id.aboutButton);
 
+        LinearLayout wipeDb = view.findViewById(R.id.wipe_db_layout);
+        LinearLayout restartService = view.findViewById(R.id.restart_service_layout);
+        LinearLayout showBlacklist = view.findViewById(R.id.block_users_layout);
+        LinearLayout aboutMenu = view.findViewById(R.id.about_layout);
+
         setColorStateList(bAboutMenu);
         setColorStateList(bRestartService);
         setColorStateList(bShowBlacklist);
         setColorStateList(bWipeDB);
+
+        wipeDb.setOnClickListener((View v) -> {
+            this.showWipeDatabaseDialog();
+        });
+        restartService.setOnClickListener((View v) -> {
+            this.showRestartServiceDialog();
+        });
+        showBlacklist.setOnClickListener((View v) -> {
+            this.showBlacklistView();
+        });
+        aboutMenu.setOnClickListener((View v) -> {
+            this.showAboutMenu();
+        });
 
         bWipeDB.setOnClickListener((View v) -> {
             this.showWipeDatabaseDialog();
@@ -112,7 +131,7 @@ public class AppSettingsView extends Fragment {
         NavController nav = Navigation.findNavController(this.getView());
         NavOptions.Builder builder = new NavOptions.Builder();
         NavOptions options = builder.setEnterAnim(R.anim.slide_from_left)
-                .setExitAnim(R.anim.slide_out_right)
+                .setExitAnim(R.anim.slide_from_left)
                 .setPopEnterAnim(R.anim.nav_default_pop_enter_anim)
                 .setPopExitAnim(R.anim.nav_default_pop_exit_anim)
                 .build();
@@ -121,7 +140,7 @@ public class AppSettingsView extends Fragment {
     private void showAboutMenu(){
         new AlertDialog.Builder(getActivity())
                 .setTitle("About Breeze")
-                .setMessage("Breeze v0.1 By: Zach Sanders, Conner  Verret, Pavel Chernichenko, Jake Stevens")
+                .setMessage("Breeze v0.1 \r\nBy: Zach Sanders, Conner  Verret, Pavel Chernichenko, Jake Stevens")
                 .setPositiveButton("Close", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         return;
