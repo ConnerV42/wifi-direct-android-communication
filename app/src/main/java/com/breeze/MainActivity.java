@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.READ_EXTERNAL_STORAGE,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.RECORD_AUDIO,
             };
 
     @Override
@@ -88,13 +89,7 @@ public class MainActivity extends AppCompatActivity {
         // Enable the sync button
         ImageButton scanButton = findViewById(R.id.scanButton);
         scanButton.setOnClickListener((l) -> {
-            api.router.startDiscovery();
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    api.router.stopDiscovery();
-                }
-            }, 10 * 1000);
+            api.router.scan();
         });
 
         // Check if location is on

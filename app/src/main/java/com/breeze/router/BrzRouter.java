@@ -15,6 +15,7 @@ import com.breeze.router.handlers.BrzAliasNameUpdateHandler;
 import com.breeze.router.handlers.BrzFileInfoPktHandler;
 import com.breeze.router.handlers.BrzGraphHandler;
 import com.breeze.router.handlers.BrzHandshakeHandler;
+import com.breeze.router.handlers.BrzLiveAudioHandler;
 import com.breeze.router.handlers.BrzMessageHandler;
 import com.breeze.router.handlers.BrzMessageReceiptHandler;
 import com.breeze.router.handlers.BrzProfileHandler;
@@ -40,8 +41,11 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.function.Consumer;
 
 public class BrzRouter extends EventEmitter {
@@ -94,6 +98,7 @@ public class BrzRouter extends EventEmitter {
         this.handlers.add(new BrzProfileHandler(this));
         this.handlers.add(new BrzPublicMessageHandler(this));
         this.handlers.add(new BrzAliasNameUpdateHandler(this));
+        this.handlers.add(new BrzLiveAudioHandler());
     }
 
     //
@@ -131,28 +136,28 @@ public class BrzRouter extends EventEmitter {
         if (packet == null || stream == null || !packet.hasStream())
             throw new RuntimeException("Invalid input");
 
-        Payload streamPayload = Payload.fromStream(stream);
-        packet.stream.filePayloadId = streamPayload.getId();
-
-        this.streamBuffer.addPacketPayload(packet);
-        this.streamBuffer.addStreamPayload(streamPayload);
-
-        this.sendStream(streamPayload.getId());
+        this.sendStream(packet, Payload.fromStream(stream));
     }
 
     private void sendStream(long payloadId) {
-        BrzPacket packet = this.streamBuffer.getPacketPayload(payloadId);
-        Payload streamPayload = this.streamBuffer.getStreamPayload(payloadId);
+        BrzPacket packet = this.streamBuffer.getPacket(payloadId);
+        InputStream stream = this.streamBuffer.getStream(payloadId);
 
-        if (packet == null || streamPayload == null)
+        if (packet == null || stream == null)
             throw new RuntimeException("The buffer does not have this stream");
+
+        this.sendStream(packet, Payload.fromStream(stream));
+        this.streamBuffer.removeStream(payloadId);
+    }
+
+    public void sendStream(BrzPacket packet, Payload streamPayload) {
+        packet.stream.filePayloadId = streamPayload.getId();
 
         // If the host is connected directly with the destination, shortcut it
         String endpointID = endpointIDs.get(packet.to);
         if (endpointID != null) {
             connectionsClient.sendPayload(endpointID, BrzPayloadBuffer.getStreamPayload(packet.toJSON()));
             connectionsClient.sendPayload(endpointID, streamPayload);
-            this.streamBuffer.removeStream(payloadId);
             return;
         }
 
@@ -168,7 +173,6 @@ public class BrzRouter extends EventEmitter {
                 && endpointIDs.values().contains(nextHopNode.endpointId)) {
             connectionsClient.sendPayload(nextHopNode.endpointId, BrzPayloadBuffer.getStreamPayload(packet.toJSON()));
             connectionsClient.sendPayload(nextHopNode.endpointId, streamPayload);
-            this.streamBuffer.removeStream(payloadId);
         }
     }
 
@@ -204,17 +208,20 @@ public class BrzRouter extends EventEmitter {
     }
 
     public void handleFilePayload(long payloadId) {
-        BrzPacket packet = this.streamBuffer.getPacketPayload(payloadId);
-        Payload streamPayload = this.streamBuffer.getStreamPayload(payloadId);
+        if (!streamBuffer.isStreamPayload(payloadId))
+            throw new RuntimeException("Payload ID entered was not in the stream buffer");
 
-        if (packet == null || streamPayload == null)
+        BrzPacket packet = this.streamBuffer.getPacket(payloadId);
+        InputStream stream = this.streamBuffer.getStream(payloadId);
+
+        if (packet == null || stream == null)
             throw new RuntimeException("The buffer does not have this stream");
 
         // Packet is for the host
         if (packet.to.equals(hostNode.id)) {
             for (BrzRouterHandler handler : this.handlers)
                 if (handler instanceof BrzRouterStreamHandler && handler.handles(packet.type))
-                    ((BrzRouterStreamHandler) handler).handleStream(packet, streamPayload.asStream().asInputStream());
+                    ((BrzRouterStreamHandler) handler).handleStream(packet, stream);
 
             this.streamBuffer.removeStream(payloadId);
         }
@@ -277,6 +284,7 @@ public class BrzRouter extends EventEmitter {
             isDiscovering = true;
         }).addOnFailureListener(e -> {
             Log.i("ENDPOINT", "Discovering failed!", e);
+            isDiscovering = false;
         });
     }
 
@@ -285,6 +293,26 @@ public class BrzRouter extends EventEmitter {
         isDiscovering = false;
         Log.i("ENDPOINT", "Stopped discovering successfully!");
     }
+
+    private LinkedList<String> discoveredEndpoints = new LinkedList<>();
+    public void scan() {
+        if(isDiscovering) return;
+
+        startDiscovery();
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                stopDiscovery();
+
+                // Initiate connection with the endpoints discovered during the scan
+                for (String endpointId : discoveredEndpoints) {
+                    connectionsClient.requestConnection(hostNode.id, endpointId, connectionLifecycleCallback);
+                }
+                discoveredEndpoints = new LinkedList<>();
+            }
+        }, 10 * 1000);
+    }
+
 
     private void handlePacket(BrzPacket packet, String fromEndpointId) {
         Log.i("ENDPOINT", "Got a packet " + packet.type);
@@ -308,7 +336,13 @@ public class BrzRouter extends EventEmitter {
         // If the packet is not a valid broadcast
         // and it is for the host node
         else if (packet.to.equals(this.hostNode.id)) {
-
+            List<BrzNode> blockedNodes = BreezeAPI.getInstance().state.getAllBlockedNodes();
+            for(BrzNode node : blockedNodes){
+                if(node.endpointId.equals(fromEndpointId)){
+                    Log.i("ENDPOINT", "Received a payload from a blocked node, not opening");
+                    return;
+                }
+            }
             // Decrypt the packet unless it's not an encryptable type
             if (packet.type != BrzPacket.BrzPacketType.GRAPH_QUERY) {
                 api.encryption.decryptPacket(packet);
@@ -338,10 +372,9 @@ public class BrzRouter extends EventEmitter {
         @Override
         public void onPayloadReceived(@NonNull String endpointId, @NonNull Payload payload) {
             Log.i("ENDPOINT", "Received a payload");
-
             // This is a raw stream, not a packet
             if (streamBuffer.isStreamPayload(payload.getId())) {
-                streamBuffer.addStreamPayload(payload);
+                streamBuffer.addStream(payload);
                 handleFilePayload(payload.getId());
                 return;
             }
@@ -351,7 +384,8 @@ public class BrzRouter extends EventEmitter {
 
             // This is a packet with a stream attached
             if (packet.hasStream())
-                streamBuffer.addPacketPayload(packet);
+                streamBuffer.addPacket(packet);
+
                 // Or just a normal packet
             else handlePacket(packet, endpointId);
         }
@@ -364,36 +398,6 @@ public class BrzRouter extends EventEmitter {
             Long payloadId = update.getPayloadId();
             if (payloadBuffer.getOutgoing(payloadId) != null)
                 payloadBuffer.removeOutgoing(payloadId);
-//
-//            Long payloadId = update.getPayloadId();
-
-//            // Incomming packet was a success!
-//            if (payloadBuffer.isIncomming(payloadId)) {
-//                Log.i("ENDPOINT", "Received a payload");
-//                Payload payload = payloadBuffer.popIncoming(payloadId);
-//
-//                // This is a raw stream, not a packet
-//                if (streamBuffer.isStreamPayload(payloadId)) {
-//                    streamBuffer.addStreamPayload(payload);
-//                    handleFilePayload(payloadId);
-//                    return;
-//                }
-//
-//                // Otherwise it's a normal packet
-//                BrzPacket packet = new BrzPacket(BrzPayloadBuffer.getStreamString(payload));
-//
-//                // This is a packet with a stream attached
-//                if (packet.hasStream()) {
-//                    streamBuffer.addPacketPayload(packet);
-//                }
-//
-//                // Or just a normal packet
-//                else handlePacket(packet, endpointId);
-//            }
-//            // Outgoing packet was a success!
-//            else {
-//                payloadBuffer.removeOutgoing(payloadId);
-//            }
         }
     };
 
@@ -403,8 +407,13 @@ public class BrzRouter extends EventEmitter {
         public void onEndpointFound(@NonNull String endpointId, DiscoveredEndpointInfo info) {
             if (info.getServiceId().equals(pkgName)) {
                 Log.i("ENDPOINT", "Endpoint found");
-                connectionsClient.requestConnection(hostNode.id, endpointId, connectionLifecycleCallback);
-                emit("endpointFound", endpointId);
+
+                // If the endpoint is not already connected, initiate a connection
+                if (endpointUUIDs.get(endpointId) == null) {
+                    discoveredEndpoints.add(endpointId);
+                    emit("endpointFound", endpointId);
+                }
+
             }
         }
 
@@ -412,15 +421,16 @@ public class BrzRouter extends EventEmitter {
         public void onEndpointLost(@NonNull String endpointId) {
             Log.i("ENDPOINT", "Endpoint lost callback fired");
             emit("endpointDisconnected", endpointId);
+            discoveredEndpoints.remove(endpointId);
         }
     };
 
     // Callbacks for connections to other devices
     private final ConnectionLifecycleCallback connectionLifecycleCallback = new ConnectionLifecycleCallback() {
+
         @Override
         public void onConnectionInitiated(@NonNull String endpointId, ConnectionInfo connectionInfo) {
             Log.i("ENDPOINT", "Endpoint initiated connection");
-
             endpointUUIDs.put(endpointId, connectionInfo.getEndpointName());
             connectionsClient.acceptConnection(endpointId, payloadCallback);
         }
@@ -431,6 +441,7 @@ public class BrzRouter extends EventEmitter {
                 Log.i("ENDPOINT", "Endpoint connected");
                 emit("endpointConnected", endpointId);
 
+                // Update uuid -> endpoinId map
                 String endpointUUID = endpointUUIDs.get(endpointId);
                 endpointIDs.put(endpointUUID, endpointId);
 
@@ -445,18 +456,18 @@ public class BrzRouter extends EventEmitter {
             Log.i("ENDPOINT", "Endpoint disconnected!");
             emit("endpointDisconnected", endpointId);
 
-            BrzNode lostNode = graph.getVertex(endpointUUIDs.get(endpointId));
-            if (hostNode != null && lostNode != null) {
-                String endpointUUID = endpointUUIDs.get(endpointId);
-                endpointIDs.remove(endpointUUID);
+            String endpointUUID = endpointUUIDs.get(endpointId);
+            endpointUUIDs.remove(endpointId);
+            endpointIDs.remove(endpointUUID);
 
+            BrzNode lostNode = graph.getVertex(endpointUUID);
+            if (hostNode != null && lostNode != null) {
                 // removes the vertex and any associated edges
-                graph.removeVertex(endpointUUID);
+                graph.removeEdge(endpointUUID, hostNode.id);
                 graph.removeDisconnected(api.hostNode.id);
-                api.state.removeChat(endpointUUID);
 
                 // Broadcast disconnect event
-                broadcast(BrzPacketBuilder.graphEvent(false, hostNode, lostNode));
+                broadcast(BrzPacketBuilder.graphEvent(false, hostNode, lostNode), endpointId);
             }
         }
     };

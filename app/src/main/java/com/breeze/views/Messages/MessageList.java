@@ -1,11 +1,10 @@
 package com.breeze.views.Messages;
 
+import android.app.AlertDialog;
 import android.content.Context;
-import android.content.Intent;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.view.Gravity;
-import android.webkit.MimeTypeMap;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.util.Log;
@@ -16,26 +15,19 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.VideoView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzNode;
-import com.breeze.graph.BrzGraph;
-import com.breeze.storage.BrzStorage;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.function.Consumer;
 
 public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder> {
@@ -47,6 +39,7 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
 
         AudioMessage audioController;
         VideoMessage videoController;
+
 
         MessageHolder(View v, int viewType) {
             super(v);
@@ -288,10 +281,24 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
         View messageView;
         if (viewType == TYPE_STATUS)
             messageView = inflater.inflate(R.layout.li_message_status, parent, false);
-        else messageView = inflater.inflate(R.layout.message_component, parent, false);
+        else {
+            messageView = inflater.inflate(R.layout.message_component, parent, false);
+        }
 
         // Make our holder
-        return new MessageHolder(messageView, viewType);
+        MessageList.MessageHolder holder = new MessageList.MessageHolder(messageView, viewType);
+
+        if (viewType == TYPE_NORMAL) {
+            // Make a message clickable
+            messageView.setOnClickListener(e -> {
+                if (this.messageClickListener != null) {
+                    BrzMessage message = this.messages.get(holder.position);
+                    this.messageClickListener.accept(message);
+                }
+            });
+        }
+
+        return holder;
     }
 
     @Override
@@ -316,6 +323,12 @@ public class MessageList extends RecyclerView.Adapter<MessageList.MessageHolder>
     @Override
     public int getItemCount() {
         return this.messages.size();
+    }
+
+    private Consumer<BrzMessage> messageClickListener = null;
+
+    public void setMessageClickListener(Consumer<BrzMessage> messageClickListener) {
+        this.messageClickListener = messageClickListener;
     }
 }
 

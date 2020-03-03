@@ -1,8 +1,12 @@
 package com.breeze.views.Messages;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.net.Uri;
@@ -15,12 +19,17 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Environment;
+import android.os.Handler;
+import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -36,6 +45,15 @@ import com.breeze.packets.BrzPacket;
 import com.breeze.packets.BrzPacketBuilder;
 import com.breeze.views.ChatSettingsActivity;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class MessagesView extends AppCompatActivity {
@@ -43,10 +61,12 @@ public class MessagesView extends AppCompatActivity {
     private static final int VIDEO_REQUEST_CODE = 70;
     private static final int AUDIO_REQUEST_CODE = 71;
     private static final int FILE_REQUEST_CODE = 72;
+    private static final int CAMERA_REQUEST_CODE = 73;
     private BrzChat chat;
     private MessageList list;
     private Consumer<BrzChat> onChatUpdate;
     private Consumer<Object> onGraphUpdate;
+    private Handler mHandler = new Handler();
 
     public static Intent getIntent(Context ctx, String chatId) {
         Intent i = new Intent(ctx, MessagesView.class);
@@ -76,6 +96,60 @@ public class MessagesView extends AppCompatActivity {
         LinearLayoutManager msgLayout = new LinearLayoutManager(this);
 
         this.list = new MessageList(this, msgView, this.chat);
+
+        this.list.setMessageClickListener((selectedMessage) -> {
+            if (selectedMessage.body.equals("Image")) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(msgView.getContext());
+                builder.setMessage(R.string.saveImage)
+                        .setTitle(R.string.saveImageTitle);
+
+                builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Bitmap bitmap = api.storage.getMessageFileAsBitmap(selectedMessage);
+                        ContentResolver cr = getContentResolver();
+                        byte[] array = new byte[7];
+                        new Random().nextBytes(array);
+                        MediaStore.Images.Media.insertImage(cr, bitmap, new String(array, Charset.forName("UTF-8")), "Breeze Image");
+                    }
+                });
+
+                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            } else if (selectedMessage.body.equals("Video")) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(msgView.getContext());
+                builder.setMessage(R.string.saveVideo)
+                        .setTitle(R.string.saveVideoTitle);
+
+                builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Bitmap bitmap = api.storage.getMessageFileAsBitmap(selectedMessage);
+                        ContentResolver cr = getContentResolver();
+                        byte[] array = new byte[7];
+                        new Random().nextBytes(array);
+                        MediaStore.Images.Media.insertImage(cr, bitmap, new String(array, Charset.forName("UTF-8")), "Breeze Video");
+                    }
+                });
+
+                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
 
         ImageButton sendPhoto = findViewById(R.id.sendPhoto);
         ImageButton sendVideo = findViewById(R.id.sendVideo);
@@ -110,48 +184,65 @@ public class MessagesView extends AppCompatActivity {
         // Set up message sending listener
         sendMessage.setOnClickListener(this::sendStringMessage);
 
+        int delayMillis = 333;
+
         // Bring up the option to select media to send from external storage
         sendPhoto.setOnClickListener(view1 -> {
-            Intent intent = new Intent(Intent.ACTION_PICK,
-                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(intent, PHOTO_REQUEST_CODE);
+            mHandler.postDelayed(delayPhotoIntent, delayMillis);
+        });
+
+        sendPhoto.setOnLongClickListener(view1 -> {
+            mHandler.postDelayed(delayCameraIntent, delayMillis);
+            return false;
         });
 
         sendVideo.setOnClickListener(view1 -> {
-            Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(intent, VIDEO_REQUEST_CODE);
+            mHandler.postDelayed(delayVideoIntent, delayMillis);
         });
 
         sendAudio.setOnClickListener(view1 -> {
-            Intent intent = new Intent(Intent.ACTION_PICK,
-                    android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(intent, AUDIO_REQUEST_CODE);
+            mHandler.postDelayed(delayAudioIntent, delayMillis);
         });
 
         sendFile.setOnClickListener(view1 -> {
-            Intent intent = new Intent(Intent.ACTION_PICK);
-            intent.setType("*/*");
-            startActivityForResult(intent, FILE_REQUEST_CODE);
+            mHandler.postDelayed(delayFileIntent, delayMillis);
+        });
+        
+        // Live audio call
+        ImageButton menu_call_button = findViewById(R.id.menu_call_button);
+        menu_call_button.setVisibility(chat.isGroup ? View.GONE : View.VISIBLE);
+        menu_call_button.setOnClickListener(v -> {
+            api.streams.sendLiveAudioRequest(chat.otherPersonId());
         });
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        BreezeAPI api = BreezeAPI.getInstance();
 
         if (resultCode == Activity.RESULT_OK && data != null) {
-            Uri fileUri = data.getData();
-            if (fileUri == null) return;
 
-            BreezeAPI api = BreezeAPI.getInstance();
             String bodyFortype = "";
             if (requestCode == PHOTO_REQUEST_CODE) bodyFortype = "Image";
+            else if (requestCode == CAMERA_REQUEST_CODE) bodyFortype = "Image";
             else if (requestCode == VIDEO_REQUEST_CODE) bodyFortype = "Video";
             else if (requestCode == AUDIO_REQUEST_CODE) bodyFortype = "Audio";
             else if (requestCode == FILE_REQUEST_CODE) bodyFortype = "File";
             else return;
-
             BrzPacket p = BrzPacketBuilder.message(api.hostNode.id, "", bodyFortype, chat.id, false);
+            Uri fileUri = null;
+
+            if (requestCode == CAMERA_REQUEST_CODE && data.getExtras() != null) {
+                Bitmap bmp = (Bitmap) data.getExtras().get("data");
+                File messageFile = api.storage.getMessageFile(p.message());
+                api.storage.saveBitmapToFile(messageFile, bmp);
+                fileUri = Uri.fromFile(messageFile);
+            } else {
+                fileUri = data.getData();
+                if (fileUri == null) return;
+            }
+
             api.sendFileMessage(p.message(), fileUri);
         }
     }
@@ -315,4 +406,47 @@ public class MessagesView extends AppCompatActivity {
         }
 
     }
+
+    private Runnable delayPhotoIntent = new Runnable() {
+        @Override
+        public void run() {
+            Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, PHOTO_REQUEST_CODE);
+        }
+    };
+
+    private Runnable delayCameraIntent = new Runnable() {
+        @Override
+        public void run() {
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                startActivityForResult(takePictureIntent, CAMERA_REQUEST_CODE);
+            }
+        }
+    };
+
+    private Runnable delayVideoIntent = new Runnable() {
+        @Override
+        public void run() {
+            Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, VIDEO_REQUEST_CODE);
+        }
+    };
+
+    private Runnable delayAudioIntent = new Runnable() {
+        @Override
+        public void run() {
+            Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, AUDIO_REQUEST_CODE);
+        }
+    };
+
+    private Runnable delayFileIntent = new Runnable() {
+        @Override
+        public void run() {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("*/*");
+            startActivityForResult(intent, FILE_REQUEST_CODE);
+        }
+    };
 }

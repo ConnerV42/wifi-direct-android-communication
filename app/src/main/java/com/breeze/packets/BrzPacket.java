@@ -10,6 +10,7 @@ import com.breeze.packets.ChatEvents.BrzChatHandshake;
 import com.breeze.packets.ChatEvents.BrzChatResponse;
 import com.breeze.packets.GraphEvents.BrzGraphEvent;
 import com.breeze.packets.GraphEvents.BrzGraphQuery;
+import com.breeze.packets.LiveAudio.BrzLiveAudioEvent;
 import com.breeze.packets.MessageEvents.BrzMessageReceipt;
 import com.breeze.packets.ProfileEvents.BrzAliasAndNameEvent;
 import com.breeze.packets.ProfileEvents.BrzProfileImageEvent;
@@ -26,6 +27,8 @@ public class BrzPacket implements BrzSerializable {
         GRAPH_QUERY, GRAPH_EVENT,
 
         CHAT_HANDSHAKE, CHAT_RESPONSE,
+
+        LIVE_AUDIO_REQUEST, LIVE_AUDIO_RESPONSE, LIVE_AUDIO_STREAM,
 
         PROFILE_REQUEST, PROFILE_RESPONSE,
 
@@ -96,7 +99,13 @@ public class BrzPacket implements BrzSerializable {
         return new BrzMessageReceipt(this.body);
     }
 
-    public BrzProfileImageEvent profileImageEvent() { return new BrzProfileImageEvent(this.body); }
+    public BrzProfileImageEvent profileImageEvent() {
+        return new BrzProfileImageEvent(this.body);
+    }
+
+    public BrzLiveAudioEvent liveAudioEvent() {
+        return new BrzLiveAudioEvent(this.body);
+    }
 
     public boolean hasStream() {
         return this.stream != null;
@@ -114,8 +123,8 @@ public class BrzPacket implements BrzSerializable {
             json.put("broadcast", this.broadcast);
             json.put("body", this.body);
 
-            if(this.hasStream())
-            json.put("stream", this.stream.toJSON());
+            if (this.hasStream())
+                json.put("stream", this.stream.toJSON());
         } catch (Exception e) {
             Log.i("SERIALIZATION ERROR", e.toString());
         }
@@ -134,7 +143,7 @@ public class BrzPacket implements BrzSerializable {
             this.broadcast = jObj.getBoolean("broadcast");
             this.body = jObj.getString("body");
 
-            if(jObj.has("stream")) {
+            if (jObj.has("stream")) {
                 this.stream = new BrzFileInfo(jObj.getString("stream"));
             }
         } catch (Exception e) {

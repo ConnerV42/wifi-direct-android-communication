@@ -65,6 +65,7 @@ public class BrzStateStore extends EventEmitter {
     //
 
     private HashMap<String, BrzNode> nodes = new HashMap<>();
+    private HashMap<String, BrzNode> blockedNodes = new HashMap<>();
 
     public List<BrzNode> getAllNodes() {
         return new LinkedList<>(this.nodes.values());
@@ -83,6 +84,19 @@ public class BrzStateStore extends EventEmitter {
     public void setNodes(List<BrzNode> nodesToAdd) {
         for (BrzNode node : nodesToAdd) setNode(node);
     }
+
+    public void blockNode(BrzNode node){
+        if (node == null || node.id == null) return;
+        this.blockedNodes.put(node.id, node);
+        this.emit("nodeSetBlock", node);
+    }
+
+    public void unblockNode(String nodeId) {
+        this.blockedNodes.remove(nodeId);
+        this.emit("nodeSetUnblock");
+    }
+
+    public List<BrzNode> getAllBlockedNodes(){ return new LinkedList<>(this.blockedNodes.values()); }
 
     //
     //  Chats

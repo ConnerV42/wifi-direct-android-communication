@@ -1,5 +1,8 @@
 package com.breeze.views.PublicMessages;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 
@@ -52,23 +55,63 @@ public class PublicMessagesView extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         BreezeAPI api = BreezeAPI.getInstance();
         BrzGraph graph = api.getGraph();
-        //setup content
+
+        // Set up content
+        RecyclerView msgView = view.findViewById(R.id.publicMessageList);
+        this.list = new PublicMessageList(this.getActivity(), msgView);
+
+        LinearLayoutManager msgLayout = new LinearLayoutManager(this.getActivity());
+        msgLayout.setStackFromEnd(true);
+        msgView.setLayoutManager(msgLayout);
+
         Switch publicSwitch = view.findViewById(R.id.PublicSwitch);
+
+        boolean dialogShown = api.preferences.getBoolean("dialogShown", false);
+        if (!dialogShown) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(msgView.getContext());
+            builder.setMessage(R.string.publicMessageDialog)
+                    .setTitle(R.string.publicMessageTitle);
+
+            builder.setPositiveButton(R.string.accept, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    api.preferences.edit().putBoolean("optIn", true).apply();
+                    publicSwitch.setChecked(true);
+                    msgView.setAdapter(list);
+                }
+            });
+
+            builder.setNegativeButton(R.string.deny, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    api.preferences.edit().putBoolean("optIn", false).apply();
+                    publicSwitch.setChecked(false);
+                    dialog.cancel();
+                }
+            });
+
+            AlertDialog dialog = builder.create();
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            api.preferences.edit().putBoolean("dialogShown", true).apply();
+            dialog.show();
+        } else {
+            boolean optIn = api.preferences.getBoolean("optIn", false);
+            publicSwitch.setChecked(optIn);
+        }
         publicSwitch.setChecked(false);
         publicSwitch.setOnTouchListener((v, e) -> {
             switch(e.getAction()){
                 case MotionEvent.ACTION_UP:
                     if(publicSwitch.isChecked()){
                         api.state.setPublicThreadOn(false);
-                        //Toast.makeText(getActivity(), "Thread activity: OFF", Toast.LENGTH_LONG).show();
+                        api.preferences.edit().putBoolean("optIn", false).apply();
                         publicSwitch.setChecked(false);
                         return true;
 
                     }
-                    else{
-
-                        //msgView.setAdapter(this.list);
-
+                    else {
+                        api.preferences.edit().putBoolean("optIn", true).apply();
                         RecyclerView msgView = view.findViewById(R.id.publicMessageList);
                         this.list = new PublicMessageList(this.getActivity(), msgView);
                         msgView.setAdapter(this.list);
@@ -91,7 +134,6 @@ public class PublicMessagesView extends Fragment {
                             api.sendPublicMessage(msg);
                         });
 
-                        //Toast.makeText(getActivity(), "Thread activity: ON", Toast.LENGTH_LONG).show();
                         publicSwitch.setChecked(true);
                         api.state.setPublicThreadOn(true);
                         return true;

@@ -8,10 +8,11 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
@@ -23,6 +24,10 @@
         android:roundIcon="@drawable/ic_launcher"
         android:supportsRtl="false"
         android:theme="@style/AppTheme">
+
+        <activity
+            android:name=".views.CallActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
 
         <receiver android:name=".application.BreezeBroadcastReceiver">
             <intent-filter>
@@ -45,21 +50,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-
         <activity android:name=".views.ProfileActivity" />
-
         <activity
             android:name=".views.Messages.MessagesView"
             android:theme="@style/AppTheme.NoActionBar" />
-
         <activity android:name=".views.ChatSettingsActivity" />
-
         <activity android:name=".views.Chats.ChatHandshakeView" />
-
         <activity android:name=".KillAppActivity" />
 
         <service android:name=".application.BreezeAPI" />

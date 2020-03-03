@@ -3,6 +3,7 @@ package com.breeze.views.UserSelection;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Paint;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,14 +33,26 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
     public static class UserItemHolder extends RecyclerView.ViewHolder {
         View v;
         int position = 0;
-
+        boolean blacklist = false;
+        BreezeAPI api;
         public UserItemHolder(View v) {
             super(v);
             this.v = v;
+            this.api = BreezeAPI.getInstance();
         }
-
+        public UserItemHolder(View v, boolean blacklist) {
+            super(v);
+            this.v = v;
+            this.blacklist = blacklist;
+            this.api = BreezeAPI.getInstance();
+        }
         public void bind(BrzNode node, int position, Context ctx, List<String> nodes) {
-
+            boolean nodeIsInBlacklist = false;
+            if(blacklist){
+                if(api.state.getAllBlockedNodes().contains(node)){
+                    nodeIsInBlacklist = true;
+                }
+            }
             TextView user_name = v.findViewById(R.id.user_name);
             user_name.setText(node.name);
 
@@ -49,25 +62,31 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
 
             // Set bitmap if it exists in BrzStorage
             ImageView user_image = v.findViewById(R.id.user_image);
-            BreezeAPI api = BreezeAPI.getInstance();
             Bitmap bm = api.storage.getProfileImage(api.storage.PROFILE_DIR, node.id);
             if (bm != null)
                 user_image.setImageBitmap(bm);
 
+            user_name.setPaintFlags(user_name.getPaintFlags());
             if (nodes.contains(node.id)) {
                 user_name.setTextColor(ctx.getColor(R.color.colorAccent));
                 user_alias.setTextColor(ctx.getColor(R.color.colorAccent));
+            } else if(nodeIsInBlacklist) {
+                user_name.setTextColor(ctx.getColor(R.color.design_default_color_error));
+                user_alias.setTextColor(ctx.getColor(R.color.design_default_color_error));
+                user_name.setPaintFlags(user_name.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             } else {
                 user_name.setTextColor(ctx.getColor(android.R.color.black));
                 user_alias.setTextColor(ctx.getColor(android.R.color.black));
             }
-
             this.position = position;
         }
 
         public void bind(String placeholderId, Context ctx) {
             TextView user_name = v.findViewById(R.id.user_name);
             user_name.setText("Connecting...");
+
+            ImageView user_image = v.findViewById(R.id.user_image);
+            user_image.setImageBitmap(api.storage.getVectorAsBitmap(R.drawable.ic_person_black_24dp));
 
             TextView user_alias = v.findViewById(R.id.user_alias);
             user_alias.setVisibility(View.GONE);
@@ -91,6 +110,8 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
     private Consumer<Object> graphListener;
     private Consumer<String> placeholderListener;
     private Consumer<String> removePlaceholderListener;
+    public boolean blacklist = false;
+
 
     public UserList(Context ctx, List<String> nodes) {
         this.ctx = ctx;
@@ -141,10 +162,7 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
 
         // Inflate a new li_user
         View user_list_item = inflater.inflate(R.layout.li_user, parent, false);
-
-        // Make our holder
-        UserItemHolder holder = new UserItemHolder(user_list_item);
-
+        UserItemHolder holder = new UserItemHolder(user_list_item, blacklist);
         // Make the item clickable!
         user_list_item.setOnClickListener(e -> {
             try {
@@ -188,9 +206,21 @@ public class UserList extends RecyclerView.Adapter<UserList.UserItemHolder>
                     String id = brzNode.id;
                     String alias = brzNode.alias.toLowerCase();
                     String name = brzNode.name.toLowerCase();
+//                    if (!id.equals(api.hostNode.id) && (alias.contains(searchStr) || name.contains(searchStr))){
+//                        filteredList.add(brzNode);
+//                    }
+                    if(!blacklist){
+                        if (!id.equals(api.hostNode.id) && (alias.contains(searchStr) || name.contains(searchStr))
+                                && (!api.state.getAllBlockedNodes().contains(brzNode))
+                        )
+                            filteredList.add(brzNode);
+                    }
+                    else {
+                        if (!id.equals(api.hostNode.id) && (alias.contains(searchStr) || name.contains(searchStr))){
+                            filteredList.add(brzNode);
+                        }
+                    }
 
-                    if (!id.equals(api.hostNode.id) && (alias.contains(searchStr) || name.contains(searchStr)))
-                        filteredList.add(brzNode);
                 }
 
                 filteredNodes = filteredList;
