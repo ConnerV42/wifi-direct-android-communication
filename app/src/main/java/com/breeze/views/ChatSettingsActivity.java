@@ -22,12 +22,15 @@ import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzNode;
+import com.breeze.packets.ChatEvents.BrzChatNameAndImageEvent;
+import com.breeze.packets.ProfileEvents.BrzProfileImageEvent;
 import com.breeze.state.BrzStateStore;
 import com.breeze.storage.BrzStorage;
 
 public class ChatSettingsActivity extends AppCompatActivity {
 
     private static final int READ_REQUEST_CODE = 42;
+    private BrzNode node = BreezeAPI.getInstance().state.getHostNode();
     private BrzChat chat = null;
 
     public static Intent getIntent(Context ctx, String chatId) {
@@ -90,11 +93,19 @@ public class ChatSettingsActivity extends AppCompatActivity {
                 // Set chat image
                 BreezeAPI api = BreezeAPI.getInstance();
                 api.storage.saveProfileImage(api.storage.CHAT_DIR, this.chat.id, bitmap);
+                    //send out new image and name
+//                BrzChatNameAndImageEvent sendNewStuff = new BrzChatNameAndImageEvent(node.name, node.id, true);
+//                Bitmap bm = api.storage.getProfileImage(api.storage.CHAT_DIR, node.id);
+//                api.sendChatNameAndImageUpdates(sendNewStuff, bm);
 
             } catch (Exception e) {
                 Log.e("FILE_ACCESS", "Failure ", e);
             }
         }
+
+
+
+
     }
 
     @Override

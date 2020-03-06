@@ -33,6 +33,7 @@ import com.breeze.datatypes.BrzMessage;
 import com.breeze.graph.BrzGraph;
 import com.breeze.packets.BrzPacket;
 import com.breeze.packets.ChatEvents.BrzChatHandshake;
+import com.breeze.packets.ChatEvents.BrzChatNameAndImageEvent;
 import com.breeze.packets.ChatEvents.BrzChatResponse;
 import com.breeze.packets.ProfileEvents.BrzAliasAndNameEvent;
 import com.breeze.packets.ProfileEvents.BrzProfileImageEvent;
@@ -562,6 +563,14 @@ public class BreezeAPI extends Service {
             InputStream stream = BrzStorage.bitmapToInputStream(bm, 45);
             router.sendStream(clone, stream);
         }
+    }
+
+
+    public void sendChatNameAndImageUpdates(BrzChatNameAndImageEvent newChatImage, Bitmap bm){
+
+
+
+
     }
 
     public void sendProfileResponse(BrzPacket packet, Bitmap bm) {

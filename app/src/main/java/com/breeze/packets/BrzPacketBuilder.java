@@ -4,6 +4,7 @@ import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.graph.BrzGraph;
 import com.breeze.datatypes.BrzNode;
+import com.breeze.packets.ChatEvents.BrzChatNameAndImageEvent;
 import com.breeze.packets.GraphEvents.BrzGraphEvent;
 import com.breeze.packets.GraphEvents.BrzGraphQuery;
 

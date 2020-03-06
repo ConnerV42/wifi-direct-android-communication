@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.datatypes.BrzFileInfo;
 import com.breeze.packets.ChatEvents.BrzChatHandshake;
+import com.breeze.packets.ChatEvents.BrzChatNameAndImageEvent;
 import com.breeze.packets.ChatEvents.BrzChatResponse;
 import com.breeze.packets.GraphEvents.BrzGraphEvent;
 import com.breeze.packets.GraphEvents.BrzGraphQuery;
@@ -32,7 +33,7 @@ public class BrzPacket implements BrzSerializable {
 
         PROFILE_REQUEST, PROFILE_RESPONSE,
 
-        ALIAS_AND_NAME_UPDATE,
+        ALIAS_AND_NAME_UPDATE, UPDATE_CHAT_IMAGE_AND_NAME,
 
 
     }
@@ -82,6 +83,8 @@ public class BrzPacket implements BrzSerializable {
     public BrzAliasAndNameEvent aliasAndNameEvent() {
         return new BrzAliasAndNameEvent(this.body);
     }
+
+    public BrzChatNameAndImageEvent chatNameAndImageEvent(){return new BrzChatNameAndImageEvent(this.body);}
 
     public BrzGraphEvent graphEvent() {
         return new BrzGraphEvent(this.body);

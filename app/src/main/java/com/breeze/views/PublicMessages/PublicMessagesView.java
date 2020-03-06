@@ -1,7 +1,10 @@
 package com.breeze.views.PublicMessages;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -20,6 +23,7 @@ import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.view.View;
 import android.widget.TextView;
@@ -31,6 +35,7 @@ import com.breeze.R;
 import com.breeze.application.BreezeAPI;
 import com.breeze.datatypes.BrzMessage;
 import com.breeze.graph.BrzGraph;
+import com.breeze.views.ProfileActivity;
 
 import java.util.function.Consumer;
 
@@ -39,6 +44,7 @@ public class PublicMessagesView extends Fragment {
 
     public PublicMessageList list;
     private Consumer<Object> onlineListener;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,6 +59,7 @@ public class PublicMessagesView extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         BreezeAPI api = BreezeAPI.getInstance();
         BrzGraph graph = api.getGraph();
         Switch publicSwitch = view.findViewById(R.id.PublicSwitch);
