@@ -26,8 +26,8 @@ public class BrzAliasAndNameEvent implements BrzSerializable{
         try {
             JSONObject jObj = new JSONObject(json);
             this.from = jObj.getString("from");
-            this.name = jObj.getString("name");
-            this.alias = jObj.getString("alias");
+            this.name = jObj.getString("nodeId");
+            this.alias = jObj.getString("request");
         } catch (Exception e) {
             Log.i("DESERIALIZATION ERROR", "BrzAliasAndNameEvent", e);
         }

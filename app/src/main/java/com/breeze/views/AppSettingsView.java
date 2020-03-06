@@ -111,10 +111,8 @@ public class AppSettingsView extends Fragment {
     private void showBlacklistView(){
         NavController nav = Navigation.findNavController(this.getView());
         NavOptions.Builder builder = new NavOptions.Builder();
-        NavOptions options = builder.setEnterAnim(R.anim.slide_from_left)
-                .setExitAnim(R.anim.slide_out_right)
-                .setPopEnterAnim(R.anim.nav_default_pop_enter_anim)
-                .setPopExitAnim(R.anim.nav_default_pop_exit_anim)
+        NavOptions options = builder.setEnterAnim(R.anim.slide_out_right)
+                .setExitAnim(R.anim.slide_from_left)
                 .build();
         nav.navigate(R.id.blacklistView,null, options);
     }

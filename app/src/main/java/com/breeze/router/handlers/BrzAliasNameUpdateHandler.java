@@ -3,6 +3,7 @@ package com.breeze.router.handlers;
 import android.graphics.Bitmap;
 
 import com.breeze.application.BreezeAPI;
+import com.breeze.datatypes.BrzChat;
 import com.breeze.datatypes.BrzFileInfo;
 import com.breeze.datatypes.BrzNode;
 import com.breeze.graph.BrzGraph;
@@ -12,6 +13,7 @@ import com.breeze.router.BrzRouter;
 
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.List;
 
 public class BrzAliasNameUpdateHandler implements  BrzRouterHandler{
     private BreezeAPI api;
@@ -33,13 +35,21 @@ public class BrzAliasNameUpdateHandler implements  BrzRouterHandler{
         newName = packet.aliasAndNameEvent().name;
         newAlias = packet.aliasAndNameEvent().alias;
 
-        Collection<BrzNode> nodes = this.graph.getNodeCollection();
+        Collection<BrzNode> nodes = this.api.state.getAllNodes();
 
         for (BrzNode node : nodes){
-            if(node.id == fromEndpointId){
+            if(node.endpointId.equals(fromEndpointId)){
                node.name = newName;
                node.alias = newAlias;
                api.state.setNode(node);
+               List<BrzChat> chatsAssociatedWithThisNode = api.state.getAllChats();
+               for(BrzChat b : chatsAssociatedWithThisNode) {
+                   if (!b.isGroup) {
+                       if(b.nodes.contains(node.id)){
+                           b.name = newName;
+                       }
+                   }
+               }
             }
         }
         return true;

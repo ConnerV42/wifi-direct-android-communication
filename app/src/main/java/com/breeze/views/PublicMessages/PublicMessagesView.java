@@ -112,12 +112,12 @@ public class PublicMessagesView extends Fragment {
                     }
                     else {
                         api.preferences.edit().putBoolean("optIn", true).apply();
-                        RecyclerView msgView = view.findViewById(R.id.publicMessageList);
-                        this.list = new PublicMessageList(this.getActivity(), msgView);
-                        msgView.setAdapter(this.list);
-                        LinearLayoutManager msgLayout = new LinearLayoutManager(this.getActivity());
-                        msgLayout.setStackFromEnd(true);
-                        msgView.setLayoutManager(msgLayout);
+                        RecyclerView msgView2 = view.findViewById(R.id.publicMessageList);
+                        this.list = new PublicMessageList(this.getActivity(), msgView2);
+                        msgView2.setAdapter(this.list);
+                        LinearLayoutManager msgLayout2 = new LinearLayoutManager(this.getActivity());
+                        msgLayout2.setStackFromEnd(true);
+                        msgView2.setLayoutManager(msgLayout2);
                         EditText messageBox = view.findViewById(R.id.editText);
                         ImageButton sendMessage = view.findViewById(R.id.sendMessage);
                         // Set up message sending listener
