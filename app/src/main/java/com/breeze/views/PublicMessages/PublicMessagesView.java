@@ -55,15 +55,9 @@ public class PublicMessagesView extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         BreezeAPI api = BreezeAPI.getInstance();
         BrzGraph graph = api.getGraph();
-
-
-
-        RecyclerView msgView = view.findViewById(R.id.publicMessageList);
-
-
-
         Switch publicSwitch = view.findViewById(R.id.PublicSwitch);
         publicSwitch.setChecked(false);
+        RecyclerView msgView = view.findViewById(R.id.publicMessageList);
 
         boolean dialogShown = api.preferences.getBoolean("dialogShown", false);
         if (!dialogShown) {
@@ -100,8 +94,7 @@ public class PublicMessagesView extends Fragment {
             switch(e.getAction()){
                 case MotionEvent.ACTION_UP:
                     if(publicSwitch.isChecked()){
-//                        api.state.setPublicThreadOn(false);
-//                        api.preferences.edit().putBoolean("optIn", false).apply();
+                        api.state.setPublicThreadOn(false);
                         publicSwitch.setChecked(false);
                         return true;
 
@@ -109,7 +102,6 @@ public class PublicMessagesView extends Fragment {
                     else {
                         //api.preferences.edit().putBoolean("optIn", true).apply();
                         RecyclerView msgView2 = view.findViewById(R.id.publicMessageList);
-
                         this.list = new PublicMessageList(this.getActivity(), msgView2);
                         msgView2.setAdapter(this.list);
                         LinearLayoutManager msgLayout2 = new LinearLayoutManager(this.getActivity());
