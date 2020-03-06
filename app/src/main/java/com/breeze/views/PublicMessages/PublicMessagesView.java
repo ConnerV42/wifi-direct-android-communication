@@ -58,7 +58,7 @@ public class PublicMessagesView extends Fragment {
 
 
 
-        RecyclerView msgView2 = view.findViewById(R.id.publicMessageList);
+        RecyclerView msgView = view.findViewById(R.id.publicMessageList);
 
 
 
@@ -67,7 +67,7 @@ public class PublicMessagesView extends Fragment {
 
         boolean dialogShown = api.preferences.getBoolean("dialogShown", false);
         if (!dialogShown) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(msgView2.getContext());
+            AlertDialog.Builder builder = new AlertDialog.Builder(msgView.getContext());
             builder.setMessage(R.string.publicMessageDialog)
                     .setTitle(R.string.publicMessageTitle);
 
@@ -108,7 +108,7 @@ public class PublicMessagesView extends Fragment {
                     }
                     else {
                         //api.preferences.edit().putBoolean("optIn", true).apply();
-
+                        RecyclerView msgView2 = view.findViewById(R.id.publicMessageList);
 
                         this.list = new PublicMessageList(this.getActivity(), msgView2);
                         msgView2.setAdapter(this.list);
