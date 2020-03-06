@@ -56,19 +56,18 @@ public class PublicMessagesView extends Fragment {
         BreezeAPI api = BreezeAPI.getInstance();
         BrzGraph graph = api.getGraph();
 
-        // Set up content
-        RecyclerView msgView = view.findViewById(R.id.publicMessageList);
-        this.list = new PublicMessageList(this.getActivity(), msgView);
 
-        LinearLayoutManager msgLayout = new LinearLayoutManager(this.getActivity());
-        msgLayout.setStackFromEnd(true);
-        msgView.setLayoutManager(msgLayout);
+
+        RecyclerView msgView2 = view.findViewById(R.id.publicMessageList);
+
+
 
         Switch publicSwitch = view.findViewById(R.id.PublicSwitch);
+        publicSwitch.setChecked(false);
 
         boolean dialogShown = api.preferences.getBoolean("dialogShown", false);
         if (!dialogShown) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(msgView.getContext());
+            AlertDialog.Builder builder = new AlertDialog.Builder(msgView2.getContext());
             builder.setMessage(R.string.publicMessageDialog)
                     .setTitle(R.string.publicMessageTitle);
 
@@ -76,8 +75,7 @@ public class PublicMessagesView extends Fragment {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     api.preferences.edit().putBoolean("optIn", true).apply();
-                    publicSwitch.setChecked(true);
-                    msgView.setAdapter(list);
+
                 }
             });
 
@@ -85,7 +83,6 @@ public class PublicMessagesView extends Fragment {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     api.preferences.edit().putBoolean("optIn", false).apply();
-                    publicSwitch.setChecked(false);
                     dialog.cancel();
                 }
             });
@@ -97,22 +94,22 @@ public class PublicMessagesView extends Fragment {
             dialog.show();
         } else {
             boolean optIn = api.preferences.getBoolean("optIn", false);
-            publicSwitch.setChecked(optIn);
         }
-        publicSwitch.setChecked(false);
+
         publicSwitch.setOnTouchListener((v, e) -> {
             switch(e.getAction()){
                 case MotionEvent.ACTION_UP:
                     if(publicSwitch.isChecked()){
-                        api.state.setPublicThreadOn(false);
-                        api.preferences.edit().putBoolean("optIn", false).apply();
+//                        api.state.setPublicThreadOn(false);
+//                        api.preferences.edit().putBoolean("optIn", false).apply();
                         publicSwitch.setChecked(false);
                         return true;
 
                     }
                     else {
-                        api.preferences.edit().putBoolean("optIn", true).apply();
-                        RecyclerView msgView2 = view.findViewById(R.id.publicMessageList);
+                        //api.preferences.edit().putBoolean("optIn", true).apply();
+
+
                         this.list = new PublicMessageList(this.getActivity(), msgView2);
                         msgView2.setAdapter(this.list);
                         LinearLayoutManager msgLayout2 = new LinearLayoutManager(this.getActivity());
